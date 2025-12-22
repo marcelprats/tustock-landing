@@ -3,11 +3,13 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "allowJs": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
+    "moduleResolution": "bundler",
     "paths": {
       "~/*": ["src/*"]
     }
   },
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist/"]
+  "include": [".astro/types.d.ts", "**/*", "functions/**/*.js"],
+  "exclude": ["dist", "node_modules", ".astro"]
 }

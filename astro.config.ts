@@ -3,6 +3,9 @@ import { fileURLToPath } from 'url';
 
 import { defineConfig } from 'astro/config';
 
+// 1. IMPORTAR EL ADAPTADOR DE CLOUDFLARE
+import cloudflare from '@astrojs/cloudflare';
+
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
@@ -22,7 +25,13 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
   hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
 export default defineConfig({
-  output: 'static',
+  // 2. CAMBIAR 'static' POR 'server' PARA ACTIVAR EL SEMÁFORO
+  output: 'server',
+
+  // 3. CONFIGURAR EL ADAPTADOR
+  adapter: cloudflare({
+    mode: 'directory',
+  }),
 
   integrations: [
     tailwind({

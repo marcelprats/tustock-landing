@@ -1,9 +1,29 @@
 ---
-import { SITE } from 'astrowind:config';
+// Lógica para detectar el subdominio y mostrarlo en el logo
+const url = new URL(Astro.request.url);
+const hostname = url.hostname;
+
+let tenantName = '';
+
+// En producción (ej: casajuana.tustock.app)
+if (import.meta.env.PROD) {
+  if (hostname.endsWith('.tustock.app') && hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
+    tenantName = hostname.split('.')[0];
+  }
+} else {
+  // En local para pruebas: localhost:4321?tenant=casajuana
+  tenantName = url.searchParams.get('tenant') || '';
+}
 ---
 
-<span
-  class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-2xl md:text-xl font-bold text-gray-900 whitespace-nowrap dark:text-white"
->
-  🚀 {SITE?.name}
-</span>
+<div class="flex flex-col ml-2 leading-tight">
+  <span class="text-2xl md:text-xl font-bold text-gray-900 whitespace-nowrap dark:text-white">
+    <span class="text-blue-600">TuStock</span>.App
+  </span>
+  
+  {tenantName && (
+    <span class="text-[10px] uppercase font-black tracking-[0.15em] text-blue-500 dark:text-blue-400 -mt-1 ml-0.5">
+      {tenantName}
+    </span>
+  )}
+</div>
