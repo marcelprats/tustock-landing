@@ -4,174 +4,124 @@ import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
 import Content from '~/components/widgets/Content.astro';
 import Pricing from '~/components/widgets/Pricing.astro';
-import FAQs from '~/components/widgets/FAQs.astro';
 import Stats from '~/components/widgets/Stats.astro';
-import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'TuStock — Gestión de Inventario Inteligente con Visión Artificial',
-  ignoreTitleTemplate: true,
+  title: 'TuStock — La Revolución Híbrida del Inventario',
 };
 ---
 
 <Layout metadata={metadata}>
   
-  {/* HERO: El gancho principal */}
   <Hero2
-    tagline="El futuro de la logística ya está aquí"
+    tagline="ERP HÍBRIDO CON VISIÓN ARTIFICIAL"
     actions={[
       { variant: 'primary', text: 'Empezar Gratis', href: '/signup', icon: 'tabler:rocket' },
-      { text: 'Ver demostración', href: '#features' },
+      { text: 'Ver Planes', href: '#pricing' },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80',
-      alt: 'TuStock Almacén Inteligente',
+      src: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80',
+      alt: 'TuStock AI Dashboard',
     }}
   >
     <Fragment slot="title">
-      Controla tu stock con la potencia de la <span class="text-accent dark:text-white highlight">Visión Artificial</span>
+      No piques más datos. <br/> Deja que la <span class="text-accent dark:text-white highlight">IA de TuStock</span> lo haga por ti.
     </Fragment>
-
     <Fragment slot="subtitle">
-      <span class="font-semibold text-blue-600 dark:text-blue-400">TuStock</span> es el primer ERP Híbrido: datos 100% privados en tu red local, accesibles con un clic desde cualquier parte del mundo. 
-      <br/><br/>
-      <span class="inline-flex items-center text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
-        ✨ IA GPT-4o para lectura de facturas integrada
-      </span>
+      El primer sistema de inventario que une la **Privacidad Total** del almacenamiento local con la **Potencia Global** de la nube.
     </Fragment>
   </Hero2>
 
-  {/* STATS: Para dar autoridad */}
   <Stats
     stats={[
-      { title: 'Tiempo ahorrado', amount: '90%' },
-      { title: 'Error humano', amount: '0%' },
-      { title: 'Configuración', amount: '5 min' },
-      { title: 'Privacidad', amount: '100%' },
+      { title: 'Reducción de Errores', amount: '99%' },
+      { title: 'Tiempo de Ingreso', amount: '-80%' },
+      { title: 'Control de Activos', amount: 'Real-Time' },
     ]}
   />
 
-  {/* FEATURES: La "chicha" técnica */}
-  <Features
-    id="features"
-    title="No es solo un inventario, es tu asistente logístico"
-    subtitle="Diseñado para negocios que no tienen tiempo que perder en excels infinitos."
-    columns={3}
-    items={[
-      {
-        title: 'Escaneo Inteligente',
-        description: 'Apunta con la cámara a un albarán. La IA detecta automáticamente productos, SKUs, precios y cantidades.',
-        icon: 'tabler:scan',
-      },
-      {
-        title: 'Nube Híbrida (D1 + Local)',
-        description: 'Tus datos críticos se quedan en casa. Disfruta de la velocidad local sin renunciar a la movilidad total.',
-        icon: 'tabler:cloud-lock',
-      },
-      {
-        title: 'Chat con tu Almacén',
-        description: 'Pregúntale a nuestra IA: "¿A qué precio compré esto la última vez?". Respuestas basadas en tus datos.',
-        icon: 'tabler:message-chatbot',
-      },
-      {
-        title: 'Gestión de Subdominios',
-        description: 'Cada negocio tiene su propia URL segura: nombre-tienda.tustock.app.',
-        icon: 'tabler:world-www',
-      },
-      {
-        title: 'Alertas Inteligentes',
-        description: 'Notificaciones vía Telegram cuando un producto baja del stock mínimo o caduca.',
-        icon: 'tabler:bell-ringing',
-      },
-      {
-        title: 'Análisis de Márgenes',
-        description: 'Calculamos tu beneficio real descontando IVAs, costes de transporte y mermas.',
-        icon: 'tabler:chart-bar',
-      },
-    ]}
-  />
+  {/* SECCIÓN DESLIZABLE / SELECTOR DE PERFIL */}
+  <section class="py-16 bg-blue-50 dark:bg-slate-800">
+    <div class="max-w-7xl mx-auto px-4 shadow-inner rounded-3xl p-8 bg-white dark:bg-slate-900">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-5xl font-bold mb-4">Una solución, dos mundos.</h2>
+        <p class="text-xl text-muted">Haz "scroll" para ver cómo TuStock se adapta a tu escala.</p>
+      </div>
 
-  {/* CONTENT 1: Explicando el escaneo IA */}
+      <div class="flex overflow-x-auto snap-x snap-mandatory gap-8 pb-8 no-scrollbar">
+        {/* OPCIÓN 1: PEQUEÑO COMERCIO */}
+        <div class="min-w-[85%] md:min-w-[45%] snap-center bg-blue-600 text-white p-8 rounded-2xl shadow-xl">
+          <div class="mb-4 bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center text-2xl">🏪</div>
+          <h3 class="text-2xl font-bold mb-4">Pequeño Comercio</h3>
+          <p class="mb-6 opacity-90">Para tiendas de barrio, ferreterías y emprendedores que quieren dejar el papel.</p>
+          <ul class="space-y-3 mb-8">
+            <li>✅ Escaneo desde el móvil</li>
+            <li>✅ Avisos de stock por Telegram</li>
+            <li>✅ Tu propia web .tustock.app</li>
+          </ul>
+          <a href="/signup" class="block text-center bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-gray-100 transition">Elegir Starter</a>
+        </div>
+
+        {/* OPCIÓN 2: GRAN EMPRESA / LOGÍSTICA */}
+        <div class="min-w-[85%] md:min-w-[45%] snap-center bg-slate-800 text-white p-8 rounded-2xl shadow-xl border-2 border-accent">
+          <div class="mb-4 bg-slate-700 w-12 h-12 rounded-lg flex items-center justify-center text-2xl">🏭</div>
+          <h3 class="text-2xl font-bold mb-4">Gran Empresa e Industria</h3>
+          <p class="mb-6 opacity-90">Nodos locales sincronizados para naves industriales y logística de alto volumen.</p>
+          <ul class="space-y-3 mb-8">
+            <li>✅ Instalación On-Premise (Docker)</li>
+            <li>✅ API para integración con E-commerce</li>
+            <li>✅ Gestión Multi-Almacén masiva</li>
+          </ul>
+          <a href="mailto:hola@tustock.app" class="block text-center bg-accent text-white font-bold py-3 rounded-xl hover:opacity-90 transition">Contactar Ventas</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <Content
     isReversed
-    tagline="Automatización Real"
-    title="Adiós a las facturas amontonadas"
+    title="Privacidad Híbrida: Lo mejor de ambos mundos"
+    subtitle="¿Por qué elegir entre velocidad y acceso remoto?"
     items={[
       {
-        title: 'Sube fotos o PDFs',
-        description: 'Sube tus facturas de proveedores directamente desde el móvil al llegar el camión.',
+        title: 'Tus datos son tuyos',
+        description: 'La base de datos vive en tu infraestructura. Nadie más tiene acceso a tus márgenes comerciales.',
+        icon: 'tabler:lock-check',
       },
       {
-        title: 'Extracción automática',
-        description: 'La IA separa los conceptos, detecta impuestos y actualiza el stock medio ponderado.',
-      },
-      {
-        title: 'Sincronización instantánea',
-        description: 'En 5 segundos, tu equipo sabe que el producto ya está disponible para la venta.',
+        title: 'Velocidad de red local',
+        description: 'Al trabajar en local, la interfaz no tiene lag. Ideal para momentos de mucho trabajo.',
+        icon: 'tabler:bolt',
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c02?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80',
-      alt: 'Escaneo de facturas con móvil',
+      src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80',
+      alt: 'Data Visualization',
     }}
   />
 
-  {/* PRICING: Monetización clara */}
-  <Pricing
-    id="pricing"
-    title="Planes adaptados a tu volumen"
-    subtitle="Paga solo por lo que necesitas. Sin permanencia."
-    prices={[
-      {
-        title: 'Starter',
-        price: 0,
-        period: 'Para siempre',
-        callToAction: { text: 'Empezar Gratis', href: '/signup' },
-        items: [
-          { description: 'Hasta 50 productos' },
-          { description: 'Escaneo IA básico' },
-          { description: 'Subdominio propio' },
-        ],
-      },
-      {
-        title: 'Pro',
-        price: 29,
-        period: 'Al mes',
-        hasRibbon: true,
-        ribbonTitle: 'El más popular',
-        callToAction: { text: 'Prueba 14 días gratis', href: '/signup' },
-        items: [
-          { description: 'Productos ilimitados' },
-          { description: 'Multi-almacén' },
-          { description: 'IA de alta precisión' },
-          { description: 'Soporte vía Telegram' },
-        ],
-      },
-      {
-        title: 'Enterprise',
-        price: 99,
-        period: 'Al mes',
-        callToAction: { text: 'Contactar', href: 'mailto:hola@tustock.app' },
-        items: [
-          { description: 'Todo lo de Pro' },
-          { description: 'Instalación en servidor local' },
-          { description: 'API para E-commerce' },
-          { description: 'Consultoría logística' },
-        ],
-      },
+  <Features
+    id="features"
+    title="IA que realmente entiende tu negocio"
+    items={[
+      { title: 'Lectura de Albaranes', description: 'Detecta referencias automáticamente.', icon: 'tabler:file-invoice' },
+      { title: 'Chat con Stock', description: 'Pregunta a la IA sobre tus existencias.', icon: 'tabler:message-2-code' },
+      { title: 'Predicción de Demanda', description: 'Sabe cuándo te vas a quedar sin stock.', icon: 'tabler:trending-up' },
     ]}
   />
 
-  {/* CTA FINAL: Cierre de venta */}
-  <CallToAction
-    actions={[{ variant: 'primary', text: 'Crear mi cuenta ahora', href: '/signup', icon: 'tabler:rocket' }]}
-  >
-    <Fragment slot="title">
-      ¿Listo para profesionalizar tu inventario?
-    </Fragment>
-    <Fragment slot="subtitle">
-      Únete a la nueva generación de comercios inteligentes. Configuración en 5 minutos, beneficios para toda la vida.
-    </Fragment>
-  </CallToAction>
+  <Pricing
+    id="pricing"
+    title="Planes"
+    prices={[
+      { title: 'Starter', price: 0, period: '/ mes', callToAction: { text: 'Gratis', href: '/signup' } },
+      { title: 'Pro', price: 29, period: '/ mes', hasRibbon: true, ribbonTitle: 'Top', callToAction: { text: 'Probar', href: '/signup' } },
+    ]}
+  />
 
 </Layout>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
