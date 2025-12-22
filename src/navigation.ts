@@ -13,8 +13,8 @@ export const headerData = {
   ],
 
   actions: [
-      { text: 'Entrar', href: '/login/', variant: 'tertiary' },
-      { text: 'Empezar Gratis', href: '/signup/', variant: 'primary' },
+      { text: 'Entrar', href: '/login', variant: 'tertiary' },
+      { text: 'Empezar Gratis', href: '/signup', variant: 'primary' },
     ],
   };
 

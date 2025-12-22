@@ -1,32 +1,30 @@
-export const POST = async ({ request, runtime }) => {
+export const POST = async ({ request, locals }) => {
   try {
-    // 1. Acceso a la DB a través del runtime de Cloudflare
-    const db = runtime?.env?.DB;
+    const env = locals.runtime?.env;
+    const db = env?.DB;
 
     if (!db) {
       return new Response(JSON.stringify({ 
-        error: "Error de configuración: La base de datos DB no está enlazada en el panel de Cloudflare." 
+        error: "Error: DB no enlazada en Cloudflare." 
       }), { status: 500 });
     }
 
     const { name, email, password, subdomain } = await request.json();
 
-    // 2. Validaciones básicas
     if (!name || !email || !password || !subdomain) {
       return new Response(JSON.stringify({ error: "Faltan datos obligatorios" }), { status: 400 });
     }
 
-    // 3. IDs únicos
     const tenantId = crypto.randomUUID();
     const userId = crypto.randomUUID();
 
-    // 4. Verificar subdominio (slug)
+    // Verificar si el subdominio ya existe
     const existingTenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(subdomain).first();
     if (existingTenant) {
       return new Response(JSON.stringify({ error: "Ese nombre de tienda ya existe 😢" }), { status: 409 });
     }
 
-    // 5. Transacción de inserción (Tienda + Usuario)
+    // Inserciones
     await db.prepare(
       "INSERT INTO tenants (id, name, slug, plan_type) VALUES (?, ?, ?, 'FREE')"
     ).bind(tenantId, name, subdomain).run();
@@ -38,28 +36,19 @@ export const POST = async ({ request, runtime }) => {
     // --- 🔔 NOTIFICACIÓN TELEGRAM ---
     const botToken = "8086835260:AAECb0ErvxZ_72QFM54QZeutTH1IKNbhOiQ";
     const chatId = "1320030558";
-    const alertMsg = `🚀 ¡NUEVO REGISTRO EN TUSTOCK!
-    
-🏢 Tienda: ${name}
-📧 Email: ${email}
-🔗 Web: https://${subdomain}.tustock.app`;
+    const alertMsg = `🚀 ¡NUEVO REGISTRO EN TUSTOCK!\n\n🏢 Tienda: ${name}\n📧 Email: ${email}\n🔗 Web: https://${subdomain}.tustock.app`;
 
-    // Usamos waitUntil para que el mensaje se envíe en segundo plano
-    if (runtime.waitUntil) {
-      runtime.waitUntil(
+    // Usamos waitUntil para que no bloquee la respuesta al usuario
+    if (locals.runtime?.waitUntil) {
+      locals.runtime.waitUntil(
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            chat_id: chatId, 
-            text: alertMsg, 
-            disable_web_page_preview: true 
-          })
+          body: JSON.stringify({ chat_id: chatId, text: alertMsg, disable_web_page_preview: true })
         }).catch(e => console.error("Error Telegram:", e))
       );
     }
 
-    // 6. Respuesta de éxito
     return new Response(JSON.stringify({
       success: true,
       message: "Cuenta creada con éxito",
@@ -71,7 +60,7 @@ export const POST = async ({ request, runtime }) => {
 
   } catch (err) {
     return new Response(JSON.stringify({ 
-      error: "Error interno del servidor", 
+      error: "Error en el registro", 
       details: err.message 
     }), { status: 500 });
   }
