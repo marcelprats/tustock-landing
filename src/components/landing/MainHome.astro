@@ -1,127 +1,166 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
-import Features from '~/components/widgets/Features.astro';
+import Features2 from '~/components/widgets/Features2.astro';
 import Content from '~/components/widgets/Content.astro';
 import Pricing from '~/components/widgets/Pricing.astro';
 import Stats from '~/components/widgets/Stats.astro';
 
 const metadata = {
-  title: 'TuStock — La Revolución Híbrida del Inventario',
+  title: 'TuStock — Gestión Híbrida Inteligente con IA',
 };
 ---
 
 <Layout metadata={metadata}>
   
+  {/* HERO PRINCIPAL - Imagen corregida a una que carga siempre */}
   <Hero2
     tagline="ERP HÍBRIDO CON VISIÓN ARTIFICIAL"
     actions={[
-      { variant: 'primary', text: 'Empezar Gratis', href: '/signup', icon: 'tabler:rocket' },
-      { text: 'Ver Planes', href: '#pricing' },
+      { variant: 'primary', text: 'Empezar ahora', href: '/signup', icon: 'tabler:rocket' },
+      { text: 'Ver soluciones', href: '#soluciones' },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80',
-      alt: 'TuStock AI Dashboard',
+      src: 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=2000&q=80',
+      alt: 'Logística Inteligente TuStock',
     }}
   >
     <Fragment slot="title">
-      No piques más datos. <br/> Deja que la <span class="text-accent dark:text-white highlight">IA de TuStock</span> lo haga por ti.
+      Tu inventario bajo control con <br/> <span class="text-accent dark:text-white highlight">Visión Artificial</span>
     </Fragment>
     <Fragment slot="subtitle">
-      El primer sistema de inventario que une la **Privacidad Total** del almacenamiento local con la **Potencia Global** de la nube.
+      Procesamos tus albaranes y facturas con IA. Datos privados en tu red local, acceso total desde la nube.
     </Fragment>
   </Hero2>
 
   <Stats
     stats={[
-      { title: 'Reducción de Errores', amount: '99%' },
-      { title: 'Tiempo de Ingreso', amount: '-80%' },
-      { title: 'Control de Activos', amount: 'Real-Time' },
+      { title: 'Ahorro de tiempo', amount: '90%' },
+      { title: 'Precisión IA', amount: '99%' },
+      { title: 'Setup', amount: '2 min' },
     ]}
   />
 
-  {/* SECCIÓN DESLIZABLE / SELECTOR DE PERFIL */}
-  <section class="py-16 bg-blue-50 dark:bg-slate-800">
-    <div class="max-w-7xl mx-auto px-4 shadow-inner rounded-3xl p-8 bg-white dark:bg-slate-900">
+  {/* SECCIÓN DESLIZABLE: PEQUEÑO VS GRANDE */}
+  <section id="soluciones" class="py-16 bg-blue-50 dark:bg-slate-900 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-5xl font-bold mb-4">Una solución, dos mundos.</h2>
-        <p class="text-xl text-muted">Haz "scroll" para ver cómo TuStock se adapta a tu escala.</p>
+        <h2 class="text-4xl font-extrabold mb-4">Elige tu escala</h2>
+        <p class="text-xl text-muted">Desliza para ver cómo TuStock se adapta a tu negocio.</p>
       </div>
 
-      <div class="flex overflow-x-auto snap-x snap-mandatory gap-8 pb-8 no-scrollbar">
-        {/* OPCIÓN 1: PEQUEÑO COMERCIO */}
-        <div class="min-w-[85%] md:min-w-[45%] snap-center bg-blue-600 text-white p-8 rounded-2xl shadow-xl">
-          <div class="mb-4 bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center text-2xl">🏪</div>
-          <h3 class="text-2xl font-bold mb-4">Pequeño Comercio</h3>
-          <p class="mb-6 opacity-90">Para tiendas de barrio, ferreterías y emprendedores que quieren dejar el papel.</p>
-          <ul class="space-y-3 mb-8">
-            <li>✅ Escaneo desde el móvil</li>
-            <li>✅ Avisos de stock por Telegram</li>
-            <li>✅ Tu propia web .tustock.app</li>
-          </ul>
-          <a href="/signup" class="block text-center bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-gray-100 transition">Elegir Starter</a>
+      <div class="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 no-scrollbar">
+        
+        {/* TARJETA 1: PEQUEÑO COMERCIO */}
+        <div class="min-w-[90%] md:min-w-[48%] snap-center bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border-t-8 border-blue-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-4 mb-6">
+              <span class="text-4xl bg-blue-50 p-2 rounded-lg">🏪</span>
+              <h3 class="text-2xl font-bold">Comercio Local</h3>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 font-medium italic">"Ideal para tiendas, ferreterías y retail."</p>
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center gap-3"><span class="text-blue-500 text-xl">✔</span> <span>Control de stock desde el móvil</span></li>
+              <li class="flex items-center gap-3"><span class="text-blue-500 text-xl">✔</span> <span>Escaneo de facturas con cámara</span></li>
+              <li class="flex items-center gap-3"><span class="text-blue-500 text-xl">✔</span> <span>Alertas de reposición por Telegram</span></li>
+            </ul>
+          </div>
+          <div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-xl mb-6 text-center">
+             <span class="text-sm font-bold uppercase tracking-widest">Plan Recomendado:</span>
+             <p class="text-2xl font-black text-blue-600 dark:text-blue-400">STARTER - 0€</p>
+          </div>
+          <a href="/signup" class="block text-center py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg">Comenzar Gratis</a>
         </div>
 
-        {/* OPCIÓN 2: GRAN EMPRESA / LOGÍSTICA */}
-        <div class="min-w-[85%] md:min-w-[45%] snap-center bg-slate-800 text-white p-8 rounded-2xl shadow-xl border-2 border-accent">
-          <div class="mb-4 bg-slate-700 w-12 h-12 rounded-lg flex items-center justify-center text-2xl">🏭</div>
-          <h3 class="text-2xl font-bold mb-4">Gran Empresa e Industria</h3>
-          <p class="mb-6 opacity-90">Nodos locales sincronizados para naves industriales y logística de alto volumen.</p>
-          <ul class="space-y-3 mb-8">
-            <li>✅ Instalación On-Premise (Docker)</li>
-            <li>✅ API para integración con E-commerce</li>
-            <li>✅ Gestión Multi-Almacén masiva</li>
-          </ul>
-          <a href="mailto:hola@tustock.app" class="block text-center bg-accent text-white font-bold py-3 rounded-xl hover:opacity-90 transition">Contactar Ventas</a>
+        {/* TARJETA 2: GRAN EMPRESA */}
+        <div class="min-w-[90%] md:min-w-[48%] snap-center bg-slate-900 dark:bg-black p-8 rounded-3xl shadow-xl border-t-8 border-accent text-white flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-4 mb-6">
+              <span class="text-4xl bg-slate-800 p-2 rounded-lg">🏭</span>
+              <h3 class="text-2xl font-bold">Logística e Industria</h3>
+            </div>
+            <p class="text-gray-400 mb-6 font-medium italic">"Para almacenes distribuidos y gran volumen."</p>
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center gap-3"><span class="text-accent text-xl">✔</span> <span>Instalación local On-Premise (Docker)</span></li>
+              <li class="flex items-center gap-3"><span class="text-accent text-xl">✔</span> <span>Integración total con API / ERP</span></li>
+              <li class="flex items-center gap-3"><span class="text-accent text-xl">✔</span> <span>Soporte para múltiples sedes</span></li>
+            </ul>
+          </div>
+          <div class="bg-slate-800 p-4 rounded-xl mb-6 text-center border border-slate-700">
+             <span class="text-sm font-bold uppercase tracking-widest opacity-70">Plan Recomendado:</span>
+             <p class="text-2xl font-black text-accent">ENTERPRISE - Custom</p>
+          </div>
+          <a href="mailto:hola@tustock.app" class="block text-center py-4 bg-accent text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg">Contactar Ventas</a>
         </div>
       </div>
     </div>
   </section>
 
+  {/* CONTENIDO TÉCNICO: ¿CÓMO FUNCIONA? */}
   <Content
     isReversed
-    title="Privacidad Híbrida: Lo mejor de ambos mundos"
-    subtitle="¿Por qué elegir entre velocidad y acceso remoto?"
+    tagline="Tecnología Híbrida"
+    title="Lo mejor de ambos mundos"
     items={[
-      {
-        title: 'Tus datos son tuyos',
-        description: 'La base de datos vive en tu infraestructura. Nadie más tiene acceso a tus márgenes comerciales.',
-        icon: 'tabler:lock-check',
-      },
-      {
-        title: 'Velocidad de red local',
-        description: 'Al trabajar en local, la interfaz no tiene lag. Ideal para momentos de mucho trabajo.',
-        icon: 'tabler:bolt',
-      },
+      { title: 'Velocidad Local', description: 'Tus datos están en tu PC o servidor, cargando al instante sin depender de internet.' },
+      { title: 'Acceso Global', description: 'Nuestra nube sincroniza de forma segura para que veas todo desde tu móvil.' },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80',
-      alt: 'Data Visualization',
+      alt: 'Dashboard de datos',
     }}
   />
 
-  <Features
-    id="features"
-    title="IA que realmente entiende tu negocio"
-    items={[
-      { title: 'Lectura de Albaranes', description: 'Detecta referencias automáticamente.', icon: 'tabler:file-invoice' },
-      { title: 'Chat con Stock', description: 'Pregunta a la IA sobre tus existencias.', icon: 'tabler:message-2-code' },
-      { title: 'Predicción de Demanda', description: 'Sabe cuándo te vas a quedar sin stock.', icon: 'tabler:trending-up' },
-    ]}
-  />
-
+  {/* PRECIOS CORREGIDOS Y AJUSTADOS */}
   <Pricing
     id="pricing"
-    title="Planes"
+    title="Planes para cada etapa"
+    subtitle="Sin sorpresas. Escala cuando tu negocio lo necesite."
     prices={[
-      { title: 'Starter', price: 0, period: '/ mes', callToAction: { text: 'Gratis', href: '/signup' } },
-      { title: 'Pro', price: 29, period: '/ mes', hasRibbon: true, ribbonTitle: 'Top', callToAction: { text: 'Probar', href: '/signup' } },
+      {
+        title: 'Starter',
+        price: 0,
+        period: '/ mes',
+        callToAction: { text: 'Empezar Gratis', href: '/signup' },
+        items: [
+          { description: 'Hasta 100 productos' },
+          { description: '1 Almacén local' },
+          { description: 'Alertas Telegram básicas' },
+        ],
+      },
+      {
+        title: 'Pro',
+        price: 29,
+        period: '/ mes',
+        hasRibbon: true,
+        ribbonTitle: 'Recomendado',
+        callToAction: { text: 'Probar Gratis', href: '/signup' },
+        items: [
+          { description: 'Productos ilimitados' },
+          { description: 'Multi-almacén' },
+          { description: 'IA de alta precisión' },
+          { description: 'Soporte prioritario' },
+        ],
+      },
+      {
+        title: 'Enterprise',
+        price: 99,
+        period: '/ mes',
+        callToAction: { text: 'Consultar', href: 'mailto:hola@tustock.app' },
+        items: [
+          { description: 'Nodos locales ilimitados' },
+          { description: 'Acceso total a la API' },
+          { description: 'Instalación On-Premise' },
+          { description: 'SLA garantizado' },
+        ],
+      },
     ]}
   />
 
 </Layout>
 
 <style>
+  /* Ocultar barra de scroll pero mantener funcionalidad deslizable */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
