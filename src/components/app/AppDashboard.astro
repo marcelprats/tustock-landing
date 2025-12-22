@@ -1,0 +1,17 @@
+---
+// src/components/app/AppDashboard.astro
+const { tenant } = Astro.props;
+import Layout from '~/layouts/PageLayout.astro'; // Usamos el mismo layout o crea uno 'AppLayout'
+---
+
+<Layout>
+  <div class="flex items-center justify-center h-screen bg-blue-50">
+    <div class="text-center p-10 bg-white shadow-xl rounded-xl">
+      <h1 class="text-4xl font-bold text-blue-600 mb-4">¡Hola {tenant}!</h1>
+      <p class="text-xl text-gray-600">Este es tu panel de control privado.</p>
+      <div class="mt-6">
+        <a href="/login" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">Cerrar Sesión</a>
+      </div>
+    </div>
+  </div>
+</Layout>
