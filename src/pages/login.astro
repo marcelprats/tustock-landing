@@ -1,0 +1,94 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+
+const metadata = {
+  title: 'Iniciar Sesión - TuStock',
+};
+---
+
+<Layout metadata={metadata}>
+  <main class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-slate-800">
+      
+      <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Bienvenido</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Entra a gestionar tu negocio</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <input type="email" name="email" required placeholder="paco@fruteria.com" 
+            class="w-full px-3 py-2 mt-1 border rounded-md dark:bg-slate-700 dark:text-white border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
+          <input type="password" name="password" required placeholder="********" 
+            class="w-full px-3 py-2 mt-1 border rounded-md dark:bg-slate-700 dark:text-white border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <button type="submit" id="btn-submit"
+          class="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Entrar
+        </button>
+
+        <p id="mensaje" class="text-sm text-center text-red-600 hidden"></p>
+      </form>
+      
+      <p class="text-xs text-center text-gray-500">
+        ¿Aún no tienes cuenta? <a href="/signup" class="text-blue-600 hover:underline">Regístrate gratis</a>
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const form = document.getElementById('login-form');
+  const msg = document.getElementById('mensaje');
+  const btn = document.getElementById('btn-submit');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.innerText = "Verificando...";
+    msg.classList.add('hidden');
+
+    const formData = new FormData(form as HTMLFormElement);
+    const datos = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify(datos),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const result = await response.json();
+
+      if (response.ok) {
+        msg.classList.remove('hidden');
+        msg.classList.replace('text-red-600', 'text-green-600');
+        msg.innerText = "¡Correcto! Entrando a tu tienda...";
+        
+        // AQUÍ ESTÁ LA CLAVE: Lo mandamos a SU subdominio
+        // Si estamos en localhost, solo redirige a /dashboard para probar
+        if (window.location.hostname === 'localhost') {
+            window.location.href = "/";
+            alert(`En producción te llevaría a: ${result.redirectUrl}`);
+        } else {
+            window.location.href = result.redirectUrl;
+        }
+
+      } else {
+        throw new Error(result.error || "Error al entrar");
+      }
+    } catch (error) {
+      msg.classList.remove('hidden');
+      msg.classList.replace('text-green-600', 'text-red-600');
+      msg.innerText = error.message;
+      btn.disabled = false;
+      btn.innerText = "Entrar";
+    }
+  });
+</script>
