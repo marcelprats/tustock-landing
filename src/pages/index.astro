@@ -1,9 +1,24 @@
 ---
-// src/pages/index.astro
 import MainHome from '../components/landing/MainHome.astro';
 import AppDashboard from '../components/app/AppDashboard.astro';
 
-// ... tu lógica de detección de tenant (url.hostname, etc) ...
+const url = new URL(Astro.request.url);
+const hostname = url.hostname;
+
+let isTenant = false;
+let tenantSlug = '';
+
+if (import.meta.env.PROD) {
+  if (hostname.endsWith('.tustock.app') && hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
+    isTenant = true;
+    tenantSlug = hostname.split('.')[0];
+  }
+} else {
+  if (url.searchParams.has('tenant')) {
+    isTenant = true;
+    tenantSlug = url.searchParams.get('tenant');
+  }
+}
 ---
 
 {

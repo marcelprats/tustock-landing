@@ -1,29 +1,23 @@
 ---
-// src/components/app/AppDashboard.astro
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 ---
 
 <Layout metadata={{ title: `Panel de ${tenant}` }}>
-  <div class="is-app-dashboard">
-    <style is:global>
-      /* Solo oculta el menú si existe el contenedor del dashboard */
-      body:has(.is-app-dashboard) header nav,
-      body:has(.is-app-dashboard) [data-aw-toggle-menu],
-      body:has(.is-app-dashboard) header .hidden.md\:flex { 
-        display: none !important; 
-      }
-    </style>
+  <style is:global>
+    /* Ocultamos el menú solo cuando estamos aquí */
+    body:has(.is-app-dashboard) header nav,
+    body:has(.is-app-dashboard) [data-aw-toggle-menu] { 
+      display: none !important; 
+    }
+  </style>
 
-    <div class="flex items-center justify-center h-screen bg-blue-50 dark:bg-slate-900">
-      <div class="text-center p-10 bg-white dark:bg-slate-800 shadow-xl rounded-xl">
-        <h1 class="text-4xl font-bold text-blue-600 mb-4">¡Hola {tenant}!</h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300">Bienvenido a tu gestión de stock.</p>
-        <div class="mt-6">
-          <a href="https://tustock.app/login" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
-            Cerrar Sesión
-          </a>
-        </div>
+  <div class="is-app-dashboard flex items-center justify-center h-screen bg-blue-50 dark:bg-slate-900">
+    <div class="text-center p-10 bg-white dark:bg-slate-800 shadow-xl rounded-xl">
+      <h1 class="text-4xl font-bold text-blue-600 mb-4">¡Hola {tenant}!</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300">Bienvenido a tu panel.</p>
+      <div class="mt-6">
+        <a href="/login" class="px-6 py-3 bg-gray-800 text-white rounded-lg">Cerrar Sesión</a>
       </div>
     </div>
   </div>
