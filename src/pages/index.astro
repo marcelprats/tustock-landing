@@ -1,26 +1,21 @@
 ---
 // src/pages/index.astro
-
-// 1. Importamos las dos opciones (Las piezas de LEGO)
+import Layout from '~/layouts/PageLayout.astro'; // <--- IMPORTANTE
 import MainHome from '../components/landing/MainHome.astro';
 import AppDashboard from '../components/app/AppDashboard.astro';
 
-// 2. Lógica del Semáforo (Server Side Rendering)
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
 
 let isTenant = false;
 let tenantSlug = '';
 
-// Detectamos si es subdominio
 if (import.meta.env.PROD) {
-  // Producción: Si termina en .tustock.app y NO es la web principal
   if (hostname.endsWith('.tustock.app') && hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isTenant = true;
-    tenantSlug = hostname.split('.')[0]; // Sacamos "casamaria"
+    tenantSlug = hostname.split('.')[0];
   }
 } else {
-  // Localhost: Para probar, usaremos ?tenant=casamaria en la URL
   if (url.searchParams.has('tenant')) {
     isTenant = true;
     tenantSlug = url.searchParams.get('tenant');
@@ -28,8 +23,10 @@ if (import.meta.env.PROD) {
 }
 ---
 
-{
-  isTenant 
-    ? <AppDashboard tenant={tenantSlug} /> 
-    : <MainHome />
-}
+<Layout> { /* <--- Envolvemos todo con el Layout para que aparezca el Header */ }
+  {
+    isTenant 
+      ? <AppDashboard tenant={tenantSlug} /> 
+      : <MainHome />
+  }
+</Layout>
