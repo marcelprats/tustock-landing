@@ -2,23 +2,28 @@
 import Layout from '~/layouts/Layout.astro';
 import Header from '~/components/widgets/Header.astro';
 import Footer from '~/components/widgets/Footer.astro';
+// No importamos Announcement para que no haya línea superior
 import { headerData, footerData } from '~/navigation';
-import type { MetaData } from '~/types';
-
-export interface Props {
-  metadata?: MetaData;
-}
 
 const { metadata } = Astro.props;
 ---
 
 <Layout metadata={metadata}>
+  {/* SIN Announcement aquí */}
+  
   <slot name="header">
-    <Header {...headerData} isSticky showToggleTheme />
+    <Header 
+      links={headerData.links} 
+      actions={headerData.actions} 
+      isSticky 
+      showToggleTheme 
+    />
   </slot>
+
   <main>
     <slot />
   </main>
+
   <slot name="footer">
     <Footer {...footerData} />
   </slot>
