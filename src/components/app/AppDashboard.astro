@@ -1,17 +1,16 @@
 ---
-// src/pages/index.astro
-import MainHome from '../components/landing/MainHome.astro';
-import AppDashboard from '../components/app/AppDashboard.astro';
+// src/components/app/AppDashboard.astro
+const { tenant } = Astro.props;
+import Layout from '~/layouts/PageLayout.astro';
 ---
 
 <Layout metadata={{ title: `Panel de ${tenant}` }}>
-  <div class="is-app-dashboard"> { /* Añadimos esta clase */ }
+  <div class="is-app-dashboard">
     <style is:global>
-      /* Este estilo AHORA SOLO funcionará si detecta que estamos en el dashboard */
-      .is-app-dashboard ~ header nav, 
-      .is-app-dashboard ~ header .hidden.md\:flex,
+      /* Solo oculta el menú si existe el contenedor del dashboard */
       body:has(.is-app-dashboard) header nav,
-      body:has(.is-app-dashboard) [data-aw-toggle-menu] { 
+      body:has(.is-app-dashboard) [data-aw-toggle-menu],
+      body:has(.is-app-dashboard) header .hidden.md\:flex { 
         display: none !important; 
       }
     </style>
@@ -29,9 +28,3 @@ import AppDashboard from '../components/app/AppDashboard.astro';
     </div>
   </div>
 </Layout>
-
-{
-  isTenant 
-    ? <AppDashboard tenant={tenantSlug} /> 
-    : <MainHome />
-}
