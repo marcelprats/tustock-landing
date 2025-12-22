@@ -30,8 +30,10 @@ export default defineConfig({
 
   // 3. CONFIGURAR EL ADAPTADOR
   adapter: cloudflare({
-    mode: 'directory',
-  }),
+      platformProxy: {
+        enabled: true,
+      },
+    }),
 
   integrations: [
     tailwind({
