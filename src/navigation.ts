@@ -11,19 +11,12 @@ export const headerData = {
       href: getPermalink('/#pricing'),
     },
   ],
+
   actions: [
-    { 
-      text: 'Entrar', 
-      href: getPermalink('/login'), 
-      variant: 'tertiary' 
-    },
-    { 
-      text: 'Empezar Gratis', 
-      href: getPermalink('/signup'), 
-      variant: 'primary' 
-    },
-  ],
-};
+      { text: 'Entrar', href: '/login', variant: 'tertiary' },
+      { text: 'Empezar Gratis', href: '/signup', variant: 'primary' },
+    ],
+  };
 
 export const footerData = {
   links: [
