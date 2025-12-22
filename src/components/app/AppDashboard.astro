@@ -1,23 +1,34 @@
 ---
-// src/components/app/AppDashboard.astro
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 ---
 
 <Layout metadata={{ title: `Panel de ${tenant}` }}>
   <style is:global>
-    header nav, header .hidden.md\:flex { display: none !important; }
+    /* Ocultamos navegación de landing en el dashboard */
+    header nav, header .hidden.md\:flex, header [data-aw-toggle-menu] { 
+      display: none !important; 
+    }
   </style>
 
-  <div class="flex items-center justify-center h-screen bg-blue-50">
-    <div class="text-center p-10 bg-white shadow-xl rounded-xl">
-      <h1 class="text-4xl font-bold text-blue-600 mb-4">¡Hola {tenant}!</h1>
-      <p class="text-xl text-gray-600">Bienvenido a tu gestión de stock.</p>
-      <div class="mt-6">
-        <a href="https://tustock.app/login" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
+  <main class="flex items-center justify-center min-h-[80vh] bg-blue-50 dark:bg-slate-900">
+    <div class="text-center p-10 bg-white dark:bg-slate-800 shadow-2xl rounded-2xl border border-blue-100 dark:border-slate-700">
+      <div class="mb-4 inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full">
+        <span class="text-3xl">🏢</span>
+      </div>
+      <h1 class="text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-2">¡Hola {tenant}!</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Bienvenido a tu panel de gestión de inventario.</p>
+      
+      <div class="flex flex-col gap-3">
+        <div class="p-4 bg-blue-50 dark:bg-slate-700 rounded-lg text-left border border-blue-200 dark:border-slate-600">
+          <p class="text-sm font-bold text-blue-800 dark:text-blue-300">Próximo paso:</p>
+          <p class="text-sm text-blue-900 dark:text-gray-200">Estamos configurando tu base de datos local...</p>
+        </div>
+        
+        <a href="https://tustock.app/login" class="mt-4 px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all font-bold shadow-lg">
           Cerrar Sesión
         </a>
       </div>
     </div>
-  </div>
+  </main>
 </Layout>
