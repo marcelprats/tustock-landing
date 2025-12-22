@@ -2,25 +2,176 @@
 import Layout from '~/layouts/PageLayout.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
+import Content from '~/components/widgets/Content.astro';
+import Pricing from '~/components/widgets/Pricing.astro';
+import FAQs from '~/components/widgets/FAQs.astro';
+import Stats from '~/components/widgets/Stats.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
 
-const metadata = { title: 'TuStock — Gestión de Inventario' };
+const metadata = {
+  title: 'TuStock — Gestión de Inventario Inteligente con Visión Artificial',
+  ignoreTitleTemplate: true,
+};
 ---
 
 <Layout metadata={metadata}>
+  
+  {/* HERO: El gancho principal */}
   <Hero2
-    tagline="Gestión de Inventario 2.0"
+    tagline="El futuro de la logística ya está aquí"
     actions={[
-      { variant: 'primary', text: 'Empezar Gratis', href: '/signup' },
-      { text: 'Saber más', href: '#features' },
+      { variant: 'primary', text: 'Empezar Gratis', href: '/signup', icon: 'tabler:rocket' },
+      { text: 'Ver demostración', href: '#features' },
     ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80',
+      alt: 'TuStock Almacén Inteligente',
+    }}
   >
-    <Fragment slot="title">Controla tu stock con IA</Fragment>
-    <Fragment slot="subtitle">TuStock lee tus facturas automáticamente.</Fragment>
+    <Fragment slot="title">
+      Controla tu stock con la potencia de la <span class="text-accent dark:text-white highlight">Visión Artificial</span>
+    </Fragment>
+
+    <Fragment slot="subtitle">
+      <span class="font-semibold text-blue-600 dark:text-blue-400">TuStock</span> es el primer ERP Híbrido: datos 100% privados en tu red local, accesibles con un clic desde cualquier parte del mundo. 
+      <br/><br/>
+      <span class="inline-flex items-center text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+        ✨ IA GPT-4o para lectura de facturas integrada
+      </span>
+    </Fragment>
   </Hero2>
 
+  {/* STATS: Para dar autoridad */}
+  <Stats
+    stats={[
+      { title: 'Tiempo ahorrado', amount: '90%' },
+      { title: 'Error humano', amount: '0%' },
+      { title: 'Configuración', amount: '5 min' },
+      { title: 'Privacidad', amount: '100%' },
+    ]}
+  />
+
+  {/* FEATURES: La "chicha" técnica */}
   <Features
     id="features"
-    title="¿Por qué nosotros?"
-    items={[{ title: 'IA Real', description: 'Escaneo de facturas.', icon: 'tabler:scan' }]}
+    title="No es solo un inventario, es tu asistente logístico"
+    subtitle="Diseñado para negocios que no tienen tiempo que perder en excels infinitos."
+    columns={3}
+    items={[
+      {
+        title: 'Escaneo Inteligente',
+        description: 'Apunta con la cámara a un albarán. La IA detecta automáticamente productos, SKUs, precios y cantidades.',
+        icon: 'tabler:scan',
+      },
+      {
+        title: 'Nube Híbrida (D1 + Local)',
+        description: 'Tus datos críticos se quedan en casa. Disfruta de la velocidad local sin renunciar a la movilidad total.',
+        icon: 'tabler:cloud-lock',
+      },
+      {
+        title: 'Chat con tu Almacén',
+        description: 'Pregúntale a nuestra IA: "¿A qué precio compré esto la última vez?". Respuestas basadas en tus datos.',
+        icon: 'tabler:message-chatbot',
+      },
+      {
+        title: 'Gestión de Subdominios',
+        description: 'Cada negocio tiene su propia URL segura: nombre-tienda.tustock.app.',
+        icon: 'tabler:world-www',
+      },
+      {
+        title: 'Alertas Inteligentes',
+        description: 'Notificaciones vía Telegram cuando un producto baja del stock mínimo o caduca.',
+        icon: 'tabler:bell-ringing',
+      },
+      {
+        title: 'Análisis de Márgenes',
+        description: 'Calculamos tu beneficio real descontando IVAs, costes de transporte y mermas.',
+        icon: 'tabler:chart-bar',
+      },
+    ]}
   />
+
+  {/* CONTENT 1: Explicando el escaneo IA */}
+  <Content
+    isReversed
+    tagline="Automatización Real"
+    title="Adiós a las facturas amontonadas"
+    items={[
+      {
+        title: 'Sube fotos o PDFs',
+        description: 'Sube tus facturas de proveedores directamente desde el móvil al llegar el camión.',
+      },
+      {
+        title: 'Extracción automática',
+        description: 'La IA separa los conceptos, detecta impuestos y actualiza el stock medio ponderado.',
+      },
+      {
+        title: 'Sincronización instantánea',
+        description: 'En 5 segundos, tu equipo sabe que el producto ya está disponible para la venta.',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c02?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80',
+      alt: 'Escaneo de facturas con móvil',
+    }}
+  />
+
+  {/* PRICING: Monetización clara */}
+  <Pricing
+    id="pricing"
+    title="Planes adaptados a tu volumen"
+    subtitle="Paga solo por lo que necesitas. Sin permanencia."
+    prices={[
+      {
+        title: 'Starter',
+        price: 0,
+        period: 'Para siempre',
+        callToAction: { text: 'Empezar Gratis', href: '/signup' },
+        items: [
+          { description: 'Hasta 50 productos' },
+          { description: 'Escaneo IA básico' },
+          { description: 'Subdominio propio' },
+        ],
+      },
+      {
+        title: 'Pro',
+        price: 29,
+        period: 'Al mes',
+        hasRibbon: true,
+        ribbonTitle: 'El más popular',
+        callToAction: { text: 'Prueba 14 días gratis', href: '/signup' },
+        items: [
+          { description: 'Productos ilimitados' },
+          { description: 'Multi-almacén' },
+          { description: 'IA de alta precisión' },
+          { description: 'Soporte vía Telegram' },
+        ],
+      },
+      {
+        title: 'Enterprise',
+        price: 99,
+        period: 'Al mes',
+        callToAction: { text: 'Contactar', href: 'mailto:hola@tustock.app' },
+        items: [
+          { description: 'Todo lo de Pro' },
+          { description: 'Instalación en servidor local' },
+          { description: 'API para E-commerce' },
+          { description: 'Consultoría logística' },
+        ],
+      },
+    ]}
+  />
+
+  {/* CTA FINAL: Cierre de venta */}
+  <CallToAction
+    actions={[{ variant: 'primary', text: 'Crear mi cuenta ahora', href: '/signup', icon: 'tabler:rocket' }]}
+  >
+    <Fragment slot="title">
+      ¿Listo para profesionalizar tu inventario?
+    </Fragment>
+    <Fragment slot="subtitle">
+      Únete a la nueva generación de comercios inteligentes. Configuración en 5 minutos, beneficios para toda la vida.
+    </Fragment>
+  </CallToAction>
+
 </Layout>

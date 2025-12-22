@@ -1,87 +1,124 @@
 ---
-// src/pages/signup.astro
 import Layout from '~/layouts/PageLayout.astro';
+
+// Metadatos para SEO
+const metadata = {
+  title: 'Crea tu cuenta | TuStock.App',
+  description: 'Únete a la revolución de la gestión de inventario híbrida con IA.',
+};
 ---
 
-<Layout metadata={{ title: "Regístrate en TuStock" }}>
-  {/* Cambiamos el fondo para que use el color de la plantilla (blanco/oscuro) */}
-  <main class="flex items-center justify-center min-h-screen bg-default dark:bg-slate-900 py-12 px-4">
-    <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700">
+<Layout metadata={metadata}>
+  <main class="bg-default dark:bg-slate-900 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
       
-      <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Crear Cuenta</h1>
-        <p class="mt-2 text-sm text-muted dark:text-gray-400">Empieza a gestionar tu stock hoy mismo</p>
+      {/* COLUMNA IZQUIERDA: Marketing/Info */}
+      <div class="hidden md:flex flex-col justify-center p-12 bg-blue-600 text-white space-y-8">
+        <div>
+          <h2 class="text-4xl font-bold mb-4">La potencia de la IA en tu almacén.</h2>
+          <p class="text-blue-100 text-lg">
+            Únete a cientos de negocios que ya han automatizado su stock.
+          </p>
+        </div>
+
+        <ul class="space-y-4">
+          <li class="flex items-center gap-3">
+            <span class="bg-blue-500 p-1 rounded-full">✅</span>
+            <span>Escaneo de facturas ilimitado</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="bg-blue-500 p-1 rounded-full">✅</span>
+            <span>Subdominio personalizado gratuito</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="bg-blue-500 p-1 rounded-full">✅</span>
+            <span>Privacidad de datos híbrida</span>
+          </li>
+        </ul>
+
+        <div class="pt-8 border-t border-blue-500 text-sm text-blue-200">
+          "TuStock ha reducido mis errores de inventario en un 90% en solo un mes." <br/>
+          <strong>— Paco, Frutería Paco</strong>
+        </div>
       </div>
 
-      <form id="registro-form" class="space-y-4">
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de tu Negocio</label>
-          <input type="text" name="name" required placeholder="Frutería Paco" 
-            class="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500 border-gray-300 dark:bg-slate-900 dark:border-slate-700 dark:text-white" />
+      {/* COLUMNA DERECHA: Formulario */}
+      <div class="p-8 md:p-12">
+        <div class="text-center md:text-left mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Empezar ahora</h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-2">Configura tu tienda en menos de 1 minuto.</p>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-          <input type="email" name="email" required placeholder="paco@fruteria.com" 
-            class="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500 border-gray-300 dark:bg-slate-900 dark:border-slate-700 dark:text-white" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tu dirección web única</label>
-          <div class="flex mt-1 rounded-md shadow-sm">
-            <input type="text" name="subdomain" id="subdomain" required placeholder="fruteria-paco" pattern="[a-z0-9-]+"
-              class="flex-1 w-full px-3 py-2 border border-r-0 rounded-l-md focus:ring-blue-500 focus:border-blue-500 border-gray-300 dark:bg-slate-900 dark:border-slate-700 dark:text-white" />
-            <span class="inline-flex items-center px-3 text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-gray-300 border border-l-0 border-gray-300 dark:border-slate-700 rounded-r-md">
-              .tustock.app
-            </span>
+        <form id="registro-form" class="space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Nombre del Negocio</label>
+            <input type="text" name="name" required placeholder="Mi Tienda S.L." 
+              class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
           </div>
-        </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
-          <input type="password" name="password" required placeholder="********" 
-            class="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500 border-gray-300 dark:bg-slate-900 dark:border-slate-700 dark:text-white" />
-        </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Email Profesional</label>
+            <input type="email" name="email" required placeholder="hola@tuempresa.com" 
+              class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
+          </div>
 
-        <button type="submit" id="btn-submit"
-          class="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 font-bold transition-colors">
-          Crear Cuenta
-        </button>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">URL de tu Panel</label>
+            <div class="flex mt-1">
+              <input type="text" name="subdomain" id="subdomain" required placeholder="mi-tienda" 
+                class="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
+              <span class="inline-flex items-center px-4 bg-gray-100 dark:bg-slate-700 border border-l-0 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-300 rounded-r-xl font-medium">
+                .tustock.app
+              </span>
+            </div>
+          </div>
 
-        <p id="mensaje" class="text-sm text-center text-red-600 hidden"></p>
-      </form>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Contraseña</label>
+            <input type="password" name="password" required placeholder="••••••••" 
+              class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
+          </div>
+
+          <button type="submit" id="btn-submit"
+            class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all transform hover:-translate-y-1 active:scale-95">
+            Crear mi cuenta gratuita
+          </button>
+
+          <p id="mensaje" class="text-sm text-center font-medium hidden"></p>
+          
+          <p class="text-center text-xs text-gray-400 mt-4">
+            Al registrarte, aceptas nuestros <a href="/terms" class="underline">Términos</a> y <a href="/privacy" class="underline">Privacidad</a>.
+          </p>
+        </form>
+      </div>
     </div>
   </main>
 </Layout>
 
 <script>
-  // ESTE SCRIPT ES EL QUE HABLA CON TU API
-  const form = document.getElementById('registro-form');
+  const form = document.getElementById('registro-form') as HTMLFormElement;
   const msg = document.getElementById('mensaje');
-  const btn = document.getElementById('btn-submit');
-  const subInput = document.getElementById('subdomain');
+  const btn = document.getElementById('btn-submit') as HTMLButtonElement;
+  const subInput = document.getElementById('subdomain') as HTMLInputElement;
 
-  // 1. Truquito: Forzar minúsculas en el subdominio mientras escribe
-  subInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+  // Forzar minúsculas y quitar caracteres raros en la URL
+  subInput?.addEventListener('input', (e) => {
+    const target = e.target as HTMLInputElement;
+    target.value = target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
   });
 
-  // 2. Cuando le da a Enviar
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Que no recargue la página
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    // Bloquear botón para que no pulse 2 veces
     btn.disabled = true;
-    btn.innerText = "Creando cuenta...";
+    const originalText = btn.innerText;
+    btn.innerText = "Procesando...";
     msg.classList.add('hidden');
 
-    // Coger los datos del formulario
     const formData = new FormData(form);
     const datos = Object.fromEntries(formData);
 
     try {
-      // LLAMADA A TU API (functions/api/register.js)
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,27 +128,21 @@ import Layout from '~/layouts/PageLayout.astro';
       const result = await response.json();
 
       if (response.ok) {
-        // ¡ÉXITO!
-        msg.classList.remove('hidden');
-        msg.classList.replace('text-red-600', 'text-green-600');
-        msg.innerText = "¡Cuenta creada! Redirigiendo...";
+        msg.classList.remove('hidden', 'text-red-600');
+        msg.classList.add('text-green-600');
+        msg.innerText = "¡Listo! Te avisaremos por Telegram.";
         
-        // Redirigir a su nuevo dominio (o al login)
-        setTimeout(() => {
-            // De momento te mando al home, luego lo cambiaremos
-            window.location.href = "/"; 
-        }, 2000);
-
+        form.reset();
+        setTimeout(() => { window.location.href = "/"; }, 3000);
       } else {
-        // ERROR (ej: "Dominio ocupado")
-        throw new Error(result.error || "Error desconocido");
+        throw new Error(result.error || "Error en el registro");
       }
-
     } catch (error) {
-      msg.classList.remove('hidden');
+      msg.classList.remove('hidden', 'text-green-600');
+      msg.classList.add('text-red-600');
       msg.innerText = error.message;
       btn.disabled = false;
-      btn.innerText = "Crear Cuenta";
+      btn.innerText = originalText;
     }
   });
 </script>
