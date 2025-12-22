@@ -1,126 +1,132 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
-import Hero from '~/components/widgets/Hero.astro';
-import Note from '~/components/widgets/Note.astro';
+import Header from '~/components/widgets/Header.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
-import Features2 from '~/components/widgets/Features2.astro';
-import Steps from '~/components/widgets/Steps.astro';
+import Steps2 from '~/components/widgets/Steps2.astro';
 import Content from '~/components/widgets/Content.astro';
-import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
+import Pricing from '~/components/widgets/Pricing.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
-import Stats from '~/components/widgets/Stats.astro';
-import CallToAction from '~/components/widgets/CallToAction.astro';
+import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
+
+import { headerData } from '~/navigation';
 
 const metadata = {
-  title: 'TuStock — ERP Híbrido con Inteligencia Artificial',
+  title: 'TuStock — El ERP Híbrido con IA',
   ignoreTitleTemplate: true,
 };
 ---
 
 <Layout metadata={metadata}>
-  <Hero
+  <Fragment slot="header">
+    <Header
+      {...headerData}
+      actions={[
+        {
+          variant: 'secondary',
+          text: 'Entrar',
+          href: '#',
+        },
+        {
+          variant: 'primary',
+          text: 'Prueba Gratis',
+          href: '#',
+        },
+      ]}
+      isSticky
+    />
+  </Fragment>
+
+  <Hero2
+    tagline="Gestión de Inventario 2.0"
     actions={[
-      {
-        variant: 'primary',
-        text: 'Probar Demo',
-        href: '#features',
-        target: '_blank',
-        icon: 'tabler:rocket',
-      },
-      { text: 'Saber más', href: '#features' },
+      { variant: 'primary', target: '_blank', text: 'Descargar Agente Local', href: '#' },
+      { text: 'Ver demo', href: '#features' },
     ]}
-    image={{ src: '~/assets/images/frontal.png', alt: 'TuStock Dashboard' }}
+    image={{
+      src: '~/assets/images/hero-tech.jpg', 
+      alt: 'TuStock Dashboard IA',
+    }}
   >
     <Fragment slot="title">
-      Controla tu inventario con <span class="hidden xl:inline">la potencia de la</span>
-      <span class="text-accent dark:text-white highlight">Visión Artificial</span>
+      Controla tu stock con <br /> la potencia de la <span class="text-accent dark:text-white highlight">Visión Artificial</span><br
+      />
     </Fragment>
 
     <Fragment slot="subtitle">
       <span class="hidden sm:inline">
-        <span class="font-semibold">TuStock.app</span> es el ERP híbrido definitivo.</span
+        Olvídate de picar datos. <span class="font-semibold">TuStock</span> lee tus facturas con IA.</span
       >
-      Sube una foto de la factura y deja que la IA actualice tu stock al instante. Datos seguros en tu PC, control total desde la nube.
+      Datos seguros en tu PC (Docker), accesibles desde la nube. El primer ERP realmente híbrido.
     </Fragment>
-  </Hero>
-
-  <Note title="Filosofía:" description="Tus datos son tuyos. Seguridad local, accesibilidad global." />
+  </Hero2>
 
   <Features
     id="features"
-    tagline="¿Por qué TuStock?"
-    title="Lo mejor de los dos mundos"
-    subtitle="Hemos combinado la velocidad de la nube con la seguridad de tener la base de datos físicamente en tu oficina."
+    title="¿Por qué TuStock es diferente?"
+    subtitle="Hemos eliminado lo peor de la nube (lentitud, inseguridad) y lo peor del local (falta de acceso remoto)."
+    columns={2}
     items={[
       {
-        title: 'Lectura con IA',
+        title: 'Lectura de Facturas con IA',
         description:
-          'Olvídate de picar datos. Arrastra un PDF o haz una foto a la factura. Nuestro motor extrae productos, precios y cantidades automáticamente.',
+          'Sube una foto o PDF. Nuestro motor extrae productos, precios y cantidades automáticamente. Adiós al error humano.',
         icon: 'tabler:scan',
       },
       {
-        title: 'Arquitectura Híbrida',
-        description:
-          'Tu base de datos SQL vive en tu PC (Docker), blindada y rápida. La web se conecta mediante un túnel seguro solo cuando tú lo necesitas.',
-        icon: 'tabler:server-bolt',
+        title: 'Privacidad Híbrida Real',
+        description: `Tu base de datos SQL vive en tu ordenador. Nosotros no vemos tus márgenes ni tus clientes. Solo tú tienes la llave.`,
+        icon: 'tabler:lock',
       },
       {
         title: 'Chat con tus Datos',
         description:
-          'Pregunta: "¿Qué proveedor me vendió Coca-Cola más barata el mes pasado?". Nuestra IA analiza tu histórico y te responde al momento.',
+          'Pregunta a la IA: "¿A qué proveedor le compré Coca-Cola más barata en 2024?". Respuesta inmediata basada en tu historial.',
         icon: 'tabler:message-chatbot',
       },
       {
-        title: 'Velocidad Real',
-        description:
-          'Al procesar los datos en local, la latencia es mínima. Trabaja sin esperas de carga y sincroniza en segundo plano.',
-        icon: 'tabler:rocket',
-      },
-      {
-        title: 'Multi-Almacén',
-        description:
-          'Gestiona distintos puntos de venta, almacenes o incluso diferentes empresas desde un único panel unificado.',
+        title: 'Multi-Almacén y Multi-Empresa',
+        description: `Gestiona diferentes naves, tiendas o sociedades fiscales desde un único panel unificado sin cerrar sesión.`,
         icon: 'tabler:building-warehouse',
       },
       {
-        title: 'Código Moderno',
-        description:
-          'Construido con Astro, Docker y tecnología de vanguardia. Escalable desde una pequeña tienda hasta una gran nave industrial.',
-        icon: 'tabler:code',
+        title: 'Velocidad Local',
+        description: `Al procesar en local, la interfaz vuela. Trabaja sin conexión a internet y sincroniza cuando vuelvas a estar online.`,
+        icon: 'tabler:rocket',
+      },
+      {
+        title: 'SEO y Catálogo Online',
+        description: `Publica parte de tu stock en una web pública para tus clientes con un solo clic.`,
+        icon: 'tabler:world',
       },
     ]}
   />
 
   <Content
+    title="Casos de Uso"
+    subtitle="Diseñado para negocios que mueven cajas reales, no solo bytes."
     isReversed
-    tagline="Inteligencia Artificial"
-    title="Tu asistente de compras personal"
     items={[
       {
-        title: 'Digitalización en segundos',
+        title: 'El problema:',
         description:
-          'No pierdas horas introduciendo albaranes. El sistema reconoce proveedores y productos automáticamente.',
+          'Tienes una ferretería o tienda de repuestos. Llegan 50 albaranes a la semana. Tarda horas en meterlos al ordenador y siempre hay errores de stock.',
       },
       {
-        title: 'Detección de errores',
-        description:
-          'La IA te avisa si el precio de compra ha subido respecto a la última vez o si hay discrepancias en las cantidades.',
-      },
-      {
-        title: 'Aprendizaje continuo',
-        description:
-          'Cuanto más lo usas, mejor entiende tus facturas y tus hábitos de compra.',
+        title: 'La solución TuStock:',
+        description: `Haces una foto al albarán con el móvil. La IA reconoce las referencias. En 10 segundos tu stock está actualizado y sabes si el proveedor te ha subido el precio.`,
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      alt: 'IA analizando documentos',
+      src: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=1671&q=80',
+      alt: 'Tienda retail',
     }}
   >
     <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Adiós al tecleo manual</h3>
-      Automatiza la entrada de mercancía y reduce los errores humanos a cero.
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        Pequeño Comercio: <br /><span class="text-2xl">Digitalización sin dolor</span>
+      </h3>
     </Fragment>
 
     <Fragment slot="bg">
@@ -129,133 +135,160 @@ const metadata = {
   </Content>
 
   <Content
-    isAfterContent
+    isAfterContent={true}
     items={[
       {
-        title: 'Datos en tu propiedad',
-        description: `A diferencia de otros SaaS, aquí la base de datos está en TU ordenador o servidor local. Nadie más tiene acceso a tus márgenes.`,
+        title: 'El problema:',
+        description: `Tienes varias naves industriales. El ERP en la nube es lento y caro. Si se cae internet, se para el almacén.`,
       },
       {
-        title: 'Acceso Remoto Seguro',
-        description:
-          'Usamos túneles encriptados (como Cloudflare Tunnel) para que puedas ver tu stock desde el móvil sin exponer tus datos a internet permanentemente.',
-      },
-      {
-        title: 'Copias de seguridad automáticas',
-        description:
-          "Configura backups automáticos en local o en tu nube privada favorita. Tu negocio, tus reglas.",
+        title: 'La solución TuStock:',
+        description: `Instalas un nodo local en cada nave. Trabajan a velocidad de red local. Se sincronizan entre ellos en segundo plano. Robustez industrial con tecnología moderna.`,
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2194&q=80',
-      alt: 'Seguridad de datos',
+      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1658&q=80',
+      alt: 'Almacén logístico',
     }}
   >
-    <Fragment slot="content">Privacidad sin sacrificar comodidad.</Fragment>
+    <Fragment slot="content">
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+        Almacenes y Logística: <br /><span class="text-2xl">Control total distribuido</span>
+      </h3>
+    </Fragment>
 
     <Fragment slot="bg">
       <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
     </Fragment>
   </Content>
 
-  <Steps
-    title="Empieza a usar TuStock en 3 pasos."
-    items={[
+  <Pricing
+    title="Precios Transparentes"
+    subtitle="Empieza gratis. Paga solo cuando crezcas."
+    prices={[
       {
-        title: 'Paso 1: <span class="font-medium">Instala el Agente Local</span>',
-        description:
-          "Descarga nuestro contenedor Docker ligero en tu PC o servidor. Es donde vivirán tus datos seguros.",
-        icon: 'tabler:package',
+        title: 'Starter',
+        subtitle: 'Para pequeños negocios',
+        price: '0',
+        period: '/ mes',
+        callToAction: {
+          target: '_blank',
+          text: 'Empezar Gratis',
+          href: '#',
+        },
+        items: [
+          { description: '1 Usuario' },
+          { description: 'Hasta 500 productos' },
+          { description: 'Lectura IA: 50 facturas/mes' },
+          { description: 'Soporte por email' },
+        ],
       },
       {
-        title: 'Paso 2: <span class="font-medium">Sincroniza</span>',
-        description:
-          "Conecta tu agente con la web TuStock.app escaneando un código QR. Se creará el túnel seguro al instante.",
-        icon: 'tabler:qrcode',
+        title: 'Pro',
+        subtitle: 'Para PYMES en crecimiento',
+        price: 29,
+        period: '/ mes',
+        callToAction: {
+          target: '_blank',
+          text: 'Prueba de 14 días',
+          href: '#',
+        },
+        hasRibbon: true,
+        ribbonTitle: 'popular',
+        items: [
+          { description: 'Usuarios ilimitados' },
+          { description: 'Productos ilimitados' },
+          { description: 'Lectura IA: 500 facturas/mes' },
+          { description: 'Multi-Almacén' },
+          { description: 'Soporte Prioritario' },
+        ],
       },
       {
-        title: 'Paso 3: <span class="font-medium">Sube tu primera factura</span>',
-        description:
-          'Arrastra un PDF o haz una foto. Mira cómo tu inventario se llena solo. ¡Listo!',
-        icon: 'tabler:file-invoice',
-      },
-      {
-        title: '¡A funcionar!',
-        icon: 'tabler:check',
+        title: 'Enterprise',
+        subtitle: 'Para grandes volúmenes',
+        price: 99,
+        period: '/ mes',
+        callToAction: {
+          target: '_blank',
+          text: 'Contactar Ventas',
+          href: '#',
+        },
+        items: [
+          { description: 'Todo lo de Pro' },
+          { description: 'Instalación On-Premise' },
+          { description: 'Lectura IA Ilimitada' },
+          { description: 'API Personalizada' },
+          { description: 'Gestor de cuenta dedicado' },
+        ],
       },
     ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1616198814651-e71f960c3180?ixlib=rb-4.0.3&auto=format&fit=crop&w=987&q=80',
-      alt: 'Pasos instalación',
-    }}
   />
 
   <FAQs
     title="Preguntas Frecuentes"
-    subtitle="Todo lo que necesitas saber sobre el modelo híbrido de TuStock."
-    tagline="FAQs"
-    classes={{ container: 'max-w-6xl' }}
     items={[
       {
-        title: '¿Dónde se guardan mis datos realmente?',
+        title: '¿Necesito conocimientos técnicos para instalarlo?',
         description:
-          "En tu propio ordenador o servidor donde instales el agente. La nube de TuStock solo actúa como un visor seguro; nosotros no almacenamos tu listado de clientes ni precios.",
+          'No. Ofrecemos un instalador de "un clic" para Windows y Mac que configura el entorno seguro automáticamente.',
+        icon: 'tabler:chevrons-right',
       },
       {
-        title: '¿Necesito un ordenador muy potente?',
-        description:
-          'Para nada. El agente de TuStock es muy ligero y funciona en cualquier PC de oficina estándar, un portátil o incluso una Raspberry Pi.',
+        title: '¿Dónde están mis datos?',
+        description: `Físicamente en el disco duro de tu ordenador. Nosotros solo facilitamos el túnel seguro para que puedas verlos desde el móvil cuando estás fuera.`,
+        icon: 'tabler:chevrons-right',
       },
       {
-        title: '¿Qué pasa si se va internet?',
+        title: '¿Funciona si se cae internet?',
         description:
-          "Puedes seguir trabajando en local sin problemas. Cuando vuelva la conexión, el sistema se sincronizará para que puedas acceder desde fuera.",
+          'Sí. El sistema es "Local First". Puedes seguir facturando, escaneando y moviendo stock. Se sincronizará cuando vuelva la conexión.',
+        icon: 'tabler:chevrons-right',
       },
       {
         title: '¿La IA lee facturas manuscritas?',
-        description:
-          "Nuestra IA está entrenada principalmente para facturas impresas y digitales (PDF), donde la precisión es casi del 100%. Las manuscritas dependen de la caligrafía.",
-      },
-      {
-        title: '¿Puedo gestionar varias empresas?',
-        description:
-          "Sí, el sistema es multi-tenant. Puedes tener inventarios totalmente separados para distintas sociedades bajo una misma cuenta.",
-      },
-      {
-        title: '¿Es difícil de instalar?',
-        description:
-          "Si sabes instalar WhatsApp, sabes instalar TuStock. Proporcionamos un instalador 'de un clic' para Windows y Mac.",
-      },
-    ]}
-  />
-
-  <Stats
-    stats={[
-      { title: 'Precisión OCR', amount: '99%' },
-      { title: 'Ahorro de tiempo', amount: '80%' },
-      { title: 'Empresas activas', amount: '10+' },
-      { title: 'Productos gestionados', amount: '15K' },
-    ]}
-  />
-
-  <CallToAction
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Empezar Gratis',
-        href: '#',
-        target: '_blank',
-        icon: 'tabler:download',
+        description: `Nuestra IA está optimizada para documentos impresos y PDFs digitales. La lectura de manuscritos está en fase beta.`,
+        icon: 'tabler:chevrons-right',
       },
     ]}
   >
-    <Fragment slot="title">
-      TuStock&nbsp;+&nbsp;<br class="block sm:hidden" /><span class="sm:whitespace-nowrap">Tu Negocio</span>
+    <Fragment slot="bg">
+      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
     </Fragment>
+  </FAQs>
 
-    <Fragment slot="subtitle">
-      Deja de perder el tiempo contando cajas y picando datos. <br class="hidden md:inline" />
-      Digitaliza tu almacén hoy mismo.
+  <Steps2
+    title="¿Hablamos?"
+    subtitle="Si tienes dudas sobre cómo encajaría TuStock en tu flujo de trabajo, contáctanos."
+    callToAction={{
+      text: 'Enviar Email',
+      href: 'mailto:hola@tustock.app',
+    }}
+    items={[
+      {
+        title: 'Soporte',
+        description: 'soporte@tustock.app',
+        icon: 'tabler:mail',
+      },
+      {
+        title: 'Ventas',
+        description: '+34 600 000 000',
+        icon: 'tabler:headset',
+      },
+      {
+        title: 'Síguenos',
+        description: '@tustock_app',
+        icon: 'tabler:brand-twitter',
+      },
+    ]}
+  />
+
+  <BlogLatestPosts
+    id="blog"
+    title="Novedades de TuStock"
+    information={`Descubre nuestros tutoriales sobre gestión de inventario, trucos para ahorrar impuestos y actualizaciones de la plataforma.`}
+  >
+    <Fragment slot="bg">
+      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
     </Fragment>
-  </CallToAction>
+  </BlogLatestPosts>
 </Layout>
