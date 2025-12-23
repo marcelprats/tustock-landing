@@ -2,175 +2,149 @@
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 
-// 1. CONFIGURACIÓN DEL HEADER PRIVADO
-// Este menú solo se verá cuando estés dentro del subdominio
+// --- 1. SEGURIDAD ---
+// Simulamos la verificación de sesión. 
+// Si esto fuera false, el usuario sería expulsado inmediatamente.
+const isLogged = true; 
+
+if (!isLogged) {
+  return Astro.redirect('/login');
+}
+
+// --- 2. CONFIGURACIÓN DEL HEADER WEB ---
+// Mantenemos el Header de la web pero limpio, solo con el botón de Salir
 const dashboardHeader = {
-  // Sin enlaces de navegación (Producto, Precios...)
   links: [], 
-  // Botones de acción específicos para el usuario logueado
   actions: [
     {
-      text: `Hola, ${tenant}`,
-      variant: 'link', 
-      href: '#',
-      icon: 'tabler:user',
-    },
-    {
-      text: 'Cerrar Sesión',
-      href: 'https://tustock.app/logout', // (Luego crearemos esta ruta si hace falta)
-      variant: 'secondary',
+      text: 'Salir',
+      href: '/api/logout', // <--- APUNTA A LA API PARA BORRAR COOKIE
+      variant: 'link',
       icon: 'tabler:logout',
     },
   ],
 };
 ---
 
-{/* Pasamos el 'headerData' personalizado al Layout */}
 <Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
   
-  {/* FONDO GRIS SUAVE PARA DAR SENSACIÓN DE APP */}
-  <div class="bg-gray-50 dark:bg-slate-900 min-h-screen pb-20">
+  {/* ESTILOS GLOBALES: Para bloquear el scroll y dar sensación de App Nativa */}
+  <style is:global>
+    body { overflow: hidden; }
+  </style>
+
+  {/* CONTENEDOR PRINCIPAL DE LA APP */}
+  <section id="app-interface" class="w-full bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center h-[calc(100vh-64px)]">
     
-    {/* CABECERA DEL DASHBOARD (Bienvenida y Stats Rápidos) */}
-    <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 pt-24 pb-12 px-4 sm:px-6">
-      <div class="max-w-7xl mx-auto">
-        <div class="md:flex md:items-center md:justify-between">
-          <div class="min-w-0 flex-1">
-            <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
-              Panel de Control
-            </h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Gestión en tiempo real de <span class="font-semibold text-blue-600 capitalize">{tenant}</span>.
-            </p>
-          </div>
-          <div class="mt-4 flex md:ml-4 md:mt-0">
-            <button type="button" class="ml-3 inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-              <span class="mr-2 text-lg">+</span> Nuevo Producto
-            </button>
-          </div>
-        </div>
-
-        {/* STATS CARDS */}
-        <dl class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {/* Card 1 */}
-          <div class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 px-4 py-5 shadow border border-gray-100 dark:border-slate-700 sm:p-6">
-            <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Valor del Inventario</dt>
-            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">12.450€</dd>
-            <div class="mt-2 flex items-center text-sm text-green-600">
-              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-              <span>+4.5% vs mes pasado</span>
-            </div>
-          </div>
-          {/* Card 2 */}
-          <div class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 px-4 py-5 shadow border border-gray-100 dark:border-slate-700 sm:p-6">
-            <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Productos Bajos de Stock</dt>
-            <dd class="mt-1 text-3xl font-semibold tracking-tight text-red-600">3</dd>
-            <div class="mt-2 flex items-center text-sm text-gray-500">
-              <span>Requiere atención</span>
-            </div>
-          </div>
-          {/* Card 3 */}
-          <div class="overflow-hidden rounded-lg bg-white dark:bg-slate-900 px-4 py-5 shadow border border-gray-100 dark:border-slate-700 sm:p-6">
-            <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Movimientos Hoy</dt>
-            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">24</dd>
-            <div class="mt-2 flex items-center text-sm text-blue-600">
-              <span>18 ventas, 6 entradas</span>
-            </div>
-          </div>
-        </dl>
-      </div>
-    </div>
-
-    {/* ZONA DE ACCIONES RÁPIDAS Y TABLA */}
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+    {/* VENTANA DE LA APP (Simulando software de escritorio) */}
+    <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
       
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-        {/* Acción Rápida 1 */}
-        <a href="#" class="group relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 hover:border-gray-400">
-          <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 p-3 rounded-lg text-blue-600 dark:text-blue-300">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+      {/* === SIDEBAR (Barra Lateral) === */}
+      <aside class="w-64 bg-gray-50 dark:bg-[#0B0F19] border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
+        
+        {/* Info del Tenant */}
+        <div class="p-6 border-b border-gray-200 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-lg">
+              {tenant.charAt(0).toUpperCase()}
+            </div>
+            <div class="overflow-hidden">
+              <h3 class="font-bold text-gray-900 dark:text-white truncate">{tenant}</h3>
+              <span class="text-xs text-green-500 flex items-center gap-1 font-medium">● En línea</span>
+            </div>
           </div>
-          <div class="min-w-0 flex-1">
-            <span class="absolute inset-0" aria-hidden="true"></span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">Añadir Entrada Manual</p>
-            <p class="truncate text-sm text-gray-500">Sin escanear</p>
-          </div>
-        </a>
-
-        {/* Acción Rápida 2 */}
-        <a href="#" class="group relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 hover:border-gray-400">
-          <div class="flex-shrink-0 bg-purple-100 dark:bg-purple-900 p-3 rounded-lg text-purple-600 dark:text-purple-300">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <span class="absolute inset-0" aria-hidden="true"></span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">Escanear Factura</p>
-            <p class="truncate text-sm text-gray-500">Usar la cámara o subir PDF</p>
-          </div>
-        </a>
-
-        {/* Acción Rápida 3 */}
-        <a href="#" class="group relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 hover:border-gray-400">
-          <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 p-3 rounded-lg text-green-600 dark:text-green-300">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <span class="absolute inset-0" aria-hidden="true"></span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">Generar Reporte</p>
-            <p class="truncate text-sm text-gray-500">Excel o PDF</p>
-          </div>
-        </a>
-      </div>
-
-      {/* TABLA DE MOVIMIENTOS RECIENTES */}
-      <div class="bg-white dark:bg-slate-800 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
-        <div class="border-b border-gray-200 dark:border-slate-700 px-4 py-5 sm:px-6">
-          <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Últimos Movimientos</h3>
         </div>
-        <ul role="list" class="divide-y divide-gray-100 dark:divide-slate-700">
-          <li class="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 dark:hover:bg-slate-700/50 sm:px-6">
-            <div class="flex min-w-0 gap-x-4">
-              <div class="min-w-0 flex-auto">
-                <p class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-                  <span class="absolute inset-x-0 -top-px bottom-0"></span>
-                  Salida: Coca-Cola Zero 33cl
-                </p>
-                <p class="mt-1 flex text-xs leading-5 text-gray-500">
-                  <span class="relative truncate">Venta TPV #402</span>
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-x-4">
-              <div class="hidden sm:flex sm:flex-col sm:items-end">
-                <p class="text-sm leading-6 text-gray-900 dark:text-white">- 24 un.</p>
-                <p class="mt-1 text-xs leading-5 text-gray-500">Hace 5 min</p>
-              </div>
-              <svg class="h-5 w-5 flex-none text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v4.59L7.3 9.24a.75.75 0 00-1.06 1.06l3.25 3.25a.75.75 0 001.06 0l3.25-3.25a.75.75 0 10-1.06-1.06l-1.95 1.95v-4.59z" clip-rule="evenodd" /></svg>
-            </div>
-          </li>
-          <li class="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 dark:hover:bg-slate-700/50 sm:px-6">
-            <div class="flex min-w-0 gap-x-4">
-              <div class="min-w-0 flex-auto">
-                <p class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-                  <span class="absolute inset-x-0 -top-px bottom-0"></span>
-                  Entrada: Patatas Lay's
-                </p>
-                <p class="mt-1 flex text-xs leading-5 text-gray-500">
-                  <span class="relative truncate">Albarán PROV-2201</span>
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-x-4">
-              <div class="hidden sm:flex sm:flex-col sm:items-end">
-                <p class="text-sm leading-6 text-gray-900 dark:text-white">+ 50 un.</p>
-                <p class="mt-1 text-xs leading-5 text-gray-500">Hace 2 horas</p>
-              </div>
-              <svg class="h-5 w-5 flex-none text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>
-            </div>
-          </li>
-        </ul>
-      </div>
 
+        {/* Menú de Navegación */}
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+          <button class="w-full flex items-center gap-3 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition border-l-4 border-blue-600">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+            Dashboard
+          </button>
+          
+          <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            Inventario
+          </button>
+
+          <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Reportes
+          </button>
+        </nav>
+
+        {/* Footer del Sidebar */}
+        <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-sm font-bold shadow-lg hover:opacity-90 transition transform active:scale-95">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
+            Escanear
+          </button>
+        </div>
+      </aside>
+
+      {/* === ZONA PRINCIPAL (WORKSPACE) === */}
+      <main class="flex-1 bg-white dark:bg-[#111827] overflow-y-auto relative p-8">
+        
+        {/* Cabecera Interna */}
+        <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Resumen General</h1>
+            <p class="text-sm text-gray-500 mt-1">Sincronizado: Hace un instante</p>
+          </div>
+          <div class="flex gap-3">
+             <button class="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition dark:text-white">
+               Entrada Manual
+             </button>
+             <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-md hover:bg-blue-700 transition flex items-center gap-2">
+               <span>+</span> Nuevo Producto
+             </button>
+          </div>
+        </header>
+
+        {/* Stats Grid */}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+           <div class="p-6 bg-blue-50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
+              <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">12.450€</p>
+           </div>
+           <div class="p-6 bg-red-50 dark:bg-slate-800/50 rounded-2xl border border-red-100 dark:border-slate-700">
+              <span class="text-xs text-red-600 font-bold uppercase tracking-wider">Bajo Stock</span>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">3 <span class="text-sm font-normal text-gray-500">items</span></p>
+           </div>
+           <div class="p-6 bg-green-50 dark:bg-slate-800/50 rounded-2xl border border-green-100 dark:border-slate-700">
+              <span class="text-xs text-green-600 font-bold uppercase tracking-wider">Ventas Hoy</span>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">24</p>
+           </div>
+        </div>
+
+        {/* Tabla de Ejemplo */}
+        <div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+            <thead class="bg-gray-50 dark:bg-slate-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-[#111827] divide-y divide-gray-200 dark:divide-slate-700">
+               <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Martillo Acero</td>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">M-2024</td>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white font-bold">45</td>
+                 <td class="px-6 py-4 whitespace-nowrap text-right">
+                   <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                     OK
+                   </span>
+                 </td>
+               </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </main>
     </div>
-  </div>
+  </section>
+
 </Layout>
