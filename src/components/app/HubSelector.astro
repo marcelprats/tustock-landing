@@ -1,0 +1,69 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+
+// --- 1. DATOS SIMULADOS (Aquí conectarías tu BBDD) ---
+// En el futuro: const stores = await db.getStoresByUser(session.userId);
+const user = "Marcel"; // Esto lo sacarías de la cookie/session
+const stores = [
+  { name: 'Frutería Paco', slug: 'fruteria', role: 'Owner', logo: 'F' },
+  { name: 'Taller Mecánico', slug: 'taller', role: 'Manager', logo: 'T' },
+  { name: 'Bar Manolo', slug: 'bar-manolo', role: 'Staff', logo: 'B' },
+];
+
+const metadata = { title: 'Mis Tiendas' };
+---
+
+<Layout metadata={metadata}>
+  <section class="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
+    
+    <div class="max-w-md w-full animate-fade-in-up">
+      <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Hola, {user} 👋</h1>
+        <p class="text-gray-500">Selecciona el negocio que quieres gestionar hoy:</p>
+      </div>
+
+      <div class="space-y-4">
+        {stores.map((store) => (
+          /* NOTA: El href usa https://SLUG.tustock.app para saltar al subdominio */
+          <a 
+            href={import.meta.env.PROD ? `https://${store.slug}.tustock.app` : `/?tenant=${store.slug}`} 
+            class="block bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-200 dark:border-slate-700 group cursor-pointer"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  {store.logo}
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {store.name}
+                  </h3>
+                  <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-full text-gray-500 dark:text-gray-300">
+                    {store.role}
+                  </span>
+                </div>
+              </div>
+              <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </div>
+          </a>
+        ))}
+        
+        {/* Botón para crear nueva tienda */}
+        <a href="/new-store" class="group block border-2 border-dashed border-gray-300 dark:border-slate-700 p-4 rounded-2xl text-center text-gray-500 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer bg-transparent">
+          <span class="flex items-center justify-center gap-2 font-medium">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            Registrar nuevo negocio
+          </span>
+        </a>
+      </div>
+
+      <div class="mt-12 text-center border-t border-gray-200 dark:border-slate-800 pt-6">
+        <a href="/api/logout" class="text-sm text-red-500 font-medium hover:text-red-600 flex items-center justify-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          Cerrar sesión en todas las cuentas
+        </a>
+      </div>
+    </div>
+
+  </section>
+</Layout>

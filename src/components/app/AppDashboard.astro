@@ -1,10 +1,9 @@
 ---
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
+import StoreSwitcher from './StoreSwitcher.astro'; // <--- Asegúrate de tener este componente creado
 
-// YA NO NECESITAMOS LA SEGURIDAD AQUÍ. 
-// El index.astro ya se encargó de verificar la cookie.
-
+// Configuración del Header (Solo botón salir, limpio)
 const dashboardHeader = {
   links: [], 
   actions: [
@@ -21,12 +20,21 @@ const dashboardHeader = {
 <Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
   
   <style is:global>
-    body { overflow: hidden; } 
+    body { overflow: hidden; } /* Modo App: Sin scroll en el body */
+    
+    /* Clases para manejar las vistas */
     .view-section { display: none; }
-    .view-section.active { display: block; }
+    .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilo botón activo del menú */
     .nav-btn.active { 
-      background-color: rgb(219 234 254);
-      color: rgb(37 99 235);
+      background-color: rgb(219 234 254); /* blue-100 */
+      color: rgb(37 99 235); /* blue-600 */
       border-left-width: 4px;
       border-left-color: rgb(37 99 235);
     }
@@ -38,47 +46,51 @@ const dashboardHeader = {
 
   <section class="w-full bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center h-[calc(100vh-64px)]">
     
+    {/* VENTANA DE LA APP */}
     <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
       
-      {/* SIDEBAR */}
+      {/* === SIDEBAR IZQUIERDO === */}
       <aside class="w-64 bg-gray-50 dark:bg-[#0B0F19] border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
-        <div class="p-6 border-b border-gray-200 dark:border-slate-800">
-          <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-lg">
-              {tenant.charAt(0).toUpperCase()}
-            </div>
-            <div class="overflow-hidden">
-              <h3 class="font-bold text-gray-900 dark:text-white truncate">{tenant}</h3>
-              <span class="text-xs text-green-500 flex items-center gap-1 font-medium">● En línea</span>
-            </div>
-          </div>
-        </div>
+        
+        {/* COMPONENTE SWITCHER (DROPDOWN DE TIENDAS) */}
+        <StoreSwitcher currentTenant={tenant} />
 
+        {/* NAVEGACIÓN */}
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto" id="sidebar-nav">
           <button data-target="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" /></svg>
              Dashboard
           </button>
+          
           <button data-target="inventario" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
              Inventario
           </button>
+
           <button data-target="reportes" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
              Reportes
           </button>
         </nav>
+
+        {/* FOOTER SIDEBAR */}
+        <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-sm font-bold shadow-lg hover:opacity-90 transition transform active:scale-95">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
+            Escanear
+          </button>
+        </div>
       </aside>
 
-      {/* WORKSPACE */}
+      {/* === ZONA PRINCIPAL (WORKSPACE) === */}
       <main class="flex-1 bg-white dark:bg-[#111827] overflow-y-auto relative p-8">
         
-        {/* DASHBOARD */}
+        {/* VISTA 1: DASHBOARD */}
         <div id="view-dashboard" class="view-section active">
           <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
             <div>
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Resumen General</h1>
-              <p class="text-sm text-gray-500 mt-1">Sincronizado: Hace un instante</p>
+              <p class="text-sm text-gray-500 mt-1">Datos actualizados en tiempo real</p>
             </div>
             <div class="flex gap-3">
                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-md hover:bg-blue-700 transition flex items-center gap-2">
@@ -87,74 +99,116 @@ const dashboardHeader = {
             </div>
           </header>
 
+          {/* STATS */}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
              <div class="p-6 bg-blue-50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
                 <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">12.450€</p>
              </div>
+             <div class="p-6 bg-red-50 dark:bg-slate-800/50 rounded-2xl border border-red-100 dark:border-slate-700">
+                <span class="text-xs text-red-600 font-bold uppercase tracking-wider">Alertas</span>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">3 <span class="text-sm font-normal text-gray-500">stock bajo</span></p>
+             </div>
+             <div class="p-6 bg-green-50 dark:bg-slate-800/50 rounded-2xl border border-green-100 dark:border-slate-700">
+                <span class="text-xs text-green-600 font-bold uppercase tracking-wider">Ventas Hoy</span>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">24</p>
+             </div>
           </div>
-          <div class="p-10 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
-             <p class="text-gray-500">Gráficas de rendimiento próximamente...</p>
+          
+          <div class="p-12 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50/50 dark:bg-slate-800/30">
+             <p class="text-gray-500">Aquí irán las gráficas de rendimiento...</p>
           </div>
         </div>
 
-        {/* INVENTARIO */}
+        {/* VISTA 2: INVENTARIO */}
         <div id="view-inventario" class="view-section">
-          <h2 class="text-2xl font-bold mb-6">Inventario de {tenant}</h2>
+          <header class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Inventario: {tenant}</h2>
+            <button class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-800 transition">Filtros</button>
+          </header>
+
           <div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
               <thead class="bg-gray-50 dark:bg-slate-800">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ref</th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stock</th>
                 </tr>
               </thead>
               <tbody class="bg-white dark:bg-[#111827] divide-y divide-gray-200 dark:divide-slate-700">
                  <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
-                   <td class="px-6 py-4 text-sm font-medium">Martillo Acero</td>
-                   <td class="px-6 py-4 text-sm text-right font-bold">45</td>
+                   <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">Martillo Acero</td>
+                   <td class="px-6 py-4 text-sm text-gray-500">M-2024</td>
+                   <td class="px-6 py-4 text-sm text-right font-bold text-gray-900 dark:text-white">45</td>
+                 </tr>
+                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
+                   <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">Destornillador Phillips</td>
+                   <td class="px-6 py-4 text-sm text-gray-500">D-PH2</td>
+                   <td class="px-6 py-4 text-sm text-right font-bold text-gray-900 dark:text-white">120</td>
                  </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* REPORTES */}
+        {/* VISTA 3: REPORTES */}
         <div id="view-reportes" class="view-section">
-          <h2 class="text-2xl font-bold mb-6">Reportes Fiscales</h2>
-          <p class="text-gray-500">Aquí podrás descargar tus reportes trimestrales en PDF.</p>
+          <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Reportes y Fiscalidad</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-6 border border-gray-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition cursor-pointer">
+              <h3 class="font-bold text-lg mb-2">📄 Cierre Trimestral</h3>
+              <p class="text-sm text-gray-500">Descargar PDF resumen de IVA e IRPF.</p>
+            </div>
+            <div class="p-6 border border-gray-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition cursor-pointer">
+              <h3 class="font-bold text-lg mb-2">📊 Movimientos de Stock</h3>
+              <p class="text-sm text-gray-500">Exportar Excel con entradas y salidas.</p>
+            </div>
+          </div>
         </div>
 
       </main>
     </div>
   </section>
+
 </Layout>
 
 <script>
-  // Script para manejar el cambio de pestañas del sidebar
+  // LÓGICA DE NAVEGACIÓN SPA (SIN RECARGA)
   document.addEventListener('astro:page-load', () => {
+    
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.view-section');
 
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
+        // 1. Gestionar clases del menú
         navButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+
+        // 2. Gestionar visibilidad de secciones
         sections.forEach(s => s.classList.remove('active'));
+        
         const targetId = btn.getAttribute('data-target');
-        document.getElementById(`view-${targetId}`)?.classList.add('active');
+        const targetSection = document.getElementById(`view-${targetId}`);
+        if (targetSection) {
+          targetSection.classList.add('active');
+        }
       });
     });
+
   });
   
-  // Fallback si no hay View Transitions
+  // Soporte básico si no usas ViewTransitions
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const target = e.currentTarget;
         const targetId = target.getAttribute('data-target');
+        
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         target.classList.add('active');
+
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.getElementById(`view-${targetId}`)?.classList.add('active');
     });
