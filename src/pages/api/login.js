@@ -1,4 +1,4 @@
-export const POST = async ({ request, locals, cookies }) => { // 1. AÑADIR 'cookies' AQUÍ
+export const POST = async ({ request, locals, cookies }) => {
   try {
     const env = locals.runtime?.env;
     const db = env?.DB;
@@ -33,22 +33,20 @@ export const POST = async ({ request, locals, cookies }) => { // 1. AÑADIR 'coo
       return new Response(JSON.stringify({ error: "Usuario sin tienda asociada" }), { status: 404 });
     }
 
-    // --- 2. LA MAGIA: CREAR LA COOKIE GLOBAL ---
-    // Esto es lo que permite que el usuario entre en el subdominio sin loguearse de nuevo
+    // --- COOKIE CONFIGURADA CORRECTAMENTE ---
     cookies.set('session', user.id, {
       path: '/',
-      httpOnly: true,                 // No accesible por JS (Seguridad)
-      secure: true,                   // Solo HTTPS
-      sameSite: 'lax',                // Permite la redirección
-      maxAge: 60 * 60 * 24 * 7,       // 1 Semana
+      httpOnly: true,
+      // FIX CRÍTICO: secure solo true en Producción, si no en local falla
+      secure: import.meta.env.PROD, 
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
       domain: import.meta.env.PROD ? '.tustock.app' : undefined 
-      // 👆 EL PUNTO ES CLAVE: permite acceso a tustock.app Y *.tustock.app
     });
 
     return new Response(JSON.stringify({
       success: true,
       message: "Login correcto",
-      // Si todo va bien, el frontend leerá esto y redirigirá
       redirectUrl: `https://${tenant.slug}.tustock.app`, 
       user: { name: user.full_name, role: user.role }
     }), { 
