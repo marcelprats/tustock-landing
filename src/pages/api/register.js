@@ -1,11 +1,9 @@
-export const POST = async ({ request, locals, cookies }) => { // 1. AÑADIR 'cookies'
+export const POST = async ({ request, locals, cookies }) => {
   try {
     const env = locals.runtime?.env;
     const db = env?.DB;
 
-    if (!db) {
-      return new Response(JSON.stringify({ error: "DB Error" }), { status: 500 });
-    }
+    if (!db) return new Response(JSON.stringify({ error: "Error DB" }), { status: 500 });
 
     const { name, email, password, subdomain } = await request.json();
 
@@ -16,60 +14,53 @@ export const POST = async ({ request, locals, cookies }) => { // 1. AÑADIR 'coo
     // Generamos IDs
     const tenantId = crypto.randomUUID();
     const userId = crypto.randomUUID();
+    const membershipId = crypto.randomUUID();
 
-    // Validar subdominio
+    // 1. Validar si existe la tienda
     const existingTenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(subdomain).first();
     if (existingTenant) {
       return new Response(JSON.stringify({ error: "Ese nombre de tienda ya existe 😢" }), { status: 409 });
     }
 
-    // Inserciones (Transacción idealmente, pero así vale por ahora)
+    // --- BLOQUE DE INSERCIÓN (3 TABLAS) ---
+    
+    // A. Crear Tienda
     await db.prepare(
       "INSERT INTO tenants (id, name, slug, plan_type) VALUES (?, ?, ?, 'FREE')"
     ).bind(tenantId, name, subdomain).run();
 
+    // B. Crear Usuario (Nota: Ya no insertamos tenant_id ni role aquí)
     await db.prepare(
-      "INSERT INTO users (id, tenant_id, email, password_hash, full_name, role) VALUES (?, ?, ?, ?, ?, 'OWNER')"
-    ).bind(userId, tenantId, email, password, name).run();
+      "INSERT INTO users (id, email, password_hash, full_name) VALUES (?, ?, ?, ?)"
+    ).bind(userId, email, password, name).run();
 
-    // --- 2. LA MAGIA: COOKIE GLOBAL AL REGISTRARSE ---
+    // C. Crear Membresía (El vínculo)
+    await db.prepare(
+      "INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, 'OWNER')"
+    ).bind(membershipId, userId, tenantId).run();
+
+    // --- FIN BLOQUE INSERCIÓN ---
+
+    // Crear Cookie Global
     cookies.set('session', userId, {
       path: '/',
       httpOnly: true,
-      secure: true,
+      secure: import.meta.env.PROD,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       domain: import.meta.env.PROD ? '.tustock.app' : undefined
     });
 
-    // Notificación Telegram (Sin cambios)
-    const botToken = "8086835260:AAECb0ErvxZ_72QFM54QZeutTH1IKNbhOiQ";
-    const chatId = "1320030558";
-    const alertMsg = `🚀 ¡NUEVO REGISTRO!\n🏢 ${name}\n🔗 https://${subdomain}.tustock.app`;
-
-    if (locals.runtime?.waitUntil) {
-      locals.runtime.waitUntil(
-        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: alertMsg })
-        }).catch(e => console.error(e))
-      );
-    }
+    // Telegram Notificación (Opcional)
+    // ... (puedes dejar tu código de telegram aquí) ...
 
     return new Response(JSON.stringify({
       success: true,
       message: "Cuenta creada",
       redirect: `https://${subdomain}.tustock.app`
-    }), { 
-      status: 200, 
-      headers: { "Content-Type": "application/json" } 
-    });
+    }), { status: 200 });
 
   } catch (err) {
-    return new Response(JSON.stringify({ 
-      error: "Error registro", 
-      details: err.message 
-    }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Error registro", details: err.message }), { status: 500 });
   }
 }

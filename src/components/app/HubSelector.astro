@@ -1,14 +1,36 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
-// --- 1. DATOS SIMULADOS (Aquí conectarías tu BBDD) ---
-// En el futuro: const stores = await db.getStoresByUser(session.userId);
-const user = "Marcel"; // Esto lo sacarías de la cookie/session
-const stores = [
-  { name: 'Frutería Paco', slug: 'fruteria', role: 'Owner', logo: 'F' },
-  { name: 'Taller Mecánico', slug: 'taller', role: 'Manager', logo: 'T' },
-  { name: 'Bar Manolo', slug: 'bar-manolo', role: 'Staff', logo: 'B' },
-];
+// 1. OBTENER SESIÓN Y DB
+const session = Astro.cookies.get('session');
+const userId = session?.value;
+const db = Astro.locals.runtime?.env?.DB;
+
+let userStores = [];
+let userName = "Usuario";
+
+// 2. CONSULTA REAL
+if (userId && db) {
+  try {
+    // Obtenemos nombre del usuario y sus tiendas
+    // Primero el nombre
+    const userRes = await db.prepare("SELECT full_name FROM users WHERE id = ?").bind(userId).first();
+    if (userRes) userName = userRes.full_name;
+
+    // Segundo las tiendas (JOIN users -> tenants)
+    const storesRes = await db.prepare(`
+      SELECT t.name, t.slug, u.role 
+      FROM users u
+      JOIN tenants t ON u.tenant_id = t.id
+      WHERE u.id = ?
+    `).bind(userId).all();
+    
+    userStores = storesRes.results.map(s => ({...s, logo: s.name.charAt(0).toUpperCase()}));
+
+  } catch (e) {
+    console.error("Error DB Hub:", e);
+  }
+}
 
 const metadata = { title: 'Mis Tiendas' };
 ---
@@ -18,13 +40,12 @@ const metadata = { title: 'Mis Tiendas' };
     
     <div class="max-w-md w-full animate-fade-in-up">
       <div class="text-center mb-10">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Hola, {user} 👋</h1>
-        <p class="text-gray-500">Selecciona el negocio que quieres gestionar hoy:</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Hola, {userName} 👋</h1>
+        <p class="text-gray-500">Selecciona tu negocio:</p>
       </div>
 
       <div class="space-y-4">
-        {stores.map((store) => (
-          /* NOTA: El href usa https://SLUG.tustock.app para saltar al subdominio */
+        {userStores.length > 0 ? userStores.map((store) => (
           <a 
             href={import.meta.env.PROD ? `https://${store.slug}.tustock.app` : `/?tenant=${store.slug}`} 
             class="block bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-200 dark:border-slate-700 group cursor-pointer"
@@ -46,9 +67,13 @@ const metadata = { title: 'Mis Tiendas' };
               <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </div>
           </a>
-        ))}
+        )) : (
+          <div class="text-center p-6 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-gray-300">
+             <p class="text-gray-500">No tienes tiendas asignadas.</p>
+          </div>
+        )}
         
-        {/* Botón para crear nueva tienda */}
+        {/* Botón crear nueva tienda */}
         <a href="/new-store" class="group block border-2 border-dashed border-gray-300 dark:border-slate-700 p-4 rounded-2xl text-center text-gray-500 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer bg-transparent">
           <span class="flex items-center justify-center gap-2 font-medium">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -60,7 +85,7 @@ const metadata = { title: 'Mis Tiendas' };
       <div class="mt-12 text-center border-t border-gray-200 dark:border-slate-800 pt-6">
         <a href="/api/logout" class="text-sm text-red-500 font-medium hover:text-red-600 flex items-center justify-center gap-2 transition">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          Cerrar sesión en todas las cuentas
+          Cerrar sesión
         </a>
       </div>
     </div>
