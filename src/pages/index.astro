@@ -8,9 +8,8 @@ const hostname = url.hostname;
 let isSubdomain = false;
 let tenantSlug = '';
 
-// 1. Detección de entorno (Producción vs Local)
+// 1. DETECCIÓN DE SUBDOMINIO
 if (import.meta.env.PROD) {
-  // Si no es el dominio principal, asumimos que es una tienda
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
@@ -23,15 +22,17 @@ if (import.meta.env.PROD) {
   }
 }
 
-// 2. Recuperar la sesión
+// 2. RECUPERAR SESIÓN
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
-// 3. Seguridad: Si es subdominio y no hay login, expulsar.
+// 3. SEGURIDAD: SI ESTÁS EN SUBDOMINIO Y NO TIENES SESIÓN...
 if (isSubdomain && !isLoggedIn) {
+  
+  // SOLUCIÓN AL BUCLE: Te enviamos OBLIGATORIAMENTE al dominio principal
   const loginUrl = import.meta.env.PROD 
-    ? `https://tustock.app/login` 
-    : `/login`;
+    ? `https://tustock.app/login?return_to=${tenantSlug}` 
+    : `/login?return_to=${tenantSlug}`;
   
   return Astro.redirect(loginUrl);
 }
