@@ -2,19 +2,26 @@
 import Layout from '~/layouts/Layout.astro';
 import Header from '~/components/widgets/Header.astro';
 import Footer from '~/components/widgets/Footer.astro';
-// No importamos Announcement para que no haya línea superior
-import { headerData, footerData } from '~/navigation';
 
-const { metadata } = Astro.props;
+// 1. IMPORTANTE: Importamos los datos por defecto con un alias (as defaultHeaderData)
+import { headerData as defaultHeaderData, footerData } from '~/navigation';
+import type { MetaData } from '~/types';
+
+export interface Props {
+  metadata?: MetaData;
+  headerData?: any; // 2. Definimos que puede recibir nuevos datos de cabecera
+}
+
+// 3. Lógica: Si nos pasan 'headerData' por props, lo usamos. Si no, usamos el default.
+const { metadata, headerData = defaultHeaderData } = Astro.props;
 ---
 
 <Layout metadata={metadata}>
-  {/* SIN Announcement aquí */}
   
   <slot name="header">
+    {/* 4. Usamos {...headerData} para que acepte dinámicamente lo que le pasemos */}
     <Header 
-      links={headerData.links} 
-      actions={headerData.actions} 
+      {...headerData} 
       isSticky 
       showToggleTheme 
     />
