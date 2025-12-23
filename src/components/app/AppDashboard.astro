@@ -1,153 +1,119 @@
 ---
-const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 import StoreSwitcher from './StoreSwitcher.astro';
 
-const dashboardHeader = {
-  links: [], 
-  actions: [
-    {
-      text: 'Salir',
-      href: '/api/logout', 
-      variant: 'link',
-      icon: 'tabler:logout',
-    },
-  ],
-};
+const { tenant } = Astro.props; // El slug de la tienda (ej: "casamaria")
+
+// 1. OBTENER SESIÓN
+const session = Astro.cookies.get('session');
+const userId = session?.value;
+const db = Astro.locals.runtime?.env?.DB;
+
+let tenantData = null;
+let userRole = null;
+let error = null;
+
+if (userId && db && tenant) {
+  try {
+    // 2. NUEVA CONSULTA DE SEGURIDAD (Usando Memberships)
+    // Buscamos si este usuario tiene permiso en esta tienda específica
+    const membership = await db.prepare(`
+      SELECT m.role, t.id, t.name, t.plan_type
+      FROM memberships m
+      JOIN tenants t ON m.tenant_id = t.id
+      WHERE m.user_id = ? AND t.slug = ?
+    `).bind(userId, tenant).first();
+
+    if (membership) {
+      // ✅ TIENE PERMISO
+      tenantData = {
+        id: membership.id,
+        name: membership.name,
+        plan: membership.plan_type,
+        slug: tenant
+      };
+      userRole = membership.role;
+    } else {
+      // ❌ NO TIENE PERMISO (O la tienda no existe)
+      error = "No tienes acceso a esta tienda o no existe.";
+    }
+
+  } catch (e) {
+    console.error("Error Dashboard:", e);
+    error = "Error de conexión con la base de datos.";
+  }
+}
 ---
 
-<Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
+<Layout metadata={{ title: tenantData ? tenantData.name : 'Error' }}>
   
-  <style>
-    /* Estilos locales para las transiciones */
-    .view-section { display: none; }
-    .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .nav-btn.active { 
-      background-color: rgb(219 234 254);
-      color: rgb(37 99 235);
-      border-left-width: 4px;
-      border-left-color: rgb(37 99 235);
-    }
-    
-    /* Modo oscuro */
-    :global(.dark) .nav-btn.active {
-      background-color: rgba(30, 58, 138, 0.3);
-      color: rgb(96 165 250);
-    }
-  </style>
-
-  {/* Contenedor principal con altura fija y sin scroll externo */}
-  <section class="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center">
-    
-    <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
+  {/* CASO DE ERROR: Si intenta entrar donde no debe */}
+  {error ? (
+    <div class="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-slate-900">
+      <h1 class="text-4xl font-bold text-red-500 mb-4">Acceso Denegado 🔒</h1>
+      <p class="text-gray-600 dark:text-gray-400 mb-8">{error}</p>
+      <a href={import.meta.env.PROD ? "https://tustock.app/hub" : "/"} class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+        Volver a Mis Tiendas
+      </a>
+    </div>
+  ) : (
+  
+  /* CASO DE ÉXITO: El Dashboard Real */
+    <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900">
       
-      {/* SIDEBAR */}
-      <aside class="w-64 bg-gray-50 dark:bg-[#0B0F19] border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
+      {/* SIDEBAR (Menú Lateral) */}
+      <aside class="w-64 flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col">
         
-        <StoreSwitcher currentTenant={tenant} />
+        {/* Aquí usamos el StoreSwitcher actualizado */}
+        <StoreSwitcher currentTenant={tenantData.slug} />
 
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button data-target="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-             <span>📊</span> Dashboard
-          </button>
-          
-          <button data-target="inventario" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-             <span>📦</span> Inventario
-          </button>
-
-          <button data-target="reportes" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-             <span>📄</span> Reportes
-          </button>
+        <nav class="flex-1 px-2 py-4 space-y-1">
+          {/* TUS ENLACES DEL MENÚ */}
+          <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Resumen
+          </a>
+          <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800 transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            Productos
+          </a>
+           {/* ... más enlaces ... */}
         </nav>
 
+        {/* PERFIL DE USUARIO (Abajo) */}
         <div class="p-4 border-t border-gray-200 dark:border-slate-800">
-          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-sm font-bold shadow-lg hover:opacity-90 transition">
-            Escanear
-          </button>
+          <div class="flex items-center gap-3">
+             <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500"></div>
+             <div class="text-sm">
+               <p class="font-bold text-gray-900 dark:text-white">Mi Usuario</p>
+               <p class="text-xs text-gray-500 capitalize">{userRole?.toLowerCase()}</p>
+             </div>
+          </div>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main class="flex-1 bg-white dark:bg-[#111827] overflow-y-auto relative p-8">
-        
-        {/* VISTA DASHBOARD */}
-        <div id="view-dashboard" class="view-section active">
-          <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Resumen General</h1>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-             <div class="p-6 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-100 dark:border-slate-700">
-                <p class="text-sm text-blue-600 font-bold uppercase">Valor Stock</p>
-                <p class="text-3xl font-bold mt-2 text-gray-900 dark:text-white">12.450€</p>
-             </div>
-             <div class="p-6 bg-red-50 dark:bg-slate-800 rounded-xl border border-red-100 dark:border-slate-700">
-                <p class="text-sm text-red-600 font-bold uppercase">Alertas</p>
-                <p class="text-3xl font-bold mt-2 text-gray-900 dark:text-white">3</p>
-             </div>
-             <div class="p-6 bg-green-50 dark:bg-slate-800 rounded-xl border border-green-100 dark:border-slate-700">
-                <p class="text-sm text-green-600 font-bold uppercase">Ventas Hoy</p>
-                <p class="text-3xl font-bold mt-2 text-gray-900 dark:text-white">24</p>
-             </div>
-          </div>
-        </div>
+      {/* CONTENIDO PRINCIPAL */}
+      <main class="flex-1 overflow-y-auto p-8">
+        <header class="flex items-center justify-between mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            Panel de Control - {tenantData.name}
+          </h1>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition">
+            + Nueva Venta
+          </button>
+        </header>
 
-        {/* VISTA INVENTARIO */}
-        <div id="view-inventario" class="view-section">
-          <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Inventario: {tenant}</h2>
-          <div class="border rounded-xl p-8 text-center text-gray-500">
-            Tabla de inventario cargando...
-          </div>
-        </div>
-
-        {/* VISTA REPORTES */}
-        <div id="view-reportes" class="view-section">
-          <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Reportes</h2>
-          <div class="border rounded-xl p-8 text-center text-gray-500">
-            Zona de descargas PDF...
-          </div>
+        {/* AQUÍ VA EL RESTO DE TU DASHBOARD (Gráficas, Tablas, etc.) */}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+              <h3 class="text-gray-500 text-sm font-medium">Ventas Hoy</h3>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">0,00 €</p>
+           </div>
+           {/* ... */}
         </div>
 
       </main>
+
     </div>
-  </section>
+  )}
 </Layout>
-
-<script>
-  // Lógica de navegación simple
-  document.addEventListener('astro:page-load', () => {
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const sections = document.querySelectorAll('.view-section');
-
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Reset
-        navButtons.forEach(b => b.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
-        
-        // Activate
-        btn.classList.add('active');
-        const targetId = btn.getAttribute('data-target');
-        const section = document.getElementById(`view-${targetId}`);
-        if(section) section.classList.add('active');
-      });
-    });
-  });
-  
-  // Fallback para primera carga
-  const navButtons = document.querySelectorAll('.nav-btn');
-  navButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const target = e.currentTarget;
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        target.classList.add('active');
-        
-        const targetId = target.getAttribute('data-target');
-        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(`view-${targetId}`)?.classList.add('active');
-      });
-  });
-</script>
