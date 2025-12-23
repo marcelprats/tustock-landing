@@ -2,23 +2,20 @@
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 
-// --- 1. SEGURIDAD ---
-// Simulamos la verificación de sesión. 
-// Si esto fuera false, el usuario sería expulsado inmediatamente.
-const isLogged = true; 
-
-if (!isLogged) {
+// --- SEGURIDAD ---
+// Verificamos si hay cookie. Si no, a la calle.
+// (Esto se ejecuta en el servidor antes de enviar nada al navegador)
+const session = Astro.cookies.get('session');
+if (!session && import.meta.env.PROD) {
   return Astro.redirect('/login');
 }
 
-// --- 2. CONFIGURACIÓN DEL HEADER WEB ---
-// Mantenemos el Header de la web pero limpio, solo con el botón de Salir
 const dashboardHeader = {
   links: [], 
   actions: [
     {
       text: 'Salir',
-      href: '/api/logout', // <--- APUNTA A LA API PARA BORRAR COOKIE
+      href: '/api/logout', 
       variant: 'link',
       icon: 'tabler:logout',
     },
@@ -28,21 +25,32 @@ const dashboardHeader = {
 
 <Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
   
-  {/* ESTILOS GLOBALES: Para bloquear el scroll y dar sensación de App Nativa */}
   <style is:global>
-    body { overflow: hidden; }
+    body { overflow: hidden; } /* App Mode: Sin scroll global */
+    
+    /* Clases para ocultar/mostrar vistas */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    
+    /* Estilo para el botón activo del menú */
+    .nav-btn.active { 
+      background-color: rgb(219 234 254); /* blue-100 */
+      color: rgb(37 99 235); /* blue-600 */
+      border-left-width: 4px;
+      border-left-color: rgb(37 99 235);
+    }
+    .dark .nav-btn.active {
+      background-color: rgba(30, 58, 138, 0.3);
+      color: rgb(96 165 250);
+    }
   </style>
 
-  {/* CONTENEDOR PRINCIPAL DE LA APP */}
-  <section id="app-interface" class="w-full bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center h-[calc(100vh-64px)]">
+  <section class="w-full bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center h-[calc(100vh-64px)]">
     
-    {/* VENTANA DE LA APP (Simulando software de escritorio) */}
     <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
       
-      {/* === SIDEBAR (Barra Lateral) === */}
+      {/* === SIDEBAR === */}
       <aside class="w-64 bg-gray-50 dark:bg-[#0B0F19] border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
-        
-        {/* Info del Tenant */}
         <div class="p-6 border-b border-gray-200 dark:border-slate-800">
           <div class="flex items-center gap-3">
             <div class="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg text-lg">
@@ -55,92 +63,83 @@ const dashboardHeader = {
           </div>
         </div>
 
-        {/* Menú de Navegación */}
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button class="w-full flex items-center gap-3 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition border-l-4 border-blue-600">
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto" id="sidebar-nav">
+          <button data-target="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Dashboard
           </button>
           
-          <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
+          <button data-target="inventario" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             Inventario
           </button>
 
-          <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
+          <button data-target="reportes" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Reportes
           </button>
         </nav>
-
-        {/* Footer del Sidebar */}
-        <div class="p-4 border-t border-gray-200 dark:border-slate-800">
-          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-sm font-bold shadow-lg hover:opacity-90 transition transform active:scale-95">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
-            Escanear
-          </button>
-        </div>
       </aside>
 
       {/* === ZONA PRINCIPAL (WORKSPACE) === */}
       <main class="flex-1 bg-white dark:bg-[#111827] overflow-y-auto relative p-8">
         
-        {/* Cabecera Interna */}
-        <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Resumen General</h1>
-            <p class="text-sm text-gray-500 mt-1">Sincronizado: Hace un instante</p>
-          </div>
-          <div class="flex gap-3">
-             <button class="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition dark:text-white">
-               Entrada Manual
-             </button>
-             <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-md hover:bg-blue-700 transition flex items-center gap-2">
-               <span>+</span> Nuevo Producto
-             </button>
-          </div>
-        </header>
+        {/* VISTA 1: DASHBOARD */}
+        <div id="view-dashboard" class="view-section active">
+          <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Resumen General</h1>
+              <p class="text-sm text-gray-500 mt-1">Sincronizado: Hace un instante</p>
+            </div>
+            <div class="flex gap-3">
+               <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-md hover:bg-blue-700 transition flex items-center gap-2">
+                 <span>+</span> Nuevo Producto
+               </button>
+            </div>
+          </header>
 
-        {/* Stats Grid */}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-           <div class="p-6 bg-blue-50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
-              <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">12.450€</p>
-           </div>
-           <div class="p-6 bg-red-50 dark:bg-slate-800/50 rounded-2xl border border-red-100 dark:border-slate-700">
-              <span class="text-xs text-red-600 font-bold uppercase tracking-wider">Bajo Stock</span>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">3 <span class="text-sm font-normal text-gray-500">items</span></p>
-           </div>
-           <div class="p-6 bg-green-50 dark:bg-slate-800/50 rounded-2xl border border-green-100 dark:border-slate-700">
-              <span class="text-xs text-green-600 font-bold uppercase tracking-wider">Ventas Hoy</span>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">24</p>
-           </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+             <div class="p-6 bg-blue-50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
+                <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">12.450€</p>
+             </div>
+             {/* Más stats... */}
+          </div>
+          
+          <div class="p-10 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+             <p class="text-gray-500">Gráficas de rendimiento próximamente...</p>
+          </div>
         </div>
 
-        {/* Tabla de Ejemplo */}
-        <div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-            <thead class="bg-gray-50 dark:bg-slate-800">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-[#111827] divide-y divide-gray-200 dark:divide-slate-700">
-               <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
-                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Martillo Acero</td>
-                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">M-2024</td>
-                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white font-bold">45</td>
-                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                   <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                     OK
-                   </span>
-                 </td>
-               </tr>
-            </tbody>
-          </table>
+        {/* VISTA 2: INVENTARIO */}
+        <div id="view-inventario" class="view-section">
+          <h2 class="text-2xl font-bold mb-6">Inventario de {tenant}</h2>
+          <div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+              <thead class="bg-gray-50 dark:bg-slate-800">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stock</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-[#111827] divide-y divide-gray-200 dark:divide-slate-700">
+                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
+                   <td class="px-6 py-4 text-sm font-medium">Martillo Acero</td>
+                   <td class="px-6 py-4 text-sm text-right font-bold">45</td>
+                 </tr>
+                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
+                   <td class="px-6 py-4 text-sm font-medium">Destornillador Phillips</td>
+                   <td class="px-6 py-4 text-sm text-right font-bold">120</td>
+                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* VISTA 3: REPORTES */}
+        <div id="view-reportes" class="view-section">
+          <h2 class="text-2xl font-bold mb-6">Reportes Fiscales</h2>
+          <p class="text-gray-500">Aquí podrás descargar tus reportes trimestrales en PDF.</p>
         </div>
 
       </main>
@@ -148,3 +147,47 @@ const dashboardHeader = {
   </section>
 
 </Layout>
+
+<script>
+  // ESTO ES LO QUE HACE QUE FUNCIONE LA BARRA LATERAL
+  document.addEventListener('astro:page-load', () => {
+    
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.view-section');
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // 1. Quitar 'active' de todos los botones
+        navButtons.forEach(b => b.classList.remove('active'));
+        // 2. Poner 'active' al botón pulsado
+        btn.classList.add('active');
+
+        // 3. Ocultar todas las secciones
+        sections.forEach(s => s.classList.remove('active'));
+        
+        // 4. Mostrar la sección correspondiente
+        const targetId = btn.getAttribute('data-target');
+        const targetSection = document.getElementById(`view-${targetId}`);
+        if (targetSection) {
+          targetSection.classList.add('active');
+        }
+      });
+    });
+
+  });
+  
+  // Soporte para cuando no hay View Transitions activado
+  const navButtons = document.querySelectorAll('.nav-btn');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const targetId = target.getAttribute('data-target');
+        
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        target.classList.add('active');
+
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`view-${targetId}`)?.classList.add('active');
+    });
+  });
+</script>
