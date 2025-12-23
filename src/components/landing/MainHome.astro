@@ -1,28 +1,24 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
-import Features from '~/components/widgets/Features.astro';
-import Features2 from '~/components/widgets/Features2.astro';
-import Content from '~/components/widgets/Content.astro';
-import Pricing from '~/components/widgets/Pricing.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'TuStock — El primer ERP Híbrido con IA del mercado',
+  title: 'TuStock — El ERP Híbrido con IA que se adapta a tu escala',
   ignoreTitleTemplate: true,
 };
 ---
 
 <Layout metadata={metadata}>
   
-  {/* 1. HERO: Impacto visual y propuesta de valor clara */}
+  {/* 1. HERO: Mensaje Global */}
   <Hero2
-    tagline="Gestión de Inventario 2.0"
+    tagline="Gestión de Inventario Inteligente"
     actions={[
-      { variant: 'primary', text: 'Empezar Gratis', href: '/signup', icon: 'tabler:rocket' },
-      { text: 'Ver demo interactiva', href: '#soluciones', icon: 'tabler:player-play' },
+      { variant: 'primary', text: 'Empezar Gratis', href: '#planes-selector', icon: 'tabler:arrow-down' },
+      { text: 'Ver tecnología', href: '#features' },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80',
@@ -30,247 +26,238 @@ const metadata = {
     }}
   >
     <Fragment slot="title">
-      Controla tu stock con la precisión de la <span class="text-accent dark:text-blue-400 highlight">Visión Artificial</span>
+      La potencia de la <span class="text-blue-600 dark:text-blue-400 highlight">IA</span> unida a la seguridad <span class="text-accent dark:text-purple-400 highlight">Local</span>
     </Fragment>
     
     <Fragment slot="subtitle">
-      <span class="font-bold">TuStock</span> elimina la entrada manual de datos. 
-      Sube una foto de tu albarán y nuestra IA actualizará tu inventario en segundos. 
-      Privacidad local, acceso global.
+      El único sistema del mercado que escala desde una pequeña tienda de barrio hasta una multinacional logística sin cambiar de plataforma.
     </Fragment>
   </Hero2>
 
-  {/* 2. SOCIAL PROOF: Logos para generar confianza (Efecto "Empresa Seria") */}
   <Brands
-    title="Tecnología en la que confían comercios modernos"
-    subtitle="Únete a la revolución logística"
+    title="Plataforma construida sobre gigantes"
     icons={[]} 
     images={[
-      { src: 'https://cdn.worldvectorlogo.com/logos/docker.svg', alt: 'Docker' }, // Ejemplo de tech usada
+      { src: 'https://cdn.worldvectorlogo.com/logos/docker.svg', alt: 'Docker' },
       { src: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg', alt: 'Cloudflare' },
+      { src: 'https://cdn.worldvectorlogo.com/logos/react-2.svg', alt: 'React' },
       { src: 'https://cdn.worldvectorlogo.com/logos/stripe-4.svg', alt: 'Stripe' },
-      { src: 'https://cdn.worldvectorlogo.com/logos/typescript.svg', alt: 'TypeScript' },
     ]}
   />
 
-  {/* 3. SELECTOR DE PERFIL: Diseño "Card" Profesional */}
-  <section id="soluciones" class="py-20 bg-blue-50 dark:bg-slate-900 overflow-hidden">
+  {/* 2. EL GRAN INTERCAMBIADOR DE NEGOCIO */}
+  <section id="planes-selector" class="py-20 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <h2 class="text-4xl font-bold font-heading mb-4">Una plataforma, dos potencias</h2>
-        <p class="text-xl text-gray-600 dark:text-gray-400">
-          Hemos diseñado experiencias específicas según tu volumen. 
-          <span class="hidden md:inline">Elige tu camino:</span>
-          <span class="md:hidden">Desliza para ver más:</span>
-        </p>
+      <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold font-heading mb-4">Elige tu modelo de negocio</h2>
+        <p class="text-xl text-gray-600 dark:text-gray-400">Te mostramos la tecnología y los precios adaptados a tu realidad.</p>
       </div>
 
-      {/* Contenedor: Grid en PC, Slider en Móvil */}
-      <div class="flex md:grid md:grid-cols-2 overflow-x-auto snap-x snap-mandatory gap-8 pb-8 md:pb-0 no-scrollbar">
+      {/* BOTONES DE CAMBIO (TABS) */}
+      <div class="flex justify-center mb-16">
+        <div class="bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-lg inline-flex gap-2 border border-gray-200 dark:border-slate-700">
+          <button id="btn-local" class="px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 bg-blue-600 text-white shadow-md">
+            🏪 Pequeño Comercio
+          </button>
+          <button id="btn-enterprise" class="px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700">
+            🏭 Gran Empresa
+          </button>
+        </div>
+      </div>
+
+      {/* CONTENEDOR 1: PEQUEÑO COMERCIO */}
+      <div id="content-local" class="animate-fade-in">
         
-        {/* OPCIÓN A: PEQUEÑO COMERCIO (Estilo Clean/Retail) */}
-        <div class="min-w-[85%] snap-center relative flex flex-col justify-between p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all border-t-4 border-blue-500">
-          <div>
-            <div class="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-600 rounded-xl mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4" /><path d="M5 21l0 -10.15" /><path d="M19 21l0 -10.15" /><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" /></svg>
-            </div>
-            <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Pequeño Comercio</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6">"Quiero dejar el papel y controlar mi tienda desde el móvil."</p>
-            
-            <ul class="space-y-4 mb-8">
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-green-500 rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-700 dark:text-gray-300">Escáner de código de barras con la cámara.</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-green-500 rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-700 dark:text-gray-300">Avisos automáticos en Telegram.</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-green-500 rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-700 dark:text-gray-300">Tienda online instantánea (.tustock.app).</span>
-              </li>
-            </ul>
-          </div>
-          <a href="/signup" class="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-center transition-colors shadow-lg shadow-blue-200 dark:shadow-none">
-            Crear cuenta Gratis
-          </a>
+        {/* Explicación Local */}
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">Digitalización sin complicaciones</h3>
+          <p class="text-lg text-gray-600 dark:text-gray-300">
+            Olvídate de servidores y técnicos. Usa tu propio ordenador como servidor local y tu móvil como escáner. 
+            Ideal para tiendas, ferreterías, talleres y retail.
+          </p>
         </div>
 
-        {/* OPCIÓN B: EMPRESA (Estilo Dark/Tech) */}
-        <div class="min-w-[85%] snap-center relative flex flex-col justify-between p-8 bg-slate-900 dark:bg-black text-white rounded-3xl shadow-xl hover:shadow-2xl transition-all border-t-4 border-accent">
-          <div>
-            <div class="inline-flex items-center justify-center p-3 bg-white/10 text-accent rounded-xl mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 21c1.147 -4.02 1.983 -8.137 2.5 -12.333a11 11 0 0 0 3 -1.667a11 11 0 0 0 3 1.667c.517 4.196 1.353 8.313 2.5 12.333" /><path d="M4 21v-10l-2 -2" /><path d="M6 6l-2 -2" /><path d="M20 21l-2 -2" /><path d="M15 21v-10l2 -2" /></svg>
+        {/* PRECIOS LOCAL (2 PLANES) */}
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Plan GRATIS Local */}
+          <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-slate-700 flex flex-col">
+            <div class="mb-4">
+              <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Starter</span>
             </div>
-            <h3 class="text-2xl font-bold mb-2">Industria y Logística</h3>
-            <p class="text-gray-400 mb-6">"Necesito integración API, múltiples almacenes y datos On-Premise."</p>
-            
-            <ul class="space-y-4 mb-8">
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-accent rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-200">Infraestructura Híbrida (Docker + D1).</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-accent rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-200">API Rest para conectar con tu ERP (SAP, Sage).</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <div class="mt-1 bg-accent rounded-full p-1 w-5 h-5 flex items-center justify-center text-white text-xs">✓</div>
-                <span class="text-gray-200">Gestión de caducidades y lotes por IA.</span>
-              </li>
+            <h4 class="text-3xl font-bold mb-2">Gratis</h4>
+            <p class="text-gray-500 mb-6">Para empezar a digitalizarte.</p>
+            <ul class="space-y-4 mb-8 flex-1">
+              <li class="flex gap-3"><span class="text-blue-600">✓</span> 1 Usuario</li>
+              <li class="flex gap-3"><span class="text-blue-600">✓</span> Hasta 100 Productos</li>
+              <li class="flex gap-3"><span class="text-blue-600">✓</span> Escaneo IA Básico</li>
+              <li class="flex gap-3"><span class="text-blue-600">✓</span> Subdominio .tustock.app</li>
             </ul>
+            <a href="/signup" class="block w-full py-4 text-center border-2 border-blue-600 text-blue-600 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 transition">
+              Crear Cuenta Gratis
+            </a>
           </div>
-          <a href="mailto:ventas@tustock.app" class="w-full py-4 rounded-xl bg-accent hover:bg-accent/90 text-white font-bold text-center transition-colors shadow-lg shadow-purple-900/20">
-            Contactar Ingeniería
-          </a>
-        </div>
 
+          {/* Plan DE PAGO Local */}
+          <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl border-2 border-blue-600 relative flex flex-col transform md:-translate-y-4">
+            <div class="absolute top-0 right-0 bg-blue-600 text-white px-4 py-1 rounded-bl-xl rounded-tr-xl text-sm font-bold">
+              RECOMENDADO
+            </div>
+            <h4 class="text-3xl font-bold mb-2">29€ <span class="text-lg font-normal text-gray-500">/mes</span></h4>
+            <p class="text-gray-500 mb-6">Para negocios activos.</p>
+            <ul class="space-y-4 mb-8 flex-1">
+              <li class="flex gap-3"><span class="text-blue-600 font-bold">✓</span> Usuarios Ilimitados</li>
+              <li class="flex gap-3"><span class="text-blue-600 font-bold">✓</span> Productos Ilimitados</li>
+              <li class="flex gap-3"><span class="text-blue-600 font-bold">✓</span> Alertas Telegram Stock Bajo</li>
+              <li class="flex gap-3"><span class="text-blue-600 font-bold">✓</span> IA Avanzada (Facturas ilimitadas)</li>
+            </ul>
+            <a href="/signup" class="block w-full py-4 text-center bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+              Prueba de 14 días
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* CONTENEDOR 2: GRAN EMPRESA */}
+      <div id="content-enterprise" class="hidden animate-fade-in">
+        
+        {/* Explicación Enterprise */}
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <h3 class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-4">Infraestructura Híbrida Distribuida</h3>
+          <p class="text-lg text-gray-600 dark:text-gray-300">
+            Despliega nodos locales (Docker) en cada nave industrial sincronizados vía Túnel Seguro. 
+            API Rest completa para integración con SAP, Sage o E-commerce.
+          </p>
+        </div>
+
+        {/* PRECIOS ENTERPRISE (3 PLANES) */}
+        <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          
+          {/* 1. Plan PILOTO (Gratis Empresa) */}
+          <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-slate-700 flex flex-col opacity-80 hover:opacity-100 transition">
+            <h4 class="text-2xl font-bold mb-2">Developer / Pilot</h4>
+            <p class="text-3xl font-bold mb-4">0€</p>
+            <p class="text-sm text-gray-500 mb-6">Para validar la integración API.</p>
+            <ul class="space-y-3 mb-8 text-sm flex-1">
+              <li class="flex gap-2"><span class="text-purple-600">✓</span> Acceso Sandbox API</li>
+              <li class="flex gap-2"><span class="text-purple-600">✓</span> 1 Nodo Docker Local</li>
+              <li class="flex gap-2"><span class="text-purple-600">✓</span> Límite 1.000 req/mes</li>
+            </ul>
+            <a href="/signup" class="block w-full py-3 text-center border border-gray-300 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700">
+              Crear Token API
+            </a>
+          </div>
+
+          {/* 2. Plan BUSINESS (Pago Normal) */}
+          <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-2xl border-2 border-purple-500 relative flex flex-col transform md:-translate-y-4">
+            <div class="absolute top-0 right-0 bg-purple-600 text-white px-3 py-1 rounded-bl-xl rounded-tr-xl text-xs font-bold">
+              PRODUCCIÓN
+            </div>
+            <h4 class="text-2xl font-bold mb-2">Business</h4>
+            <p class="text-4xl font-bold mb-4">99€ <span class="text-lg font-normal opacity-70">/sede</span></p>
+            <p class="text-sm text-gray-300 mb-6">Para naves en funcionamiento.</p>
+            <ul class="space-y-3 mb-8 text-sm flex-1">
+              <li class="flex gap-2"><span class="text-purple-400">✓</span> Nodos Docker Ilimitados</li>
+              <li class="flex gap-2"><span class="text-purple-400">✓</span> Sincronización Multi-Sede</li>
+              <li class="flex gap-2"><span class="text-purple-400">✓</span> API Rate: 50k req/mes</li>
+              <li class="flex gap-2"><span class="text-purple-400">✓</span> Soporte Ingeniero Dedicado</li>
+            </ul>
+            <a href="mailto:ventas@tustock.app" class="block w-full py-3 text-center bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-900/50">
+              Contactar Ventas
+            </a>
+          </div>
+
+          {/* 3. Plan SUPER PREMIUM (Custom Volume) */}
+          <div class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-lg border border-gray-200 dark:border-slate-700 flex flex-col">
+            <h4 class="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">High Volume</h4>
+            <p class="text-3xl font-bold mb-4">Custom</p>
+            <p class="text-sm text-gray-500 mb-6">Para logística masiva (>50k req).</p>
+            <ul class="space-y-3 mb-8 text-sm flex-1">
+              <li class="flex gap-2"><span class="text-gray-800 dark:text-gray-200">✓</span> Todo lo de Business</li>
+              <li class="flex gap-2"><span class="text-gray-800 dark:text-gray-200">✓</span> <strong>API Ilimitada</strong></li>
+              <li class="flex gap-2"><span class="text-gray-800 dark:text-gray-200">✓</span> Despliegue On-Premise Total</li>
+              <li class="flex gap-2"><span class="text-gray-800 dark:text-gray-200">✓</span> SLA Garantizado 99.99%</li>
+            </ul>
+            <a href="mailto:partners@tustock.app" class="block w-full py-3 text-center bg-gray-800 dark:bg-white text-white dark:text-black font-bold rounded-xl hover:opacity-90 transition">
+              Negociar Contrato
+            </a>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </section>
 
-  {/* 4. STATS: Números que validan la promesa */}
   <Stats
     stats={[
-      { title: 'Productos gestionados', amount: '+100K' },
-      { title: 'Precisión de Stock', amount: '99.9%' },
-      { title: 'Tiempo de Setup', amount: '2 min' },
-      { title: 'Satisfacción', amount: '5/5' },
+      { title: 'Peticiones API procesadas', amount: '+1M' },
+      { title: 'Nodos Locales Activos', amount: '+500' },
+      { title: 'Tiempo de respuesta (Local)', amount: '<10ms' },
     ]}
   />
 
-  {/* 5. CONTENT: Explicación de la tecnología "Híbrida" */}
-  <Content
-    isReversed
-    tagline="Local First Technology"
-    title="La velocidad del Local, la libertad de la Nube"
-    items={[
-      {
-        title: 'Sin latencia',
-        description: 'Tus operarios trabajan contra una base de datos local en el almacén. Cero esperas de carga.',
-      },
-      {
-        title: 'Sincronización silenciosa',
-        description: 'Nuestro "Tunnel Service" sube los datos a la nube en segundo plano cuando hay conexión.',
-      },
-      {
-        title: 'Seguridad Militar',
-        description: 'Tus márgenes y costes nunca viajan en texto plano. Solo tú tienes la llave de cifrado.',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1650&q=80',
-      alt: 'Arquitectura de Datos',
-    }}
-  />
-
-  {/* 6. PRICING: ARREGLADO (El "0" ahora se verá bien) */}
-  <Pricing
-    id="pricing"
-    title="Precios transparentes"
-    subtitle="Sin costes ocultos. Escala cuando lo necesites."
-    prices={[
-      {
-        title: 'Starter',
-        price: '0', // IMPORTANTE: Pasado como String para evitar el bug visual
-        period: '/ mes',
-        callToAction: {
-          text: 'Crear cuenta gratis',
-          href: '/signup',
-          variant: 'secondary' // Botón secundario para diferenciar
-        },
-        items: [
-          { description: '1 Usuario' },
-          { description: 'Hasta 100 productos' },
-          { description: 'Lectura IA básica' },
-          { description: 'Soporte comunidad' },
-        ],
-      },
-      {
-        title: 'Pro',
-        price: '29',
-        period: '/ mes',
-        hasRibbon: true,
-        ribbonTitle: 'Más Popular',
-        callToAction: {
-          text: 'Prueba de 14 días',
-          href: '/signup',
-          variant: 'primary' // Botón primario resaltado
-        },
-        items: [
-          { description: 'Usuarios ilimitados' },
-          { description: 'Productos ilimitados' },
-          { description: 'IA Avanzada (GPT-4o)' },
-          { description: 'Soporte prioritario Telegram' },
-        ],
-      },
-      {
-        title: 'Enterprise',
-        price: 'Custom', // Texto en lugar de número
-        period: '',
-        callToAction: {
-          text: 'Contactar',
-          href: 'mailto:hola@tustock.app',
-          variant: 'secondary'
-        },
-        items: [
-          { description: 'Instalación On-Premise' },
-          { description: 'Contrato SLA' },
-          { description: 'Gestor de cuenta dedicado' },
-          { description: 'Auditoría de stock inicial' },
-        ],
-      },
-    ]}
-  />
-
-  {/* 7. FAQ: Para derribar objeciones finales */}
-  <Features2
-    title="Preguntas Frecuentes"
-    tagline="Dudas"
-    columns={2}
-    items={[
-      {
-        title: '¿Necesito un servidor?',
-        description: 'Para el plan Starter no. Para Enterprise, te ayudamos a montar el nodo local en un mini-pc o Raspberry Pi.',
-        icon: 'tabler:server',
-      },
-      {
-        title: '¿Funciona sin internet?',
-        description: 'Sí. Puedes seguir escaneando y vendiendo. Se sincronizará todo cuando vuelva la conexión.',
-        icon: 'tabler:wifi-off',
-      },
-    ]}
-  />
-
-  {/* 8. CTA FINAL */}
   <CallToAction
     actions={[
       {
         variant: 'primary',
-        text: 'Registrar mi negocio ahora',
+        text: 'Empezar ahora',
         href: '/signup',
         icon: 'tabler:rocket',
       },
     ]}
   >
     <Fragment slot="title">
-      ¿Listo para digitalizar tu almacén?
+      ¿Preparado para escalar?
     </Fragment>
     <Fragment slot="subtitle">
-      Únete a las empresas que ya ahorran un 90% de tiempo en gestión de stock.
+      Tanto si vendes tornillos en el barrio como si distribuyes palets en Europa, TuStock es tu motor.
     </Fragment>
   </CallToAction>
 </Layout>
 
+{/* SCRIPT PARA LA MAGIA DEL INTERCAMBIADOR */}
+<script>
+  const btnLocal = document.getElementById('btn-local');
+  const btnEnterprise = document.getElementById('btn-enterprise');
+  const contentLocal = document.getElementById('content-local');
+  const contentEnterprise = document.getElementById('content-enterprise');
+
+  // Función para activar Modo Local
+  btnLocal.addEventListener('click', () => {
+    // Estilos botones
+    btnLocal.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+    btnLocal.classList.remove('text-gray-600', 'hover:bg-gray-100', 'dark:text-gray-300');
+    
+    btnEnterprise.classList.remove('bg-purple-600', 'text-white', 'shadow-md');
+    btnEnterprise.classList.add('text-gray-600', 'hover:bg-gray-100', 'dark:text-gray-300', 'dark:hover:bg-slate-700');
+
+    // Visibilidad Contenido
+    contentLocal.classList.remove('hidden');
+    contentEnterprise.classList.add('hidden');
+  });
+
+  // Función para activar Modo Empresa
+  btnEnterprise.addEventListener('click', () => {
+    // Estilos botones
+    btnEnterprise.classList.add('bg-purple-600', 'text-white', 'shadow-md');
+    btnEnterprise.classList.remove('text-gray-600', 'hover:bg-gray-100', 'dark:text-gray-300');
+    
+    btnLocal.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+    btnLocal.classList.add('text-gray-600', 'hover:bg-gray-100', 'dark:text-gray-300', 'dark:hover:bg-slate-700');
+
+    // Visibilidad Contenido
+    contentEnterprise.classList.remove('hidden');
+    contentLocal.classList.add('hidden');
+  });
+</script>
+
 <style>
-  /* Oculta la barra de scroll en el slider de móvil */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
