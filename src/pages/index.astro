@@ -3,52 +3,46 @@ import MainHome from '../components/landing/MainHome.astro';
 import AppDashboard from '../components/app/AppDashboard.astro';
 import HubSelector from '../components/app/HubSelector.astro';
 
-// 1. DETECCIÓN DE SUBDOMINIO (TENANT)
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
 let isSubdomain = false;
 let tenantSlug = '';
 
-// En Producción (tustock.app)
+// 1. Detección de entorno (Producción vs Local)
 if (import.meta.env.PROD) {
-  if (hostname.endsWith('.tustock.app') && hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
+  // Si no es el dominio principal, asumimos que es una tienda
+  if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
   }
-} 
-// En Local (localhost) - Usamos ?tenant=nombre para simular
-else {
+} else {
+  // En local usamos ?tenant=nombre
   if (url.searchParams.has('tenant')) {
     isSubdomain = true;
     tenantSlug = url.searchParams.get('tenant');
   }
 }
 
-// 2. DETECCIÓN DE SESIÓN (Cookie Global)
+// 2. Recuperar la sesión
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
-// 3. LÓGICA DE SEGURIDAD PARA SUBDOMINIOS
-if (isSubdomain) {
-  // Si intentas entrar a una tienda sin estar logueado...
-  if (!isLoggedIn) {
-    // Te mandamos al login, pero recordamos dónde querías ir (?return_to=...)
-    // IMPORTANTE: Redirigimos al dominio principal para que pueda loguearse
-    const loginUrl = import.meta.env.PROD 
-      ? `https://tustock.app/login?return_to=${tenantSlug}` 
-      : `/login?return_to=${tenantSlug}`;
-      
-    return Astro.redirect(loginUrl);
-  }
+// 3. Seguridad: Si es subdominio y no hay login, expulsar.
+if (isSubdomain && !isLoggedIn) {
+  const loginUrl = import.meta.env.PROD 
+    ? `https://tustock.app/login` 
+    : `/login`;
   
-  // (Opcional) Aquí verificarías en BBDD si el usuario tiene permiso en 'tenantSlug'
+  return Astro.redirect(loginUrl);
 }
 ---
 
 {
-  isSubdomain
-    ? <AppDashboard tenant={tenantSlug} />  // CASO A: App Privada (Tienda)
-    : isLoggedIn 
-      ? <HubSelector />                     // CASO B: Usuario Logueado (Selector)
-      : <MainHome />                        // CASO C: Usuario Anónimo (Landing)
+  isSubdomain && isLoggedIn ? (
+    <AppDashboard tenant={tenantSlug} />
+  ) : isLoggedIn ? (
+    <HubSelector />
+  ) : (
+    <MainHome />
+  )
 }
