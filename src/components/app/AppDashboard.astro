@@ -2,13 +2,8 @@
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
 
-// --- SEGURIDAD ---
-// Verificamos si hay cookie. Si no, a la calle.
-// (Esto se ejecuta en el servidor antes de enviar nada al navegador)
-const session = Astro.cookies.get('session');
-if (!session && import.meta.env.PROD) {
-  return Astro.redirect('/login');
-}
+// YA NO NECESITAMOS LA SEGURIDAD AQUÍ. 
+// El index.astro ya se encargó de verificar la cookie.
 
 const dashboardHeader = {
   links: [], 
@@ -26,16 +21,12 @@ const dashboardHeader = {
 <Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
   
   <style is:global>
-    body { overflow: hidden; } /* App Mode: Sin scroll global */
-    
-    /* Clases para ocultar/mostrar vistas */
+    body { overflow: hidden; } 
     .view-section { display: none; }
     .view-section.active { display: block; }
-    
-    /* Estilo para el botón activo del menú */
     .nav-btn.active { 
-      background-color: rgb(219 234 254); /* blue-100 */
-      color: rgb(37 99 235); /* blue-600 */
+      background-color: rgb(219 234 254);
+      color: rgb(37 99 235);
       border-left-width: 4px;
       border-left-color: rgb(37 99 235);
     }
@@ -49,7 +40,7 @@ const dashboardHeader = {
     
     <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
       
-      {/* === SIDEBAR === */}
+      {/* SIDEBAR */}
       <aside class="w-64 bg-gray-50 dark:bg-[#0B0F19] border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-200 dark:border-slate-800">
           <div class="flex items-center gap-3">
@@ -65,26 +56,24 @@ const dashboardHeader = {
 
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto" id="sidebar-nav">
           <button data-target="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-            Dashboard
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+             Dashboard
           </button>
-          
           <button data-target="inventario" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-            Inventario
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+             Inventario
           </button>
-
           <button data-target="reportes" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            Reportes
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+             Reportes
           </button>
         </nav>
       </aside>
 
-      {/* === ZONA PRINCIPAL (WORKSPACE) === */}
+      {/* WORKSPACE */}
       <main class="flex-1 bg-white dark:bg-[#111827] overflow-y-auto relative p-8">
         
-        {/* VISTA 1: DASHBOARD */}
+        {/* DASHBOARD */}
         <div id="view-dashboard" class="view-section active">
           <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
             <div>
@@ -103,15 +92,13 @@ const dashboardHeader = {
                 <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">12.450€</p>
              </div>
-             {/* Más stats... */}
           </div>
-          
           <div class="p-10 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
              <p class="text-gray-500">Gráficas de rendimiento próximamente...</p>
           </div>
         </div>
 
-        {/* VISTA 2: INVENTARIO */}
+        {/* INVENTARIO */}
         <div id="view-inventario" class="view-section">
           <h2 class="text-2xl font-bold mb-6">Inventario de {tenant}</h2>
           <div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
@@ -127,16 +114,12 @@ const dashboardHeader = {
                    <td class="px-6 py-4 text-sm font-medium">Martillo Acero</td>
                    <td class="px-6 py-4 text-sm text-right font-bold">45</td>
                  </tr>
-                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
-                   <td class="px-6 py-4 text-sm font-medium">Destornillador Phillips</td>
-                   <td class="px-6 py-4 text-sm text-right font-bold">120</td>
-                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* VISTA 3: REPORTES */}
+        {/* REPORTES */}
         <div id="view-reportes" class="view-section">
           <h2 class="text-2xl font-bold mb-6">Reportes Fiscales</h2>
           <p class="text-gray-500">Aquí podrás descargar tus reportes trimestrales en PDF.</p>
@@ -145,47 +128,33 @@ const dashboardHeader = {
       </main>
     </div>
   </section>
-
 </Layout>
 
 <script>
-  // ESTO ES LO QUE HACE QUE FUNCIONE LA BARRA LATERAL
+  // Script para manejar el cambio de pestañas del sidebar
   document.addEventListener('astro:page-load', () => {
-    
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.view-section');
 
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        // 1. Quitar 'active' de todos los botones
         navButtons.forEach(b => b.classList.remove('active'));
-        // 2. Poner 'active' al botón pulsado
         btn.classList.add('active');
-
-        // 3. Ocultar todas las secciones
         sections.forEach(s => s.classList.remove('active'));
-        
-        // 4. Mostrar la sección correspondiente
         const targetId = btn.getAttribute('data-target');
-        const targetSection = document.getElementById(`view-${targetId}`);
-        if (targetSection) {
-          targetSection.classList.add('active');
-        }
+        document.getElementById(`view-${targetId}`)?.classList.add('active');
       });
     });
-
   });
   
-  // Soporte para cuando no hay View Transitions activado
+  // Fallback si no hay View Transitions
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement;
+        const target = e.currentTarget;
         const targetId = target.getAttribute('data-target');
-        
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         target.classList.add('active');
-
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.getElementById(`view-${targetId}`)?.classList.add('active');
     });

@@ -8,15 +8,26 @@ const hostname = url.hostname;
 let isTenant = false;
 let tenantSlug = '';
 
+// 1. Detectar si es un subdominio (Tenant)
 if (import.meta.env.PROD) {
   if (hostname.endsWith('.tustock.app') && hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isTenant = true;
     tenantSlug = hostname.split('.')[0];
   }
 } else {
+  // Para desarrollo local: ?tenant=nombre
   if (url.searchParams.has('tenant')) {
     isTenant = true;
     tenantSlug = url.searchParams.get('tenant');
+  }
+}
+
+// 2. SEGURIDAD: Si es tenant, verificamos la cookie AQUÍ, no en el dashboard
+if (isTenant) {
+  const session = Astro.cookies.get('session');
+  // Si no hay sesión, cortamos el acceso y mandamos al login inmediatamente
+  if (!session || !session.value) {
+    return Astro.redirect('/login');
   }
 }
 ---
