@@ -1,9 +1,9 @@
 ---
 const { tenant } = Astro.props;
 import Layout from '~/layouts/PageLayout.astro';
-import StoreSwitcher from './StoreSwitcher.astro'; // <--- Asegúrate de tener este componente creado
+// Asegúrate de tener el componente StoreSwitcher creado en la misma carpeta
+import StoreSwitcher from './StoreSwitcher.astro'; 
 
-// Configuración del Header (Solo botón salir, limpio)
 const dashboardHeader = {
   links: [], 
   actions: [
@@ -20,7 +20,7 @@ const dashboardHeader = {
 <Layout metadata={{ title: `Panel de ${tenant}` }} headerData={dashboardHeader}>
   
   <style is:global>
-    body { overflow: hidden; } /* Modo App: Sin scroll en el body */
+    /* ❌ HEMOS QUITADO EL BODY OVERFLOW HIDDEN GLOBAL */
     
     /* Clases para manejar las vistas */
     .view-section { display: none; }
@@ -44,7 +44,8 @@ const dashboardHeader = {
     }
   </style>
 
-  <section class="w-full bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center h-[calc(100vh-64px)]">
+  {/* AQUI ESTÁ EL FIX: h-screen overflow-hidden SOLO en esta sección */}
+  <section class="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black py-4 px-4 flex justify-center items-center">
     
     {/* VENTANA DE LA APP */}
     <div class="w-full max-w-7xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex h-full max-h-[900px]">
@@ -99,7 +100,6 @@ const dashboardHeader = {
             </div>
           </header>
 
-          {/* STATS */}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
              <div class="p-6 bg-blue-50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
                 <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Valor Stock</span>
@@ -174,41 +174,30 @@ const dashboardHeader = {
 </Layout>
 
 <script>
-  // LÓGICA DE NAVEGACIÓN SPA (SIN RECARGA)
   document.addEventListener('astro:page-load', () => {
-    
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.view-section');
 
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        // 1. Gestionar clases del menú
         navButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
-        // 2. Gestionar visibilidad de secciones
         sections.forEach(s => s.classList.remove('active'));
-        
         const targetId = btn.getAttribute('data-target');
         const targetSection = document.getElementById(`view-${targetId}`);
-        if (targetSection) {
-          targetSection.classList.add('active');
-        }
+        if (targetSection) targetSection.classList.add('active');
       });
     });
-
   });
   
-  // Soporte básico si no usas ViewTransitions
+  // Fallback
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const target = e.currentTarget;
         const targetId = target.getAttribute('data-target');
-        
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         target.classList.add('active');
-
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.getElementById(`view-${targetId}`)?.classList.add('active');
     });
