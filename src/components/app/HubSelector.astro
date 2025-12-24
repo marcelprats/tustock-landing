@@ -1,7 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
-// 1. OBTENER SESIÓN Y DB
+// 1. OBTENER USUARIO
 const session = Astro.cookies.get('session');
 const userId = session?.value;
 const db = Astro.locals.runtime?.env?.DB;
@@ -9,26 +9,31 @@ const db = Astro.locals.runtime?.env?.DB;
 let userStores = [];
 let userName = "Usuario";
 
-// 2. CONSULTA REAL
+// 2. CONSULTA A LA NUEVA TABLA MEMBERSHIPS
 if (userId && db) {
   try {
-    // Obtenemos nombre del usuario y sus tiendas
-    // Primero el nombre
+    // A. Obtener nombre del usuario
     const userRes = await db.prepare("SELECT full_name FROM users WHERE id = ?").bind(userId).first();
     if (userRes) userName = userRes.full_name;
 
-    // Segundo las tiendas (JOIN users -> tenants)
+    // B. Obtener las tiendas (JOIN memberships + tenants)
     const storesRes = await db.prepare(`
-      SELECT t.name, t.slug, u.role 
-      FROM users u
-      JOIN tenants t ON u.tenant_id = t.id
-      WHERE u.id = ?
+      SELECT t.name, t.slug, m.role 
+      FROM memberships m
+      JOIN tenants t ON m.tenant_id = t.id
+      WHERE m.user_id = ?
     `).bind(userId).all();
     
-    userStores = storesRes.results.map(s => ({...s, logo: s.name.charAt(0).toUpperCase()}));
+    // Formatear datos (Añadir logo temporal con la inicial)
+    if (storesRes.results) {
+      userStores = storesRes.results.map(s => ({
+        ...s, 
+        logo: s.name.charAt(0).toUpperCase()
+      }));
+    }
 
   } catch (e) {
-    console.error("Error DB Hub:", e);
+    console.error("Error cargando Hub:", e);
   }
 }
 
@@ -45,6 +50,7 @@ const metadata = { title: 'Mis Tiendas' };
       </div>
 
       <div class="space-y-4">
+        {/* LISTADO DE TIENDAS */}
         {userStores.length > 0 ? userStores.map((store) => (
           <a 
             href={import.meta.env.PROD ? `https://${store.slug}.tustock.app` : `/?tenant=${store.slug}`} 
@@ -68,14 +74,15 @@ const metadata = { title: 'Mis Tiendas' };
             </div>
           </a>
         )) : (
-          <div class="text-center p-6 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-gray-300">
-             <p class="text-gray-500">No tienes tiendas asignadas.</p>
+          <div class="text-center p-6 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-gray-300 dark:border-slate-700">
+             <p class="text-gray-500 mb-2">No tienes tiendas asignadas.</p>
+             <p class="text-xs text-gray-400">¿Acabas de registrarte? Prueba a recargar.</p>
           </div>
         )}
         
-        {/* Botón crear nueva tienda */}
-        <a href="/new-store" class="group block border-2 border-dashed border-gray-300 dark:border-slate-700 p-4 rounded-2xl text-center text-gray-500 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer bg-transparent">
-          <span class="flex items-center justify-center gap-2 font-medium">
+        {/* BOTÓN CREAR NUEVA TIENDA */}
+        <a href="/new-store" class="group block border-2 border-dashed border-blue-300 dark:border-blue-900/50 p-4 rounded-2xl text-center text-blue-600 dark:text-blue-400 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition cursor-pointer">
+          <span class="flex items-center justify-center gap-2 font-bold">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             Registrar nuevo negocio
           </span>
