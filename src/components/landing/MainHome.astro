@@ -5,7 +5,7 @@ import Features2 from '~/components/widgets/Features2.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import PricingSection from '~/components/widgets/PricingSection.astro';
+import PricingSection from '~/components/widgets/PricingSection.astro'; 
 
 const metadata = {
   title: 'TuStock — El ERP Híbrido con IA que se adapta a tu escala',
@@ -57,7 +57,7 @@ const metadata = {
           icon: 'tabler:scan',
         },
         {
-          title: 'Funciona Offline (Local-First)',
+          title: 'Funciona Offline',
           description: 'Si se cae internet, tu tienda sigue vendiendo. Los datos se sincronizan automáticamente al volver.',
           icon: 'tabler:wifi-off',
         },
@@ -70,8 +70,8 @@ const metadata = {
     />
   </div>
 
-  {/* AQUI ESTÁ LA MAGIA: Insertamos el componente reutilizable */}
-  <PricingSection id="pricing" />
+  {/* SECCIÓN DE PRECIOS RESUMIDA (Con link a la página completa) */}
+  <PricingSection id="pricing" showLink={true} />
 
   <Stats
     stats={[
