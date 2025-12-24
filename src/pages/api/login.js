@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+
 export const POST = async ({ request, locals, cookies }) => {
   try {
     const env = locals.runtime?.env;
@@ -9,11 +11,20 @@ export const POST = async ({ request, locals, cookies }) => {
 
     if (!email || !password) return new Response(JSON.stringify({ error: "Faltan datos" }), { status: 400 });
 
-    // 1. Verificar Usuario (Email/Pass)
-    const user = await db.prepare("SELECT * FROM users WHERE email = ? AND password_hash = ?").bind(email, password).first();
+    // 1. Verificar Usuario (SOLO POR EMAIL)
+    // Ya no comprobamos la contraseña en el SQL
+    const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+    
     if (!user) return new Response(JSON.stringify({ error: "Credenciales incorrectas" }), { status: 401 });
 
-    // 2. BUSCAR MEMBRESÍAS (JOIN con Tenants para saber los nombres)
+    // 2. 🔐 COMPARAR HASH (Bcrypt)
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isMatch) {
+        return new Response(JSON.stringify({ error: "Credenciales incorrectas" }), { status: 401 });
+    }
+
+    // 3. BUSCAR MEMBRESÍAS
     const memberships = await db.prepare(`
         SELECT t.name, t.slug, m.role 
         FROM memberships m
@@ -21,29 +32,26 @@ export const POST = async ({ request, locals, cookies }) => {
         WHERE m.user_id = ?
     `).bind(user.id).all();
 
-    // Si no tiene ninguna tienda asociada
     if (!memberships.results || memberships.results.length === 0) {
         return new Response(JSON.stringify({ error: "Usuario sin tiendas asignadas" }), { status: 403 });
     }
 
-    // 3. DECIDIR EL DESTINO
+    // 4. DECIDIR EL DESTINO
     let redirectUrl = "";
     const stores = memberships.results;
 
-    // Si tiene SOLAMENTE UNA tienda, lo mandamos directo
     if (stores.length === 1) {
         const slug = stores[0].slug;
         redirectUrl = import.meta.env.PROD 
             ? `https://${slug}.tustock.app`
             : `/?tenant=${slug}`;
     } else {
-        // Si tiene VARIAS, lo mandamos al Hub (o al Dashboard principal)
         redirectUrl = import.meta.env.PROD 
             ? "https://tustock.app/hub"
-            : "/hub"; // Ojo: Asegúrate de tener la ruta /hub o que el index maneje esto
+            : "/hub"; 
     }
 
-    // 4. COOKIE GLOBAL
+    // 5. COOKIE
     cookies.set('session', user.id, {
       path: '/',
       httpOnly: true,
