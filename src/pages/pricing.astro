@@ -1,56 +1,59 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import PricingSection from '~/components/widgets/PricingSection.astro'; // <--- Usamos TU componente nuevo
-import FAQs from '~/components/widgets/FAQs.astro'; // Reutilizamos el widget de FAQ de la plantilla
+import PricingSection from '~/components/widgets/PricingSection.astro';
+import ComparisonTable from '~/components/widgets/ComparisonTable.astro'; // <--- NUESTRA TABLA
+import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'Precios | TuStock',
+  title: 'Precios y Comparativa | TuStock',
 };
 ---
 
 <Layout metadata={metadata}>
   
-  {/* Cabecera Simple */}
-  <div class="py-16 bg-blue-50 dark:bg-slate-900/50 text-center px-4">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 font-heading">Planes flexibles</h1>
+  <div class="pt-20 pb-10 bg-blue-50 dark:bg-slate-900/50 text-center px-4">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6 font-heading">Transparencia Total</h1>
     <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-      Transparencia total. Sin costes ocultos.
+      Sin costes ocultos. Sin sorpresas. Escoge el plan que se adapta a tu volumen de inventario.
     </p>
   </div>
 
-  {/* TU COMPONENTE MAESTRO */}
-  <PricingSection />
+  {/* 1. LAS TARJETAS (Sin el enlace "Ver más", porque ya estamos aquí) */}
+  <PricingSection showLink={false} />
 
-  {/* FAQs (Usamos el widget de la plantilla pero con texto en español) */}
+  {/* 2. LA TABLA DETALLADA (Esto es "Toda la info") */}
+  <ComparisonTable />
+
+  {/* 3. PREGUNTAS FRECUENTES */}
   <FAQs
     title="Preguntas Frecuentes"
-    subtitle="Resolvemos tus dudas."
+    subtitle="Todo lo que necesitas saber antes de suscribirte."
     columns={1}
     items={[
       {
+        title: '¿Qué significa "Nodos Docker"?',
+        description: 'En los planes de empresa, instalamos un pequeño contenedor (software) en tu servidor local que se comunica con nuestra nube de forma segura.',
+      },
+      {
         title: '¿Hay permanencia?',
-        description: 'No. Puedes cancelar o cambiar de plan en cualquier momento.',
+        description: 'No. Puedes cancelar el plan Pro o Business mensualmente. Los planes Enterprise suelen ser anuales.',
       },
       {
-        title: '¿Qué pasa si me quedo sin internet?',
-        description: 'TuStock es "Local-First". Sigues vendiendo y se sincroniza cuando vuelva la conexión.',
+        title: '¿Puedo cambiar de plan más tarde?',
+        description: 'Sí, puedes pasar de Gratis a Pro, o de Pro a Business en cualquier momento sin perder datos.',
       },
       {
-        title: '¿Necesito comprar servidores?',
-        description: 'No. En el plan Pequeño Comercio, tu PC es el servidor. En Gran Empresa usamos Docker.',
-      },
-      {
-        title: '¿Puedo probar el plan Pro?',
-        description: 'Sí, tienes 14 días gratis sin compromiso.',
+        title: '¿Cómo funciona la IA de facturas?',
+        description: 'Subes una foto o PDF de una factura de proveedor, y nuestra IA extrae los productos, cantidades y precios para actualizar tu stock automáticamente.',
       },
     ]}
   />
 
   <CallToAction
-    actions={[{ variant: 'primary', text: 'Crear cuenta gratis', href: '/register' }]}
+    actions={[{ variant: 'primary', text: 'Empezar con el Plan Gratis', href: '/register' }]}
   >
-    <Fragment slot="title">¿Listo para empezar?</Fragment>
-    <Fragment slot="subtitle">No necesitas tarjeta de crédito para el plan gratuito.</Fragment>
+    <Fragment slot="title">¿Aún con dudas?</Fragment>
+    <Fragment slot="subtitle">Crea una cuenta gratuita y prueba el sistema. No te pediremos tarjeta de crédito.</Fragment>
   </CallToAction>
 </Layout>
