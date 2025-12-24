@@ -1,23 +1,13 @@
 import { getPermalink } from './utils/permalinks';
 
+// src/navigation.js
+
 export const headerData = {
   links: [
-    { text: 'Producto', href: '/#features' },
-    { text: 'Precios', href: '/#pricing' },
-  ],
-  actions: [
-    { 
-      text: 'Entrar', 
-      href: '/login', 
-      variant: 'tertiary', 
-      attrs: { 'data-astro-reload': true } 
-    },
-    { 
-      text: 'Empezar Gratis', 
-      href: '/signup', 
-      variant: 'primary', 
-      attrs: { 'data-astro-reload': true } 
-    },
+    { text: 'Inicio', href: '/' },
+    { text: 'Características', href: '/#features' }, // El ancla que añadiremos abajo
+    { text: 'Precios', href: '/#pricing' },          // El ancla de precios
+    { text: 'Contacto', href: 'mailto:hola@tustock.app' },
   ],
 };
 
