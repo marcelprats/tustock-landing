@@ -1,26 +1,33 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import StoreSwitcher from './StoreSwitcher.astro';
-import ServerStatus from './dashboard/ServerStatus.astro'; // <--- 1. NUEVO COMPONENTE
-import { decryptLicense } from '~/utils/crypto'; // <--- 2. LIBRERÍA DE SEGURIDAD
+import ServerStatus from './dashboard/ServerStatus.astro'; 
+import { decryptLicense } from '~/utils/crypto'; 
 
 const { tenant } = Astro.props; 
 
 // 1. OBTENER SESIÓN Y ENTORNO
 const session = Astro.cookies.get('session');
 const userId = session?.value;
-const env = Astro.locals.runtime?.env; // Necesitamos 'env' para la MASTER_KEY
+const env = Astro.locals.runtime?.env; 
 const db = env?.DB;
 
 let tenantData = null;
 let userRole = null;
 let error = null;
 
+// Variables para el estado visual
+let isOnline = false;
+let containerClass = "bg-white dark:bg-slate-800";
+let statusBadge = "";
+let lastUpdateText = "---";
+
 if (userId && db && tenant) {
   try {
-    // 2. CONSULTA ACTUALIZADA (Pedimos license_encrypted y last_heartbeat)
+    // 2. CONSULTA ACTUALIZADA (Añadimos sales_today y data_updated_at)
     const membership = await db.prepare(`
-      SELECT m.role, t.id, t.name, t.plan_type, t.license_encrypted, t.last_heartbeat
+      SELECT m.role, t.id, t.name, t.plan_type, t.license_encrypted, t.last_heartbeat, 
+             t.sales_today, t.data_updated_at
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ? AND t.slug = ?
@@ -31,14 +38,11 @@ if (userId && db && tenant) {
       // --- 🔐 FASE DE DESENCRIPTADO ---
       let realKey = "No disponible";
       try {
-        // Usamos la MASTER_KEY del servidor para revelar la licencia
         if (membership.license_encrypted && env.MASTER_KEY) {
             realKey = decryptLicense(membership.license_encrypted, env.MASTER_KEY);
-        } else if (!env.MASTER_KEY) {
-            console.error("Falta MASTER_KEY en variables de entorno");
         }
       } catch (err) {
-        console.error("Error desencriptando licencia:", err);
+        console.error("Error desencriptando:", err);
         realKey = "Error de clave";
       }
       // -------------------------------
@@ -48,10 +52,32 @@ if (userId && db && tenant) {
         name: membership.name,
         plan: membership.plan_type,
         slug: tenant,
-        licenseKey: realKey,        // <--- Pasamos la clave real
-        lastHeartbeat: membership.last_heartbeat // <--- Pasamos el latido
+        licenseKey: realKey,       
+        lastHeartbeat: membership.last_heartbeat,
+        salesToday: membership.sales_today || 0,        // <--- NUEVO
+        dataUpdatedAt: membership.data_updated_at       // <--- NUEVO
       };
       userRole = membership.role;
+
+      // --- 👻 LÓGICA DE MODO FANTASMA ---
+      const now = Date.now();
+      // Consideramos ONLINE si hace menos de 2 minutos (120000 ms)
+      isOnline = tenantData.lastHeartbeat && (now - tenantData.lastHeartbeat) < 120000;
+
+      // Clases CSS dinámicas (Gris si está offline)
+      containerClass = isOnline 
+        ? "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700" // VIVO
+        : "bg-gray-100 dark:bg-slate-900 border-gray-200 dark:border-slate-800 opacity-60 grayscale"; // FANTASMA
+
+      // Badge de texto
+      statusBadge = isOnline
+        ? '<span class="text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE</span>'
+        : '<span class="text-gray-500 bg-gray-200 dark:bg-slate-700 px-2 py-0.5 rounded text-xs font-bold">OFFLINE</span>';
+
+      // Texto de fecha
+      lastUpdateText = tenantData.dataUpdatedAt 
+        ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', day: 'numeric', month: 'numeric'})
+        : '---';
 
     } else {
       error = "No tienes acceso a esta tienda o no existe.";
@@ -90,10 +116,7 @@ if (userId && db && tenant) {
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             Resumen
           </a>
-          <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800 transition">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-            Productos
-          </a>
+          {/* ... más enlaces ... */}
         </nav>
 
         <div class="p-4 border-t border-gray-200 dark:border-slate-800">
@@ -117,16 +140,28 @@ if (userId && db && tenant) {
             </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">Visión general de tu negocio</p>
           </div>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition text-sm font-bold flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Nueva Venta
-          </button>
         </header>
+
+        {/* 🚨 AVISO DE TIENDA DESCONECTADA (Solo si !isOnline) */}
+        {!isOnline && (
+            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-r shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700 dark:text-red-200">
+                            <span class="font-bold">Tienda desconectada.</span> Estás viendo una copia de seguridad del {lastUpdateText}.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        )}
 
         {/* GRID PRINCIPAL */}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
            
-           {/* COLUMNA 1: ESTADO DEL SERVIDOR (WIDGET NUEVO) */}
+           {/* COLUMNA 1: ESTADO DEL SERVIDOR */}
            <div class="lg:col-span-1">
               <ServerStatus 
                 licenseKey={tenantData.licenseKey} 
@@ -134,21 +169,29 @@ if (userId && db && tenant) {
               />
            </div>
 
-           {/* COLUMNA 2 y 3: MÉTRICAS */}
+           {/* COLUMNA 2 y 3: MÉTRICAS (Con efecto Fantasma si offline) */}
            <div class="lg:col-span-2 space-y-6">
               
               {/* Tarjeta de Ventas */}
-              <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+              <div class={`p-6 rounded-2xl shadow-sm border transition-all duration-500 ${containerClass}`}>
                 <div class="flex items-center justify-between mb-4">
                    <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Ventas Hoy</h3>
-                   <span class="text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold">+0%</span>
+                   {/* Badge dinámico (LIVE / OFFLINE) */}
+                   <div set:html={statusBadge} />
                 </div>
-                <p class="text-4xl font-bold text-gray-900 dark:text-white">0,00 €</p>
-                <p class="text-xs text-gray-400 mt-2">Esperando datos del TPV local...</p>
+                
+                {/* DATO REAL DE BBDD */}
+                <p class="text-4xl font-bold text-gray-900 dark:text-white">
+                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday)}
+                </p>
+                
+                <p class="text-xs text-gray-400 mt-2">
+                    {isOnline ? "Sincronizando en tiempo real..." : `Datos guardados: ${lastUpdateText}`}
+                </p>
               </div>
 
               {/* Placeholder para Gráfica */}
-              <div class="h-64 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 flex items-center justify-center p-6 text-center">
+              <div class={`h-64 rounded-2xl shadow-sm border flex items-center justify-center p-6 text-center ${containerClass}`}>
                  <div class="text-gray-400">
                     <svg class="w-12 h-12 mx-auto mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
                     <p>Conecta tu tienda para ver las gráficas de rendimiento.</p>

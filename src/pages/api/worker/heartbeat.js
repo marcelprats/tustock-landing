@@ -1,4 +1,3 @@
-// Archivo: src/pages/api/worker/heartbeat.js
 import { hashLicense } from '../../../utils/crypto';
 
 export const POST = async ({ request, locals }) => {
@@ -7,11 +6,11 @@ export const POST = async ({ request, locals }) => {
     const db = env?.DB;
     
     // 1. Recibimos la clave (ts_...) y métricas
-    const { licenseKey } = await request.json();
+    const { licenseKey, metrics } = await request.json();
 
     if (!licenseKey || !env.MASTER_KEY) return new Response("Error setup", { status: 400 });
 
-    // 2. HASHEAMOS para buscar (El servidor no sabe la clave real, solo su huella)
+    // 2. HASHEAMOS para buscar
     const searchHash = hashLicense(licenseKey);
 
     // 3. BUSCAMOS LA TIENDA
@@ -22,13 +21,25 @@ export const POST = async ({ request, locals }) => {
         return new Response(JSON.stringify({ error: "Licencia rechazada" }), { status: 401 });
     }
 
-    // 4. ✅ LATIDO EXITOSO: Actualizamos la hora
-    await db.prepare("UPDATE tenants SET last_heartbeat = ? WHERE id = ?")
-      .bind(Date.now(), tenant.id).run();
+    // 4. ACTUALIZAMOS DATOS 💰
+    // Si envían métricas, las usamos. Si no, 0.
+    const sales = metrics?.sales || 0;
+    const orders = metrics?.orders || 0;
+
+    // Actualizamos: Latido (siempre), Ventas y Fecha de Datos
+    await db.prepare(`
+      UPDATE tenants 
+      SET last_heartbeat = ?, 
+          sales_today = ?, 
+          orders_today = ?,
+          data_updated_at = ? 
+      WHERE id = ?
+    `).bind(Date.now(), sales, orders, Date.now(), tenant.id).run();
 
     return new Response(JSON.stringify({ 
         status: "connected", 
-        store: tenant.name 
+        store: tenant.name,
+        saved: { sales, orders }
     }), { status: 200 });
 
   } catch (e) {
