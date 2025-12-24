@@ -161,11 +161,11 @@ if (userId && db && tenant) {
         {/* GRID PRINCIPAL */}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
            
-           {/* COLUMNA 1: ESTADO DEL SERVIDOR */}
+            {/* COLUMNA 1: ESTADO DEL SERVIDOR */}
            <div class="lg:col-span-1">
               <ServerStatus 
                 licenseKey={tenantData.licenseKey} 
-                lastHeartbeat={tenantData.lastHeartbeat} 
+                isOnline={isOnline}  {/* <--- ¡AQUÍ ESTÁ LA CLAVE! */}
               />
            </div>
 

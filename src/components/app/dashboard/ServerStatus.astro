@@ -1,27 +1,21 @@
 ---
 // src/components/app/dashboard/ServerStatus.astro
 
-const { licenseKey, lastHeartbeat } = Astro.props;
-
-// Lógica: Si el último latido fue hace menos de 5 min (300.000ms), está ONLINE.
-// Si lastHeartbeat es null, nunca se conectó.
-const now = Date.now();
-const isOnline = lastHeartbeat && (now - lastHeartbeat) < 300000;
+// AHORA RECIBIMOS EL ESTADO CALCULADO DESDE FUERA
+const { licenseKey, isOnline } = Astro.props; 
 
 const statusColor = isOnline ? 'bg-green-500' : 'bg-red-500';
-const statusText = isOnline ? 'ONLINE' : 'OFFLINE';
+const statusText = isOnline ? 'CONECTADO' : 'DESCONECTADO'; // Texto más claro
 const containerBorder = isOnline ? 'border-green-200 dark:border-green-900' : 'border-red-200 dark:border-red-900';
 ---
 
 <div class={`bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border ${containerBorder} transition-all`}>
   <div class="flex items-center justify-between mb-6">
     <h3 class="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-      {/* Icono Servidor */}
       <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
       Servidor Local
     </h3>
     
-    {/* Badge de Estado */}
     <div class="flex items-center gap-2">
       <span class={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${statusColor}`}>
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -35,11 +29,13 @@ const containerBorder = isOnline ? 'border-green-200 dark:border-green-900' : 'b
     {/* Mensaje si está desconectado */}
     {!isOnline && (
       <div class="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl text-sm border border-gray-100 dark:border-slate-700">
-        <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">🔌 Servidor desconectado</p>
+        <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">🔌 Enlace caído</p>
         <p class="text-gray-500 mb-3 text-xs">
-          Para ver datos en tiempo real, conecta el software TuStock en tu tienda.
+          Tu PC no está enviando datos. Asegúrate de que el programa está abierto.
         </p>
-        <a href="/download" class="text-blue-600 underline text-xs font-bold">Descargar Instalador</a>
+        <a href="/download" class="text-blue-600 underline text-xs font-bold hover:text-blue-500">
+            Descargar e Instalar de nuevo
+        </a>
       </div>
     )}
 
@@ -47,7 +43,6 @@ const containerBorder = isOnline ? 'border-green-200 dark:border-green-900' : 'b
     <div>
       <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Token de Vinculación</label>
       <div class="flex group">
-        {/* Input de solo lectura con la clave */}
         <input 
             type="text" 
             readonly 
@@ -55,8 +50,6 @@ const containerBorder = isOnline ? 'border-green-200 dark:border-green-900' : 'b
             class="flex-1 bg-gray-100 dark:bg-slate-950 p-3 rounded-l-lg font-mono text-sm border-y border-l border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 focus:outline-none truncate"
             id="licenseInput"
         />
-        
-        {/* Botón de Copiar con Javascript inline simple */}
         <button 
           onclick="const i = document.getElementById('licenseInput'); i.select(); navigator.clipboard.writeText(i.value); alert('¡Copiado!');"
           class="px-4 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-r-lg border border-transparent transition text-gray-600 dark:text-gray-200 font-bold text-xs uppercase"
@@ -64,8 +57,6 @@ const containerBorder = isOnline ? 'border-green-200 dark:border-green-900' : 'b
           Copiar
         </button>
       </div>
-      <p class="text-[10px] text-gray-400 mt-2">Pega esta clave en el instalador de tu tienda.</p>
     </div>
-
   </div>
 </div>

@@ -1,0 +1,56 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+
+const DOWNLOAD_LINK = "/instalador-tustock-v1.exe"; // Apunta a tu archivo en /public
+---
+
+<Layout metadata={{ title: 'Descargar TuStock' }}>
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900 p-6 text-center">
+    
+    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-600/30">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+    </div>
+
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+      Instalar Servidor Local
+    </h1>
+    
+    <p class="text-gray-600 dark:text-gray-400 max-w-lg mb-8 text-lg">
+      Para vincular tu tienda, necesitas ejecutar este pequeño programa en el ordenador principal de tu negocio (TPV).
+    </p>
+
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 max-w-md w-full mb-8">
+        <h3 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span class="bg-gray-100 dark:bg-slate-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
+            Instrucciones rápidas:
+        </h3>
+        <ol class="text-left text-sm space-y-3 text-gray-600 dark:text-gray-400">
+            <li class="flex gap-3">
+                <span>👇</span>
+                <span>Descarga el archivo <b>.exe</b>.</span>
+            </li>
+            <li class="flex gap-3">
+                <span>🚀</span>
+                <span>Ejecútalo (Windows te pedirá permiso).</span>
+            </li>
+            <li class="flex gap-3">
+                <span>🔑</span>
+                <span>Pega el <b>Token de Vinculación</b> que tienes en el Dashboard.</span>
+            </li>
+        </ol>
+    </div>
+
+    <a href={DOWNLOAD_LINK} download class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+        Descargar para Windows
+    </a>
+    <p class="text-xs text-gray-400 mt-4">Versión 1.0.0 • 64-bit • Seguro y Libre de Virus</p>
+
+    <div class="mt-12">
+        <a href="/hub" class="text-gray-500 hover:text-gray-900 dark:hover:text-white transition text-sm font-medium">
+            ← Volver al Dashboard
+        </a>
+    </div>
+
+  </div>
+</Layout>
