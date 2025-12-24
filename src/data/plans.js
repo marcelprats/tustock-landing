@@ -1,14 +1,14 @@
 export const pricingData = {
   local: {
     title: "Pequeño Comercio",
-    description: "Olvídate de servidores. Tu PC es el servidor y tu móvil el escáner.",
+    description: "Tu ordenador es el servidor. Sin costes de nube.",
     plans: [
       {
         name: "Gratis",
         price: "0€",
         period: "/mes",
-        description: "Para empezar hoy mismo.",
-        features: ["1 Usuario", "100 Productos", "Subdominio Gratis"],
+        description: "Para validar tu idea o micro-negocios.",
+        features: ["1 Usuario", "100 Productos", "Subdominio Gratis", "Soporte Comunitario"],
         cta: "Crear Cuenta",
         href: "/register",
         highlight: false
@@ -17,8 +17,8 @@ export const pricingData = {
         name: "Pro",
         price: "29€",
         period: "/mes",
-        description: "Sin límites.",
-        features: ["Usuarios Ilimitados", "Productos Ilimitados", "IA Facturas Ilimitada"],
+        description: "Gestión completa sin límites.",
+        features: ["Usuarios Ilimitados", "Productos Ilimitados", "IA Facturas Ilimitada", "Alertas Stock Bajo"],
         cta: "Prueba 14 días gratis",
         href: "/register",
         highlight: true,
@@ -28,14 +28,14 @@ export const pricingData = {
   },
   enterprise: {
     title: "Gran Empresa",
-    description: "Arquitectura Híbrida: Nodos Docker locales + Sincronización Nube.",
+    description: "Arquitectura Híbrida Distribuida (Docker + Nube).",
     plans: [
       {
         name: "Developer",
         price: "0€",
         period: "",
-        description: "Sandbox para integración.",
-        features: ["Sandbox API", "1 Nodo Local Docker"],
+        description: "Entorno Sandbox para IT.",
+        features: ["Sandbox API", "1 Nodo Local Docker", "Documentación Técnica"],
         cta: "Crear Token",
         href: "/register",
         highlight: false
@@ -44,8 +44,8 @@ export const pricingData = {
         name: "Business",
         price: "99€",
         period: "/sede",
-        description: "Para producción.",
-        features: ["Nodos Docker Ilimitados", "Sync Multi-Sede", "SLA 99.9%"],
+        description: "Para naves logísticas activas.",
+        features: ["Nodos Docker Ilimitados", "Sync Multi-Sede", "SLA 99.9%", "Soporte Prioritario"],
         cta: "Contactar",
         href: "mailto:sales@tustock.app",
         highlight: true
@@ -54,8 +54,8 @@ export const pricingData = {
         name: "Enterprise",
         price: "Custom",
         period: "",
-        description: "Logística masiva.",
-        features: ["API Ilimitada", "Despliegue On-Premise Total", "Soporte 24/7"],
+        description: "Logística masiva global.",
+        features: ["API Ilimitada", "Despliegue 100% On-Premise", "Ingeniero Dedicado", "SSO / SAML"],
         cta: "Hablar",
         href: "mailto:partners@tustock.app",
         highlight: false
