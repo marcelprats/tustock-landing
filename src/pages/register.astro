@@ -1,6 +1,12 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+// --- GUEST GUARD: Si ya tienes sesión, al Hub ---
+const session = Astro.cookies.get('session');
+if (session && session.value) {
+  return Astro.redirect('/hub');
+}
+
 // Metadatos para SEO
 const metadata = {
   title: 'Crea tu cuenta | TuStock.App',
@@ -66,7 +72,7 @@ const metadata = {
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">URL de tu Panel</label>
             <div class="flex mt-1">
               <input type="text" name="subdomain" id="subdomain" required placeholder="mi-tienda" 
-                class="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
+                class="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white lowercase" />
               <span class="inline-flex items-center px-4 bg-gray-100 dark:bg-slate-700 border border-l-0 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-300 rounded-r-xl font-medium">
                 .tustock.app
               </span>
@@ -96,53 +102,68 @@ const metadata = {
 </Layout>
 
 <script>
-  const form = document.getElementById('registro-form') as HTMLFormElement;
+  // Script robusto sin tipos estrictos de TS para evitar errores en cliente
+  const form = document.getElementById('registro-form');
   const msg = document.getElementById('mensaje');
-  const btn = document.getElementById('btn-submit') as HTMLButtonElement;
-  const subInput = document.getElementById('subdomain') as HTMLInputElement;
+  const btn = document.getElementById('btn-submit');
+  const subInput = document.getElementById('subdomain');
 
   // Forzar minúsculas y quitar caracteres raros en la URL
-  subInput?.addEventListener('input', (e) => {
-    const target = e.target as HTMLInputElement;
-    target.value = target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-  });
+  if (subInput) {
+    subInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      e.target.value = val.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    });
+  }
 
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    btn.disabled = true;
-    const originalText = btn.innerText;
-    btn.innerText = "Procesando...";
-    msg.classList.add('hidden');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // UI Loading
+      if(btn) btn.disabled = true;
+      const originalText = btn ? btn.innerText : '';
+      if(btn) btn.innerText = "Procesando...";
+      if(msg) msg.classList.add('hidden');
 
-    const formData = new FormData(form);
-    const datos = Object.fromEntries(formData);
+      const formData = new FormData(e.target);
+      const datos = Object.fromEntries(formData);
 
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      });
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (response.ok) {
-        msg.classList.remove('hidden', 'text-red-600');
-        msg.classList.add('text-green-600');
-        msg.innerText = "¡Listo! Te avisaremos por Telegram.";
-        
-        form.reset();
-        setTimeout(() => { window.location.href = "/"; }, 3000);
-      } else {
-        throw new Error(result.error || "Error en el registro");
+        if (response.ok && result.success) {
+          if(msg) {
+            msg.classList.remove('hidden', 'text-red-600');
+            msg.classList.add('text-green-600');
+            msg.innerText = "¡Listo! Redirigiendo...";
+          }
+          
+          form.reset();
+          
+          // REDIRECCIÓN INMEDIATA (Usamos la URL que nos da la API, ej: /hub)
+          window.location.href = result.redirect || "/hub";
+
+        } else {
+          throw new Error(result.error || "Error en el registro");
+        }
+      } catch (error) {
+        if(msg) {
+            msg.classList.remove('hidden', 'text-green-600');
+            msg.classList.add('text-red-600');
+            msg.innerText = error.message;
+        }
+        if(btn) {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
       }
-    } catch (error) {
-      msg.classList.remove('hidden', 'text-green-600');
-      msg.classList.add('text-red-600');
-      msg.innerText = error.message;
-      btn.disabled = false;
-      btn.innerText = originalText;
-    }
-  });
+    });
+  }
 </script>
