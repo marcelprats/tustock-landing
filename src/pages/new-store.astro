@@ -1,0 +1,144 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+
+// 1. SEGURIDAD: Solo usuarios logueados pueden ver esto
+const session = Astro.cookies.get('session');
+if (!session || !session.value) {
+  return Astro.redirect('/login');
+}
+
+const metadata = {
+  title: "Registrar Nuevo Negocio",
+};
+---
+
+<Layout metadata={metadata}>
+  <section class="relative min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900 overflow-hidden p-4">
+    
+    <div class="relative w-full max-w-lg p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700">
+      
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-4">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Nuevo Negocio</h1>
+        <p class="text-gray-500 text-sm">Añade otra empresa a tu cuenta actual. Podrás cambiar entre ellas fácilmente.</p>
+      </div>
+
+      <form id="new-store-form" class="space-y-6">
+        
+        {/* NOMBRE DE LA EMPRESA */}
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Negocio</label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            required 
+            placeholder="Ej: Taller Paco"
+            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          />
+        </div>
+
+        {/* SUBDOMINIO */}
+        <div>
+          <label for="subdomain" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección Web (Subdominio)</label>
+          <div class="flex">
+            <input 
+              type="text" 
+              id="subdomain" 
+              name="subdomain" 
+              required 
+              placeholder="tallerpaco"
+              class="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition lowercase"
+            />
+            <span class="inline-flex items-center px-4 bg-gray-100 dark:bg-slate-700 border border-l-0 border-gray-300 dark:border-slate-600 rounded-r-lg text-gray-500 text-sm">
+              .tustock.app
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Solo letras minúsculas, números y guiones.</p>
+        </div>
+
+        {/* MENSAJE DE ERROR */}
+        <div id="error-message" class="hidden p-3 bg-red-100 text-red-700 text-sm rounded-lg text-center"></div>
+
+        {/* BOTONES */}
+        <div class="flex gap-4">
+          <a href="/hub" class="w-1/3 py-3 px-4 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl text-center hover:bg-gray-300 transition">
+            Cancelar
+          </a>
+          <button 
+            type="submit" 
+            id="submit-btn"
+            class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 flex justify-center items-center gap-2"
+          >
+            <span>Crear Negocio</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // LÓGICA DEL FORMULARIO
+  const form = document.getElementById('new-store-form');
+  const errorMsg = document.getElementById('error-message');
+  const btn = document.getElementById('submit-btn');
+
+  // Auto-generar subdominio al escribir el nombre
+  const nameInput = document.getElementById('name');
+  const slugInput = document.getElementById('subdomain');
+  
+  nameInput?.addEventListener('input', (e) => {
+    if (!slugInput.value || slugInput.dataset.touched !== 'true') {
+      const val = (e.target as HTMLInputElement).value;
+      slugInput.value = val.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+    }
+  });
+
+  slugInput?.addEventListener('input', () => {
+    slugInput.dataset.touched = 'true';
+  });
+
+  // Enviar formulario
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      errorMsg.classList.add('hidden');
+      btn.innerHTML = 'Creando...';
+      btn.setAttribute('disabled', 'true');
+      btn.classList.add('opacity-75');
+
+      const formData = new FormData(e.target as HTMLFormElement);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const res = await fetch('/api/create-tenant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+           // ÉXITO: Redirigimos a la nueva tienda
+           window.location.href = result.redirectUrl;
+        } else {
+           throw new Error(result.error);
+        }
+
+      } catch (err: any) {
+        errorMsg.innerText = err.message;
+        errorMsg.classList.remove('hidden');
+        btn.innerHTML = 'Crear Negocio';
+        btn.removeAttribute('disabled');
+        btn.classList.remove('opacity-75');
+      }
+    });
+  }
+</script>
