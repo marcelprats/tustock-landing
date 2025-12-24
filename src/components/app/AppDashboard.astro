@@ -1,13 +1,16 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import StoreSwitcher from './StoreSwitcher.astro';
+import ServerStatus from './dashboard/ServerStatus.astro'; // <--- 1. NUEVO COMPONENTE
+import { decryptLicense } from '~/utils/crypto'; // <--- 2. LIBRERÍA DE SEGURIDAD
 
-const { tenant } = Astro.props; // El slug de la tienda (ej: "casamaria")
+const { tenant } = Astro.props; 
 
-// 1. OBTENER SESIÓN
+// 1. OBTENER SESIÓN Y ENTORNO
 const session = Astro.cookies.get('session');
 const userId = session?.value;
-const db = Astro.locals.runtime?.env?.DB;
+const env = Astro.locals.runtime?.env; // Necesitamos 'env' para la MASTER_KEY
+const db = env?.DB;
 
 let tenantData = null;
 let userRole = null;
@@ -15,26 +18,42 @@ let error = null;
 
 if (userId && db && tenant) {
   try {
-    // 2. NUEVA CONSULTA DE SEGURIDAD (Usando Memberships)
-    // Buscamos si este usuario tiene permiso en esta tienda específica
+    // 2. CONSULTA ACTUALIZADA (Pedimos license_encrypted y last_heartbeat)
     const membership = await db.prepare(`
-      SELECT m.role, t.id, t.name, t.plan_type
+      SELECT m.role, t.id, t.name, t.plan_type, t.license_encrypted, t.last_heartbeat
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ? AND t.slug = ?
     `).bind(userId, tenant).first();
 
     if (membership) {
-      // ✅ TIENE PERMISO
+      
+      // --- 🔐 FASE DE DESENCRIPTADO ---
+      let realKey = "No disponible";
+      try {
+        // Usamos la MASTER_KEY del servidor para revelar la licencia
+        if (membership.license_encrypted && env.MASTER_KEY) {
+            realKey = decryptLicense(membership.license_encrypted, env.MASTER_KEY);
+        } else if (!env.MASTER_KEY) {
+            console.error("Falta MASTER_KEY en variables de entorno");
+        }
+      } catch (err) {
+        console.error("Error desencriptando licencia:", err);
+        realKey = "Error de clave";
+      }
+      // -------------------------------
+
       tenantData = {
         id: membership.id,
         name: membership.name,
         plan: membership.plan_type,
-        slug: tenant
+        slug: tenant,
+        licenseKey: realKey,        // <--- Pasamos la clave real
+        lastHeartbeat: membership.last_heartbeat // <--- Pasamos el latido
       };
       userRole = membership.role;
+
     } else {
-      // ❌ NO TIENE PERMISO (O la tienda no existe)
       error = "No tienes acceso a esta tienda o no existe.";
     }
 
@@ -47,7 +66,7 @@ if (userId && db && tenant) {
 
 <Layout metadata={{ title: tenantData ? tenantData.name : 'Error' }}>
   
-  {/* CASO DE ERROR: Si intenta entrar donde no debe */}
+  {/* CASO DE ERROR */}
   {error ? (
     <div class="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-slate-900">
       <h1 class="text-4xl font-bold text-red-500 mb-4">Acceso Denegado 🔒</h1>
@@ -58,17 +77,15 @@ if (userId && db && tenant) {
     </div>
   ) : (
   
-  /* CASO DE ÉXITO: El Dashboard Real */
+  /* CASO DE ÉXITO */
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900">
       
-      {/* SIDEBAR (Menú Lateral) */}
-      <aside class="w-64 flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col">
+      {/* SIDEBAR */}
+      <aside class="w-64 flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col hidden md:flex">
         
-        {/* Aquí usamos el StoreSwitcher actualizado */}
         <StoreSwitcher currentTenant={tenantData.slug} />
 
         <nav class="flex-1 px-2 py-4 space-y-1">
-          {/* TUS ENLACES DEL MENÚ */}
           <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             Resumen
@@ -77,15 +94,13 @@ if (userId && db && tenant) {
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             Productos
           </a>
-           {/* ... más enlaces ... */}
         </nav>
 
-        {/* PERFIL DE USUARIO (Abajo) */}
         <div class="p-4 border-t border-gray-200 dark:border-slate-800">
           <div class="flex items-center gap-3">
              <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500"></div>
              <div class="text-sm">
-               <p class="font-bold text-gray-900 dark:text-white">Mi Usuario</p>
+               <p class="font-bold text-gray-900 dark:text-white">Usuario</p>
                <p class="text-xs text-gray-500 capitalize">{userRole?.toLowerCase()}</p>
              </div>
           </div>
@@ -93,23 +108,54 @@ if (userId && db && tenant) {
       </aside>
 
       {/* CONTENIDO PRINCIPAL */}
-      <main class="flex-1 overflow-y-auto p-8">
-        <header class="flex items-center justify-between mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-            Panel de Control - {tenantData.name}
-          </h1>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition">
-            + Nueva Venta
+      <main class="flex-1 overflow-y-auto p-4 md:p-8">
+        
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+              {tenantData.name}
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Visión general de tu negocio</p>
+          </div>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition text-sm font-bold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            Nueva Venta
           </button>
         </header>
 
-        {/* AQUÍ VA EL RESTO DE TU DASHBOARD (Gráficas, Tablas, etc.) */}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
-              <h3 class="text-gray-500 text-sm font-medium">Ventas Hoy</h3>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">0,00 €</p>
+        {/* GRID PRINCIPAL */}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+           
+           {/* COLUMNA 1: ESTADO DEL SERVIDOR (WIDGET NUEVO) */}
+           <div class="lg:col-span-1">
+              <ServerStatus 
+                licenseKey={tenantData.licenseKey} 
+                lastHeartbeat={tenantData.lastHeartbeat} 
+              />
            </div>
-           {/* ... */}
+
+           {/* COLUMNA 2 y 3: MÉTRICAS */}
+           <div class="lg:col-span-2 space-y-6">
+              
+              {/* Tarjeta de Ventas */}
+              <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-4">
+                   <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Ventas Hoy</h3>
+                   <span class="text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold">+0%</span>
+                </div>
+                <p class="text-4xl font-bold text-gray-900 dark:text-white">0,00 €</p>
+                <p class="text-xs text-gray-400 mt-2">Esperando datos del TPV local...</p>
+              </div>
+
+              {/* Placeholder para Gráfica */}
+              <div class="h-64 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 flex items-center justify-center p-6 text-center">
+                 <div class="text-gray-400">
+                    <svg class="w-12 h-12 mx-auto mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                    <p>Conecta tu tienda para ver las gráficas de rendimiento.</p>
+                 </div>
+              </div>
+
+           </div>
         </div>
 
       </main>
