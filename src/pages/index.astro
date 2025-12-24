@@ -1,7 +1,6 @@
 ---
 import MainHome from '../components/landing/MainHome.astro';
 import AppDashboard from '../components/app/AppDashboard.astro';
-import HubSelector from '../components/app/HubSelector.astro';
 
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
@@ -10,12 +9,13 @@ let tenantSlug = '';
 
 // 1. DETECCIÓN DE SUBDOMINIO
 if (import.meta.env.PROD) {
+  // En producción, si no es tustock.app, asumimos que es un subdominio (ej: frutpaco.tustock.app)
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
   }
 } else {
-  // En local usamos ?tenant=nombre
+  // En local simulamos subdominios con ?tenant=nombre
   if (url.searchParams.has('tenant')) {
     isSubdomain = true;
     tenantSlug = url.searchParams.get('tenant');
@@ -26,10 +26,9 @@ if (import.meta.env.PROD) {
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
-// 3. SEGURIDAD: SI ESTÁS EN SUBDOMINIO Y NO TIENES SESIÓN...
+// 3. SEGURIDAD: SI ESTÁS EN UN SUBDOMINIO Y NO TIENES SESIÓN...
 if (isSubdomain && !isLoggedIn) {
-  
-  // SOLUCIÓN AL BUCLE: Te enviamos OBLIGATORIAMENTE al dominio principal
+  // Te enviamos al login del dominio principal, recordando a dónde querías ir
   const loginUrl = import.meta.env.PROD 
     ? `https://tustock.app/login?return_to=${tenantSlug}` 
     : `/login?return_to=${tenantSlug}`;
@@ -39,11 +38,14 @@ if (isSubdomain && !isLoggedIn) {
 ---
 
 {
+  /* LÓGICA DE RENDERIZADO SIMPLIFICADA */
+  
   isSubdomain && isLoggedIn ? (
+    /* CASO A: Estás en un subdominio (tienda) y logueado -> Ver Dashboard */
     <AppDashboard tenant={tenantSlug} />
-  ) : isLoggedIn ? (
-    <HubSelector />
   ) : (
+    /* CASO B: Estás en el dominio principal (tustock.app) -> Ver Landing Page */
+    /* (Aunque estés logueado, mostramos la Landing. El botón "Mis Tiendas" del Header te llevará al Hub) */
     <MainHome />
   )
 }
