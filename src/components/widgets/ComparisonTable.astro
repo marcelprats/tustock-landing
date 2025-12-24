@@ -1,0 +1,98 @@
+---
+const features = [
+  {
+    category: "Inventario y Ventas",
+    items: [
+      { name: "Límite de Productos", free: "100", pro: "Ilimitado", business: "Ilimitado", ent: "Ilimitado" },
+      { name: "Usuarios", free: "1", pro: "Ilimitado", business: "Ilimitado", ent: "Ilimitado" },
+      { name: "Escaneo IA de Facturas", free: "5/mes", pro: "Ilimitado", business: "Ilimitado", ent: "Ilimitado" },
+      { name: "Alertas Stock Bajo", free: false, pro: true, business: true, ent: true },
+      { name: "Gestión de Caducidades", free: false, pro: true, business: true, ent: true },
+    ]
+  },
+  {
+    category: "Tecnología e Infraestructura",
+    items: [
+      { name: "Tipo de Servidor", free: "Tu PC", pro: "Tu PC", business: "Docker Local", ent: "On-Premise Total" },
+      { name: "Sincronización Nube", free: true, pro: true, business: true, ent: "Opcional" },
+      { name: "Modo Offline", free: true, pro: true, business: true, ent: true },
+      { name: "Multi-Sede (Sincronizado)", free: false, pro: false, business: true, ent: true },
+      { name: "Rate Limit API", free: "100 req/min", pro: "1k req/min", business: "50k req/min", ent: "Ilimitado" },
+    ]
+  },
+  {
+    category: "Soporte y Seguridad",
+    items: [
+      { name: "Soporte", free: "Comunidad", pro: "Email", business: "Email Prioritario", ent: "Ingeniero 24/7" },
+      { name: "Copias de Seguridad", free: "Manual", pro: "Diaria", business: "Horaria", ent: "Tiempo Real" },
+      { name: "SSO / SAML", free: false, pro: false, business: false, ent: true },
+      { name: "SLA Garantizado", free: false, pro: false, business: "99.9%", ent: "99.99%" },
+    ]
+  }
+];
+---
+
+<section class="py-20 bg-white dark:bg-slate-950">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl font-bold font-heading mb-4">Comparativa Detallada</h2>
+      <p class="text-gray-600 dark:text-gray-400">Analiza cada característica en profundidad.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr>
+            <th class="p-4 bg-gray-50 dark:bg-slate-900 rounded-tl-xl w-1/4"></th>
+            <th class="p-4 bg-gray-50 dark:bg-slate-900 text-center font-bold text-gray-900 dark:text-white w-1/6">Gratis</th>
+            <th class="p-4 bg-blue-50 dark:bg-blue-900/20 text-center font-bold text-blue-600 dark:text-blue-400 w-1/6 border-t-2 border-blue-500 rounded-t-xl">Pro</th>
+            <th class="p-4 bg-gray-50 dark:bg-slate-900 text-center font-bold text-purple-600 dark:text-purple-400 w-1/6">Business</th>
+            <th class="p-4 bg-gray-50 dark:bg-slate-900 text-center font-bold text-gray-900 dark:text-white w-1/6 rounded-tr-xl">Enterprise</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          {features.map((section) => (
+            <>
+              <tr class="bg-gray-100 dark:bg-slate-800">
+                <td colspan="5" class="p-3 font-bold text-gray-700 dark:text-gray-300 border-b dark:border-slate-700">{section.category}</td>
+              </tr>
+              {section.items.map((row, idx) => (
+                <tr class={`border-b border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900/50 transition`}>
+                  <td class="p-4 font-medium text-gray-600 dark:text-gray-400">{row.name}</td>
+                  
+                  {/* Gratis */}
+                  <td class="p-4 text-center text-gray-500">
+                    {typeof row.free === 'boolean' 
+                      ? (row.free ? <span class="text-green-500 text-lg">●</span> : <span class="text-gray-300 text-lg">-</span>) 
+                      : row.free}
+                  </td>
+                  
+                  {/* Pro (Destacado) */}
+                  <td class="p-4 text-center font-bold text-blue-600 bg-blue-50/30 dark:bg-blue-900/10 border-x border-blue-100 dark:border-blue-900/30">
+                    {typeof row.pro === 'boolean' 
+                      ? (row.pro ? <span class="text-blue-600 text-lg">●</span> : <span class="text-gray-300 text-lg">-</span>) 
+                      : row.pro}
+                  </td>
+
+                  {/* Business */}
+                  <td class="p-4 text-center text-gray-700 dark:text-gray-300">
+                    {typeof row.business === 'boolean' 
+                      ? (row.business ? <span class="text-purple-500 text-lg">●</span> : <span class="text-gray-300 text-lg">-</span>) 
+                      : row.business}
+                  </td>
+
+                  {/* Enterprise */}
+                  <td class="p-4 text-center text-gray-700 dark:text-gray-300 font-medium">
+                    {typeof row.ent === 'boolean' 
+                      ? (row.ent ? <span class="text-gray-800 dark:text-white text-lg">●</span> : <span class="text-gray-300 text-lg">-</span>) 
+                      : row.ent}
+                  </td>
+                </tr>
+              ))}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
