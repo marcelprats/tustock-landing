@@ -1,244 +1,56 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import HeroText from '~/components/widgets/HeroText.astro';
-import Prices from '~/components/widgets/Pricing.astro';
-import FAQs from '~/components/widgets/FAQs.astro';
-import Steps from '~/components/widgets/Steps.astro';
-import Features3 from '~/components/widgets/Features3.astro';
+import PricingSection from '~/components/widgets/PricingSection.astro'; // <--- Usamos TU componente nuevo
+import FAQs from '~/components/widgets/FAQs.astro'; // Reutilizamos el widget de FAQ de la plantilla
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'Pricing',
+  title: 'Precios | TuStock',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- HeroText Widget ******************* -->
+  
+  {/* Cabecera Simple */}
+  <div class="py-16 bg-blue-50 dark:bg-slate-900/50 text-center px-4">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 font-heading">Planes flexibles</h1>
+    <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      Transparencia total. Sin costes ocultos.
+    </p>
+  </div>
 
-  <HeroText
-    tagline="Pricing"
-    title="Stellar Pricing for Every Journey"
-    subtitle="Choose the perfect plan that aligns with your cosmic goals."
-  />
+  {/* TU COMPONENTE MAESTRO */}
+  <PricingSection />
 
-  <!-- Pricing Widget ******************* -->
-
-  <Prices
-    title="Our prices"
-    subtitle="Only pay for what you need"
-    prices={[
-      {
-        title: 'basic',
-        subtitle: 'Optimal choice for personal use',
-        price: 29,
-        period: 'per month',
-        items: [
-          {
-            description: 'Etiam in libero, et volutpat',
-          },
-          {
-            description: 'Aenean ac nunc dolor tristique',
-          },
-          {
-            description: 'Cras scelerisque accumsan lib',
-          },
-          {
-            description: 'In hac habitasse',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-      },
-      {
-        title: 'standard',
-        subtitle: 'Optimal choice for small teams',
-        price: 69,
-        period: 'Per Month',
-        items: [
-          {
-            description: 'Proin vel laoreet',
-          },
-          {
-            description: 'Ut efficitur habitasse egestas',
-          },
-          {
-            description: 'Volutpat hac curabitur',
-          },
-          {
-            description: 'Pellentesque blandit ut nibh',
-          },
-          {
-            description: 'Donec fringilla sem',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-        hasRibbon: true,
-        ribbonTitle: 'popular',
-      },
-      {
-        title: 'premium',
-        subtitle: 'Optimal choice for companies',
-        price: 199,
-        period: 'Per Month',
-        items: [
-          {
-            description: 'Curabitur suscipit risus',
-          },
-          {
-            description: 'Aliquam habitasse malesuada',
-          },
-          {
-            description: 'Suspendisse sit amet blandit',
-          },
-          {
-            description: 'Suspendisse auctor blandit dui',
-          },
-        ],
-        callToAction: {
-          target: '_blank',
-          text: 'Get started',
-          href: '#',
-        },
-      },
-    ]}
-  />
-
-  <!-- Features3 Widget ************** -->
-
-  <Features3
-    title="Price-related features"
-    subtitle="Discover the advantages of choosing our plans"
-    columns={2}
-    items={[
-      {
-        title: 'Tiered Pricing Plans',
-        description: 'Choose from a range of pricing plans designed to accommodate different budgets and requirements.',
-        icon: 'tabler:stairs',
-      },
-      {
-        title: 'Transparent Pricing',
-        description: 'Clearly displayed pricing details for each plan, with no hidden costs or unexpected charges.',
-        icon: 'tabler:flip-vertical',
-      },
-      {
-        title: 'Secure Payment Methods',
-        description: 'Secure payment gateways to protect your financial information during transactions.',
-        icon: 'tabler:shield-lock',
-      },
-      {
-        title: 'Instant Access',
-        description: `Immediate access to your chosen plan's features and templates upon subscription.`,
-        icon: 'tabler:accessible',
-      },
-      {
-        title: 'Upgrade Value',
-        description: 'Upgrade to higher-tier plans to unlock more features and benefits for an enhanced experience.',
-        icon: 'tabler:chevrons-up',
-      },
-      {
-        title: '24H support',
-        description: 'Questions answered via live chat, email or phone, every calendar day.',
-        icon: 'tabler:headset',
-      },
-    ]}
-    classes={{ container: 'max-w-5xl' }}
-  />
-
-  <!-- Steps Widget ****************** -->
-
-  <Steps
-    title="A guided journey from plans to creativity"
-    tagline="simplified process"
-    isReversed={true}
-    items={[
-      {
-        title: 'Explore plans',
-        icon: 'tabler:number-1',
-      },
-      {
-        title: 'Select a plan',
-        icon: 'tabler:number-2',
-      },
-      {
-        title: 'Sign Up / Log In',
-        icon: 'tabler:number-3',
-      },
-      {
-        title: 'Review order',
-        icon: 'tabler:number-4',
-      },
-      {
-        title: 'Enter payment details',
-        icon: 'tabler:number-5',
-      },
-      {
-        title: 'Confirmation',
-        icon: 'tabler:number-6',
-      },
-      {
-        title: 'Download and start using the template(s)',
-        icon: 'tabler:number-7',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1536816579748-4ecb3f03d72a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80',
-      alt: 'Steps image',
-    }}
-  />
-
-  <!-- FAQs Widget ******************* -->
-
+  {/* FAQs (Usamos el widget de la plantilla pero con texto en español) */}
   <FAQs
-    title="Pricing FAQs"
-    subtitle="Choosing the right plan is important, and we're here to answer your questions. If you have queries about our pricing options, you're in the right place."
+    title="Preguntas Frecuentes"
+    subtitle="Resolvemos tus dudas."
     columns={1}
     items={[
       {
-        title: 'Do the plans come with customer support?',
-        description:
-          'Absolutely, all plans include access to our dedicated customer support to assist you with any queries or concerns.',
+        title: '¿Hay permanencia?',
+        description: 'No. Puedes cancelar o cambiar de plan en cualquier momento.',
       },
       {
-        title: 'Is there a trial period for the different plans?',
-        description:
-          "Unfortunately, we don't offer trial periods for the plans. However, you can check out our demo section to preview the quality of our templates.",
+        title: '¿Qué pasa si me quedo sin internet?',
+        description: 'TuStock es "Local-First". Sigues vendiendo y se sincroniza cuando vuelva la conexión.',
       },
       {
-        title: 'Can I switch between plans?',
-        description:
-          'Certainly! You can easily upgrade or downgrade your plan, at any time, to find the one that best suits your evolving requirements.',
+        title: '¿Necesito comprar servidores?',
+        description: 'No. En el plan Pequeño Comercio, tu PC es el servidor. En Gran Empresa usamos Docker.',
       },
       {
-        title: 'What payment methods do you accept?',
-        description:
-          'We accept major credit cards and online payment methods to ensure a convenient and secure transaction process.',
-      },
-      {
-        title: 'Are there any hidden fees beyond the displayed cost?',
-        description:
-          'No, the subscription cost covers all the features and templates listed under each plan. There are no hidden fees or extra charges.',
+        title: '¿Puedo probar el plan Pro?',
+        description: 'Sí, tienes 14 días gratis sin compromiso.',
       },
     ]}
   />
-
-  <!-- CallToAction Widget *********** -->
 
   <CallToAction
-    title="Ready to boost your projects?"
-    subtitle="Join our community of satisfied customers who have transformed their work with our templates."
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Get started now',
-        href: '/',
-      },
-    ]}
-  />
+    actions={[{ variant: 'primary', text: 'Crear cuenta gratis', href: '/register' }]}
+  >
+    <Fragment slot="title">¿Listo para empezar?</Fragment>
+    <Fragment slot="subtitle">No necesitas tarjeta de crédito para el plan gratuito.</Fragment>
+  </CallToAction>
 </Layout>
