@@ -1,0 +1,138 @@
+---
+import { pricingData } from '~/data/plans';
+
+const { id = "pricing" } = Astro.props;
+---
+
+<section id={id} class="py-20 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold font-heading mb-4">Elige tu escala</h2>
+      <p class="text-xl text-gray-600 dark:text-gray-400">Tecnología que crece contigo.</p>
+    </div>
+
+    {/* SWITCHER (Segmented Control) */}
+    <div class="flex justify-center mb-16">
+      <div class="relative bg-gray-200 dark:bg-slate-800 p-1.5 rounded-full inline-flex">
+         <button id="btn-local" class="relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-blue-600 text-black dark:text-white shadow-sm">
+           🏪 Pequeño Comercio
+         </button>
+         <button id="btn-enterprise" class="relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+           🏭 Gran Empresa
+         </button>
+      </div>
+    </div>
+
+    {/* --- CONTENIDO LOCAL --- */}
+    <div id="content-local" class="animate-fade-in block">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">{pricingData.local.title}</h3>
+        <p class="text-lg text-gray-600 dark:text-gray-300">{pricingData.local.description}</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {pricingData.local.plans.map((plan) => (
+          <div class={`relative flex flex-col p-8 rounded-3xl transition-all ${plan.highlight 
+              ? 'bg-white dark:bg-slate-900 border-2 border-blue-600 shadow-xl transform md:-translate-y-4' 
+              : 'bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-lg hover:border-blue-300'
+            }`}>
+            
+            {plan.badge && (
+              <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl rounded-tr-xl text-xs font-bold tracking-wider">
+                {plan.badge}
+              </div>
+            )}
+
+            <h4 class="text-2xl font-bold mb-2">{plan.name}</h4>
+            <p class="text-gray-500 mb-6 text-sm">{plan.description}</p>
+            <div class="text-4xl font-bold mb-6">{plan.price} <span class="text-sm font-normal text-gray-400">{plan.period}</span></div>
+            
+            <ul class="space-y-4 mb-8 flex-1 text-sm font-medium">
+              {plan.features.map(feat => (
+                <li class="flex gap-3"><span class="text-blue-600">✓</span> {feat}</li>
+              ))}
+            </ul>
+
+            <a href={plan.href} class={`block w-full py-3 text-center font-bold rounded-xl transition ${plan.highlight 
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30' 
+                : 'border-2 border-gray-200 dark:border-slate-600 hover:border-blue-600 hover:text-blue-600'}`}>
+              {plan.cta}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* --- CONTENIDO ENTERPRISE --- */}
+    <div id="content-enterprise" class="hidden animate-fade-in">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h3 class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-4">{pricingData.enterprise.title}</h3>
+        <p class="text-lg text-gray-600 dark:text-gray-300">{pricingData.enterprise.description}</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {pricingData.enterprise.plans.map((plan) => (
+          <div class={`flex flex-col p-6 rounded-3xl transition-all ${plan.highlight 
+              ? 'bg-slate-900 text-white border-2 border-purple-500 shadow-2xl relative transform md:-translate-y-4'
+              : 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-md'
+            }`}>
+            
+            <h4 class={`text-lg font-bold ${plan.highlight ? 'text-purple-300' : ''}`}>{plan.name}</h4>
+            <div class="text-3xl font-bold mt-2 mb-4">{plan.price} <span class="text-xs font-normal opacity-50">{plan.period}</span></div>
+            <p class="text-xs opacity-70 mb-6">{plan.description}</p>
+            
+            <ul class="space-y-3 text-sm mb-6 flex-1">
+               {plan.features.map(feat => (
+                 <li class="flex gap-2"><span>•</span> {feat}</li>
+               ))}
+            </ul>
+
+            <a href={plan.href} class={`block w-full py-2 text-center rounded-lg text-sm font-bold ${plan.highlight 
+                ? 'bg-purple-600 hover:bg-purple-500' 
+                : 'bg-gray-100 dark:bg-slate-700 hover:bg-gray-200'}`}>
+              {plan.cta}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // ESTO SE EJECUTA SIEMPRE, INCLUSO SI CAMBIAS DE PÁGINA CON VIEW TRANSITIONS
+  document.addEventListener('astro:page-load', () => {
+    const btnLocal = document.getElementById('btn-local');
+    const btnEnterprise = document.getElementById('btn-enterprise');
+    const contentLocal = document.getElementById('content-local');
+    const contentEnterprise = document.getElementById('content-enterprise');
+
+    if(!btnLocal || !btnEnterprise) return; // Si no estamos en la página correcta, no hacemos nada
+
+    function setLocal() {
+      // Estilos
+      btnLocal.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-blue-600 text-black dark:text-white shadow-sm";
+      btnEnterprise.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
+      // Visibilidad
+      contentLocal.classList.remove('hidden');
+      contentEnterprise.classList.add('hidden');
+    }
+
+    function setEnterprise() {
+      btnEnterprise.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-purple-600 text-black dark:text-white shadow-sm";
+      btnLocal.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
+      contentEnterprise.classList.remove('hidden');
+      contentLocal.classList.add('hidden');
+    }
+
+    btnLocal.addEventListener('click', setLocal);
+    btnEnterprise.addEventListener('click', setEnterprise);
+  });
+</script>
+
+<style>
+  .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
