@@ -1,3 +1,5 @@
+import { sendTelegramAlert } from '../../utils/notifications';
+
 export const POST = async ({ request, locals, cookies }) => {
   try {
     const env = locals.runtime?.env;
@@ -16,32 +18,38 @@ export const POST = async ({ request, locals, cookies }) => {
     const userId = crypto.randomUUID();
     const membershipId = crypto.randomUUID();
 
-    // 1. Validar si existe la tienda
+    // 1. Validar si existe la tienda (por slug)
     const existingTenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(subdomain).first();
     if (existingTenant) {
       return new Response(JSON.stringify({ error: "Ese nombre de tienda ya existe 😢" }), { status: 409 });
     }
+    
+    // 2. Validar si existe el usuario (por email)
+    const existingUser = await db.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
+    if (existingUser) {
+        return new Response(JSON.stringify({ error: "Este email ya está registrado. Por favor, inicia sesión y crea una nueva tienda desde el Hub." }), { status: 409 });
+    }
 
     // --- BLOQUE DE INSERCIÓN (3 TABLAS) ---
     
-    // A. Crear Tienda
+    // A. Crear Tienda (OJO: status = 'PENDING')
     await db.prepare(
-      "INSERT INTO tenants (id, name, slug, plan_type) VALUES (?, ?, ?, 'FREE')"
+      "INSERT INTO tenants (id, name, slug, plan_type, status) VALUES (?, ?, ?, 'FREE', 'PENDING')"
     ).bind(tenantId, name, subdomain).run();
 
-    // B. Crear Usuario (Nota: Ya no insertamos tenant_id ni role aquí)
+    // B. Crear Usuario
     await db.prepare(
       "INSERT INTO users (id, email, password_hash, full_name) VALUES (?, ?, ?, ?)"
     ).bind(userId, email, password, name).run();
 
-    // C. Crear Membresía (El vínculo)
+    // C. Crear Membresía (OWNER)
     await db.prepare(
       "INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, 'OWNER')"
     ).bind(membershipId, userId, tenantId).run();
 
     // --- FIN BLOQUE INSERCIÓN ---
 
-    // Crear Cookie Global
+    // 3. Crear Cookie Global (Auto-login)
     cookies.set('session', userId, {
       path: '/',
       httpOnly: true,
@@ -51,16 +59,25 @@ export const POST = async ({ request, locals, cookies }) => {
       domain: import.meta.env.PROD ? '.tustock.app' : undefined
     });
 
-    // Telegram Notificación (Opcional)
-    // ... (puedes dejar tu código de telegram aquí) ...
+    // 4. NOTIFICACIÓN A TELEGRAM 🔔
+    const msg = `🆕 <b>NUEVO REGISTRO (USUARIO + TIENDA)</b>\n\n👤 Usuario: ${name} (${email})\n🏪 Tienda: ${name}\n🔗 Slug: <code>${subdomain}</code>\n\n⚠️ <b>ACCIÓN REQUERIDA:</b>\n1. Crear DNS en Cloudflare.\n2. Activar tienda en DB.`;
+    
+    // Usamos waitUntil para no hacer esperar al usuario mientras se envía el mensaje
+    if (locals.runtime?.ctx?.waitUntil) {
+        locals.runtime.ctx.waitUntil(sendTelegramAlert(msg, env));
+    } else {
+        await sendTelegramAlert(msg, env); // En local esperamos
+    }
 
+    // 5. RESPUESTA (Redirigimos al HUB, no al subdominio)
     return new Response(JSON.stringify({
       success: true,
-      message: "Cuenta creada",
-      redirect: `https://${subdomain}.tustock.app`
+      message: "Cuenta creada. Configurando tienda...",
+      redirect: "/hub" // <--- CAMBIO IMPORTANTE
     }), { status: 200 });
 
   } catch (err) {
+    console.error(err);
     return new Response(JSON.stringify({ error: "Error registro", details: err.message }), { status: 500 });
   }
 }
