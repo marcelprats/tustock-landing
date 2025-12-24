@@ -1,10 +1,11 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
-import Features2 from '~/components/widgets/Features2.astro'; // <--- NUEVO IMPORT
+import Features2 from '~/components/widgets/Features2.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
+import PricingSection from '~/components/widgets/PricingSection.astro';
 
 const metadata = {
   title: 'TuStock — El ERP Híbrido con IA que se adapta a tu escala',
@@ -14,11 +15,10 @@ const metadata = {
 
 <Layout metadata={metadata}>
   
-  {/* 1. HERO: Mensaje Global */}
   <Hero2
     tagline="Gestión de Inventario Inteligente"
     actions={[
-      { variant: 'primary', text: 'Empezar Gratis', href: '#pricing', icon: 'tabler:arrow-down' },
+      { variant: 'primary', text: 'Empezar Gratis', href: '/pricing', icon: 'tabler:arrow-down' },
       { text: 'Ver tecnología', href: '#features' },
     ]}
     image={{
@@ -46,7 +46,6 @@ const metadata = {
     ]}
   />
 
-  {/* 2. CARACTERÍSTICAS (Nuevo: Para que funcionen los anclas del menú) */}
   <div id="features">
     <Features2
       title="¿Por qué TuStock?"
@@ -71,119 +70,8 @@ const metadata = {
     />
   </div>
 
-  {/* 3. EL GRAN INTERCAMBIADOR DE NEGOCIO (DISEÑO APPLE) */}
-  <section id="pricing" class="py-20 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-      
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold font-heading mb-4">Elige tu escala</h2>
-        <p class="text-xl text-gray-600 dark:text-gray-400">Tecnología que crece contigo.</p>
-      </div>
-
-      {/* TABS ESTILO APPLE (Segmented Control Moderno) */}
-      <div class="flex justify-center mb-16">
-        <div class="relative bg-gray-200 dark:bg-slate-800 p-1.5 rounded-full inline-flex">
-           <button id="btn-local" class="relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-blue-600 text-black dark:text-white shadow-sm">
-             🏪 Pequeño Comercio
-           </button>
-           <button id="btn-enterprise" class="relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-             🏭 Gran Empresa
-           </button>
-        </div>
-      </div>
-
-      {/* CONTENEDOR 1: PEQUEÑO COMERCIO */}
-      <div id="content-local" class="animate-fade-in">
-        
-        {/* Explicación Local */}
-        <div class="text-center max-w-3xl mx-auto mb-12">
-          <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">Digitalización sin complicaciones</h3>
-          <p class="text-lg text-gray-600 dark:text-gray-300">
-            Olvídate de servidores. Usa tu propio ordenador como servidor y tu móvil como escáner. 
-          </p>
-        </div>
-
-        {/* PRECIOS LOCAL */}
-        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Plan GRATIS */}
-          <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-slate-700 flex flex-col hover:border-blue-300 transition-colors">
-            <h4 class="text-2xl font-bold mb-2">Gratis</h4>
-            <p class="text-gray-500 mb-6 text-sm">Para empezar hoy mismo.</p>
-            <div class="text-4xl font-bold mb-6">0€</div>
-            <ul class="space-y-4 mb-8 flex-1 text-sm">
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> 1 Usuario</li>
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> 100 Productos</li>
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> Subdominio Gratis</li>
-            </ul>
-            <a href="/register" class="block w-full py-3 text-center border-2 border-gray-200 dark:border-slate-600 font-bold rounded-xl hover:border-blue-600 hover:text-blue-600 transition">
-              Crear Cuenta
-            </a>
-          </div>
-
-          {/* Plan PRO */}
-          <div class="bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 shadow-xl border-2 border-blue-500 relative flex flex-col transform md:-translate-y-4">
-            <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 rounded-bl-xl rounded-tr-xl text-xs font-bold tracking-wider">POPULAR</div>
-            <h4 class="text-2xl font-bold mb-2">Pro</h4>
-            <p class="text-gray-500 mb-6 text-sm">Sin límites.</p>
-            <div class="text-4xl font-bold mb-6">29€ <span class="text-sm font-normal text-gray-400">/mes</span></div>
-            <ul class="space-y-4 mb-8 flex-1 text-sm font-medium">
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> Usuarios Ilimitados</li>
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> Productos Ilimitados</li>
-              <li class="flex gap-3"><span class="text-blue-600">✓</span> IA Facturas Ilimitada</li>
-            </ul>
-            <a href="/register" class="block w-full py-3 text-center bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
-              Prueba 14 días gratis
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* CONTENEDOR 2: GRAN EMPRESA */}
-      <div id="content-enterprise" class="hidden animate-fade-in">
-        <div class="text-center max-w-2xl mx-auto mb-10">
-           <p class="text-purple-600 dark:text-purple-400 font-bold text-xl">Arquitectura Híbrida Distribuida</p>
-           <p class="text-sm text-gray-500 mt-2">Despliegue On-Premise (Docker) con sincronización nube.</p>
-           
-           
-           
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Developer */}
-          <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-md border border-gray-200 dark:border-slate-700 opacity-75 hover:opacity-100 transition">
-            <h4 class="text-lg font-bold">Developer</h4>
-            <div class="text-3xl font-bold mt-2 mb-4">0€</div>
-            <ul class="space-y-2 text-xs mb-6 text-gray-500">
-               <li>• Sandbox API</li>
-               <li>• 1 Nodo Local Docker</li>
-            </ul>
-            <a href="/register" class="block w-full py-2 border rounded-lg text-sm font-bold text-center">Crear Token</a>
-          </div>
-
-          {/* Business */}
-          <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-2xl border border-purple-500 relative transform md:-translate-y-4">
-            <h4 class="text-lg font-bold text-purple-300">Business</h4>
-            <div class="text-3xl font-bold mt-2 mb-4">99€ <span class="text-xs font-normal opacity-50">/sede</span></div>
-            <ul class="space-y-3 text-sm mb-6">
-               <li class="flex gap-2">⚡ Nodos Docker Ilimitados</li>
-               <li class="flex gap-2">🔄 Sync Multi-Sede</li>
-               <li class="flex gap-2">🛡️ SLA 99.9%</li>
-            </ul>
-            <a href="mailto:sales@tustock.app" class="block w-full py-3 text-center bg-purple-600 rounded-lg text-sm font-bold hover:bg-purple-500 transition">Contactar</a>
-          </div>
-
-          {/* Custom */}
-          <div class="bg-gray-100 dark:bg-slate-800 rounded-3xl p-6 border border-gray-200 dark:border-slate-700">
-             <h4 class="text-lg font-bold">Enterprise</h4>
-             <div class="text-3xl font-bold mt-2 mb-4">Custom</div>
-             <p class="text-xs text-gray-500 mb-6">Logística masiva e integraciones SAP/Sage.</p>
-             <button class="w-full py-2 bg-gray-200 dark:bg-slate-700 rounded-lg text-sm font-bold">Hablar</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
+  {/* AQUI ESTÁ LA MAGIA: Insertamos el componente reutilizable */}
+  <PricingSection id="pricing" />
 
   <Stats
     stats={[
@@ -211,44 +99,3 @@ const metadata = {
     </Fragment>
   </CallToAction>
 </Layout>
-
-{/* SCRIPT PARA LA MAGIA DEL INTERCAMBIADOR (ACTUALIZADO AL NUEVO DISEÑO) */}
-<script>
-  const btnLocal = document.getElementById('btn-local');
-  const btnEnterprise = document.getElementById('btn-enterprise');
-  const contentLocal = document.getElementById('content-local');
-  const contentEnterprise = document.getElementById('content-enterprise');
-
-  function setLocal() {
-    // Estilos Botones (Simulando switch Apple)
-    btnLocal.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-blue-600 text-black dark:text-white shadow-sm";
-    btnEnterprise.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
-    
-    // Contenido
-    contentLocal.classList.remove('hidden');
-    contentEnterprise.classList.add('hidden');
-  }
-
-  function setEnterprise() {
-    // Estilos Botones
-    btnEnterprise.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-purple-600 text-black dark:text-white shadow-sm";
-    btnLocal.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
-
-    // Contenido
-    contentEnterprise.classList.remove('hidden');
-    contentLocal.classList.add('hidden');
-  }
-
-  btnLocal?.addEventListener('click', setLocal);
-  btnEnterprise?.addEventListener('click', setEnterprise);
-</script>
-
-<style>
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
