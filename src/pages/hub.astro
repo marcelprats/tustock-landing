@@ -1,0 +1,11 @@
+---
+import HubSelector from '../components/app/HubSelector.astro';
+
+// Seguridad básica: Si no hay cookie, al login
+const session = Astro.cookies.get('session');
+if (!session || !session.value) {
+  return Astro.redirect('/login');
+}
+---
+
+<HubSelector />
