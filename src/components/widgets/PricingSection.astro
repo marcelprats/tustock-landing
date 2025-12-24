@@ -1,5 +1,5 @@
 ---
-import { pricingData } from '~/data/plans';
+import { pricingData } from '~/data/plans'; // Asegúrate de que esta ruta es correcta
 
 const { id = "pricing" } = Astro.props;
 ---
@@ -102,20 +102,18 @@ const { id = "pricing" } = Astro.props;
 </section>
 
 <script>
-  // ESTO SE EJECUTA SIEMPRE, INCLUSO SI CAMBIAS DE PÁGINA CON VIEW TRANSITIONS
+  // Script robusto para Astro View Transitions
   document.addEventListener('astro:page-load', () => {
     const btnLocal = document.getElementById('btn-local');
     const btnEnterprise = document.getElementById('btn-enterprise');
     const contentLocal = document.getElementById('content-local');
     const contentEnterprise = document.getElementById('content-enterprise');
 
-    if(!btnLocal || !btnEnterprise) return; // Si no estamos en la página correcta, no hacemos nada
+    if(!btnLocal || !btnEnterprise) return; 
 
     function setLocal() {
-      // Estilos
       btnLocal.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 bg-white dark:bg-blue-600 text-black dark:text-white shadow-sm";
       btnEnterprise.className = "relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white";
-      // Visibilidad
       contentLocal.classList.remove('hidden');
       contentEnterprise.classList.add('hidden');
     }
