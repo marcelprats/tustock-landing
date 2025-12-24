@@ -1,6 +1,13 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+// --- GUEST GUARD: Si ya tienes sesión, al Hub ---
+const session = Astro.cookies.get('session');
+if (session && session.value) {
+  return Astro.redirect('/hub');
+}
+
+// Lógica de retorno (por si vienes de un subdominio)
 const returnTo = Astro.url.searchParams.get('return_to');
 const title = returnTo ? `Entrar a ${returnTo}` : "Bienvenido a TuStock";
 
@@ -83,7 +90,7 @@ const metadata = {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // Resetear estado
+      // Resetear estado visual
       errorMsg.classList.add('hidden');
       errorMsg.innerText = '';
       btn.innerHTML = '<span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span> Cargando...';
@@ -91,7 +98,7 @@ const metadata = {
       btn.classList.add('opacity-75', 'cursor-not-allowed');
 
       // Obtener datos
-      const formData = new FormData(e.target as HTMLFormElement);
+      const formData = new FormData(e.target);
       const email = formData.get('email');
       const password = formData.get('password');
 
@@ -105,15 +112,13 @@ const metadata = {
         const data = await res.json();
 
         if (res.ok && data.success) {
-          // ÉXITO: La API nos devuelve la URL del subdominio
-          // Como ya tenemos la cookie global, entraremos directo.
+          // ÉXITO: Redirigir a donde diga la API (generalmente /hub o el subdominio)
           window.location.href = data.redirectUrl;
         } else {
-          // ERROR
           throw new Error(data.error || 'Error al iniciar sesión');
         }
 
-      } catch (err: any) {
+      } catch (err) {
         // Mostrar error visualmente
         errorMsg.classList.remove('hidden');
         errorMsg.innerText = err.message;
