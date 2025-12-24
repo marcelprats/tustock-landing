@@ -9,27 +9,33 @@ const db = Astro.locals.runtime?.env?.DB;
 let userStores = [];
 let userName = "Usuario";
 
-// 2. CONSULTA A LA NUEVA TABLA MEMBERSHIPS
+// 2. CONSULTA ACTUALIZADA (Traemos 't.status')
 if (userId && db) {
   try {
-    // A. Obtener nombre del usuario
     const userRes = await db.prepare("SELECT full_name FROM users WHERE id = ?").bind(userId).first();
     if (userRes) userName = userRes.full_name;
 
-    // B. Obtener las tiendas (JOIN memberships + tenants)
     const storesRes = await db.prepare(`
-      SELECT t.name, t.slug, m.role 
+      SELECT t.name, t.slug, t.status, m.role 
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ?
     `).bind(userId).all();
     
-    // Formatear datos (Añadir logo temporal con la inicial)
+    // Formatear datos + Lógica visual
     if (storesRes.results) {
-      userStores = storesRes.results.map(s => ({
-        ...s, 
-        logo: s.name.charAt(0).toUpperCase()
-      }));
+      userStores = storesRes.results.map(s => {
+        const isPending = s.status === 'PENDING';
+        return {
+          ...s, 
+          logo: s.name.charAt(0).toUpperCase(),
+          isPending: isPending,
+          // Si está pendiente, el enlace es '#' (no hace nada)
+          url: isPending || !s.status 
+               ? '#' 
+               : (import.meta.env.PROD ? `https://${s.slug}.tustock.app` : `/?tenant=${s.slug}`)
+        };
+      });
     }
 
   } catch (e) {
@@ -50,33 +56,52 @@ const metadata = { title: 'Mis Tiendas' };
       </div>
 
       <div class="space-y-4">
-        {/* LISTADO DE TIENDAS */}
         {userStores.length > 0 ? userStores.map((store) => (
           <a 
-            href={import.meta.env.PROD ? `https://${store.slug}.tustock.app` : `/?tenant=${store.slug}`} 
-            class="block bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-200 dark:border-slate-700 group cursor-pointer"
+            href={store.url} 
+            class={`block p-6 rounded-2xl shadow-sm border transition-all group relative overflow-hidden
+              ${store.isPending 
+                ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 cursor-not-allowed opacity-90' 
+                : 'bg-white dark:bg-slate-800 hover:shadow-xl hover:-translate-y-1 border-gray-200 cursor-pointer'
+              }`}
           >
+            {/* ETIQUETA AMARILLA SI ESTÁ PENDIENTE */}
+            {store.isPending && (
+              <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-3 py-1 rounded-bl-lg z-10">
+                EN PROCESO 🚧
+              </div>
+            )}
+
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
-                <div class="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <div class={`h-12 w-12 rounded-xl flex items-center justify-center font-bold text-xl transition-colors
+                  ${store.isPending
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                  }`}>
                   {store.logo}
                 </div>
                 <div>
-                  <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h3 class="font-bold text-lg text-gray-900 dark:text-white">
                     {store.name}
                   </h3>
-                  <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-full text-gray-500 dark:text-gray-300">
-                    {store.role}
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-full text-gray-500 dark:text-gray-300">
+                      {store.role}
+                    </span>
+                    {store.isPending && <span class="text-xs text-yellow-600 font-medium">Provisionando...</span>}
+                  </div>
                 </div>
               </div>
-              <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              
+              {!store.isPending && (
+                <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+              )}
             </div>
           </a>
         )) : (
           <div class="text-center p-6 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-gray-300 dark:border-slate-700">
              <p class="text-gray-500 mb-2">No tienes tiendas asignadas.</p>
-             <p class="text-xs text-gray-400">¿Acabas de registrarte? Prueba a recargar.</p>
           </div>
         )}
         
@@ -96,6 +121,5 @@ const metadata = { title: 'Mis Tiendas' };
         </a>
       </div>
     </div>
-
   </section>
 </Layout>
