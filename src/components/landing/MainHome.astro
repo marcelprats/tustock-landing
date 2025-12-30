@@ -332,7 +332,8 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
 <script>
   const observerOptions = {
     root: null,
-    rootMargin: '-20% 0px -60% 0px',
+    // 🔥 AJUSTE CLAVE: Detecta el centro de la pantalla mejor
+    rootMargin: '-40% 0px -40% 0px', 
     threshold: 0
   };
 
@@ -341,21 +342,33 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute('id');
         
-        // Reset
+        // 1. RESETEAR TODOS (Gris y pequeños)
         document.querySelectorAll('.nav-link').forEach(link => {
           link.classList.remove('active'); 
+          const dot = link.querySelector('div');
+          // Si encontramos el puntito, lo ponemos gris
+          if (dot) {
+             dot.classList.remove('bg-blue-600', 'scale-125');
+             dot.classList.add('bg-slate-400/50');
+          }
         });
         
-        // Activar
+        // 2. ACTIVAR EL ACTUAL (Azul y grande)
         const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
         if (activeLink) {
           activeLink.classList.add('active');
+          const dot = activeLink.querySelector('div');
+          // Si encontramos el puntito, lo ponemos azul
+          if (dot) {
+             dot.classList.remove('bg-slate-400/50');
+             dot.classList.add('bg-blue-600', 'scale-125');
+          }
         }
       }
     });
   }, observerOptions);
 
-  // Observar todas las secciones clave
+  // Observamos todas las secciones
   document.querySelectorAll('#hero, #features, #fiscalidad, #ai-core, #steps, #pricing, #faq').forEach((section) => {
     observer.observe(section);
   });

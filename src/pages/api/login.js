@@ -1,74 +1,55 @@
-import bcrypt from 'bcryptjs';
+import { createClient } from "@libsql/client/web";
+import bcrypt from "bcryptjs"; 
 
-export const POST = async ({ request, locals, cookies }) => {
+export const POST = async ({ request, cookies, redirect, locals }) => {
   try {
+    // 1. LEER DATOS DEL FORMULARIO (BODY)
+    const formData = await request.formData();
+    const email = formData.get("email");
+    const password = formData.get("password");
+    
+    // Obtener DB desde el entorno (Cloudflare)
     const env = locals.runtime?.env;
-    const db = env?.DB;
+    if (!env) return new Response("Error de configuración de BD", { status: 500 });
 
-    if (!db) return new Response(JSON.stringify({ error: "Error DB" }), { status: 500 });
-
-    const { email, password } = await request.json();
-
-    if (!email || !password) return new Response(JSON.stringify({ error: "Faltan datos" }), { status: 400 });
-
-    // 1. Verificar Usuario (SOLO POR EMAIL)
-    // Ya no comprobamos la contraseña en el SQL
-    const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
-    
-    if (!user) return new Response(JSON.stringify({ error: "Credenciales incorrectas" }), { status: 401 });
-
-    // 2. 🔐 COMPARAR HASH (Bcrypt)
-    const isMatch = await bcrypt.compare(password, user.password_hash);
-    
-    if (!isMatch) {
-        return new Response(JSON.stringify({ error: "Credenciales incorrectas" }), { status: 401 });
-    }
-
-    // 3. BUSCAR MEMBRESÍAS
-    const memberships = await db.prepare(`
-        SELECT t.name, t.slug, m.role 
-        FROM memberships m
-        JOIN tenants t ON m.tenant_id = t.id
-        WHERE m.user_id = ?
-    `).bind(user.id).all();
-
-    if (!memberships.results || memberships.results.length === 0) {
-        return new Response(JSON.stringify({ error: "Usuario sin tiendas asignadas" }), { status: 403 });
-    }
-
-    // 4. DECIDIR EL DESTINO
-    let redirectUrl = "";
-    const stores = memberships.results;
-
-    if (stores.length === 1) {
-        const slug = stores[0].slug;
-        redirectUrl = import.meta.env.PROD 
-            ? `https://${slug}.tustock.app`
-            : `/?tenant=${slug}`;
-    } else {
-        redirectUrl = import.meta.env.PROD 
-            ? "https://tustock.app/hub"
-            : "/hub"; 
-    }
-
-    // 5. COOKIE
-    cookies.set('session', user.id, {
-      path: '/',
-      httpOnly: true,
-      secure: import.meta.env.PROD,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      domain: import.meta.env.PROD ? '.tustock.app' : undefined
+    const db = createClient({
+        url: env.TURSO_DB_URL,
+        authToken: env.TURSO_AUTH_TOKEN,
     });
 
-    return new Response(JSON.stringify({
-      success: true,
-      message: "Login correcto",
-      redirectUrl: redirectUrl,
-      user: { name: user.full_name }
-    }), { status: 200 });
+    // 2. BUSCAR USUARIO
+    const result = await db.execute({
+        sql: "SELECT * FROM users WHERE email = ? LIMIT 1",
+        args: [email]
+    });
 
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    if (result.rows.length === 0) {
+        // Redirigimos al login con error (por GET, pero sin exponer password)
+        return redirect("/login?error=invalid_credentials"); 
+    }
+
+    const user = result.rows[0];
+
+    // 3. VERIFICAR HASH DE CONTRASEÑA
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!validPassword) {
+        return redirect("/login?error=invalid_credentials");
+    }
+
+    // 4. CREAR SESIÓN
+    cookies.set("session", user.id, {
+        path: "/",
+        httpOnly: true,
+        secure: true, // Solo HTTPS
+        maxAge: 60 * 60 * 24 * 7, // 7 días
+    });
+
+    // Redirigir al Hub (o donde quisiera ir)
+    const returnTo = new URL(request.url).searchParams.get("return_to") || "/hub";
+    return redirect(returnTo);
+
+  } catch (error) {
+    console.error("Login Critical Error:", error);
+    return new Response("Error interno del servidor", { status: 500 });
   }
-}
+};

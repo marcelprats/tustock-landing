@@ -1,46 +1,29 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import MainHome from '~/components/landing/MainHome.astro';
-import AppDashboard from '~/components/app/AppDashboard.astro';
+import StoreFront from '~/components/storefront/StoreFront.astro'; // Componente nuevo (Punto 5)
 
-// ==============================================
-// 1. LÓGICA DE ENRUTAMIENTO (Router)
-// ==============================================
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
 let isSubdomain = false;
 let tenantSlug = '';
 
-// Detectar si estamos en un subdominio (Tienda) o en la Landing
+// 1. DETECTAR SUBDOMINIO
 if (import.meta.env.PROD) {
+  // En producción, cualquier cosa que NO sea tustock.app es una tienda
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
   }
 } else {
-  // En local (localhost): usamos el parámetro ?tenant=nombre
+  // En local simulamos con ?tenant=fruteria
   if (url.searchParams.has('tenant')) {
     isSubdomain = true;
     tenantSlug = url.searchParams.get('tenant') || '';
   }
 }
 
-// ==============================================
-// 2. SEGURIDAD Y SESIÓN
-// ==============================================
-const session = Astro.cookies.get('session');
-const isLoggedIn = session && session.value;
-
-if (isSubdomain && !isLoggedIn) {
-  const loginUrl = import.meta.env.PROD 
-    ? `https://tustock.app/login?return_to=${tenantSlug}` 
-    : `/login?return_to=${tenantSlug}`;
-  return Astro.redirect(loginUrl);
-}
-
-// ==============================================
-// 3. DATOS EN TIEMPO REAL (Solo para Landing)
-// ==============================================
+// 2. DATOS PARA LA LANDING (Solo si no es subdominio)
 let shopCount = "10+";
 let userCount = "50+";
 
@@ -50,28 +33,26 @@ if (!isSubdomain) {
     try {
       const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
       const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
-      
-      if (shops && typeof shops.total === 'number') shopCount = shops.total.toString();
-      if (users && typeof users.total === 'number') userCount = users.total.toString();
-
+      if (shops?.total) shopCount = shops.total.toString();
+      if (users?.total) userCount = users.total.toString();
     } catch(e) {
-      console.error("⚠️ Error obteniendo stats de D1:", e);
+      console.error("Stats Error:", e);
     }
   }
 }
 
-const metadata = {
-  title: 'TuStock - Gestión Fiscal y de Stock con IA',
-  ignoreTitleTemplate: true,
-};
+const metadata = { title: 'TuStock - Plataforma Retail' };
 ---
 
 {
-  isSubdomain && isLoggedIn ? (
-    <AppDashboard tenant={tenantSlug} />
+  isSubdomain ? (
+    // CASO A: TIENDA PÚBLICA (Storefront)
+    // Aquí cargamos el escaparate para clientes
+    <StoreFront tenant={tenantSlug} />
   ) : (
+    // CASO B: LANDING PAGE CORPORATIVA
     <Layout metadata={metadata}>
       <MainHome shopCount={shopCount} userCount={userCount} />
     </Layout>
   )
-} 
+}

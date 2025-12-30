@@ -1,0 +1,36 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+const { tenant } = Astro.props;
+const metadata = { title: `${tenant} - Powered by TuStock` };
+---
+
+<Layout metadata={metadata}>
+  
+  <header class="bg-white shadow-sm p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-full"></div> <h1 class="text-xl font-bold uppercase tracking-wider">{tenant}</h1>
+        </div>
+        
+        <a href="/admin" class="text-xs font-medium text-gray-500 hover:text-black border border-gray-200 px-3 py-1 rounded-full transition-colors">
+            Administrar Tienda
+        </a>
+    </div>
+  </header>
+
+  <Hero
+    title={`Bienvenido a ${tenant}`}
+    subtitle="Compra online o consulta nuestro catálogo en tiempo real."
+    actions={[{ text: 'Ver Productos', href: '#catalogo', variant: 'primary' }]}
+  />
+
+  <section id="catalogo" class="py-16 px-4 max-w-7xl mx-auto">
+      <div class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl">
+          <h2 class="text-2xl font-bold text-gray-400 mb-2">Catálogo en construcción</h2>
+          <p class="text-gray-500">Los productos de {tenant} aparecerán aquí pronto.</p>
+      </div>
+  </section>
+
+</Layout>

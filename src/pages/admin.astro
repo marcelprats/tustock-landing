@@ -1,0 +1,30 @@
+---
+import AppDashboard from '~/components/app/AppDashboard.astro';
+
+// 1. SEGURIDAD: Solo usuarios logueados
+const session = Astro.cookies.get('session');
+if (!session || !session.value) {
+  // Guardamos a donde quería ir para devolverle después del login
+  return Astro.redirect('/login?return_to=/admin');
+}
+
+// 2. DETECTAR EN QUÉ TIENDA ESTAMOS
+const url = new URL(Astro.request.url);
+const hostname = url.hostname;
+let tenantSlug = '';
+
+if (import.meta.env.PROD) {
+  if (hostname !== 'tustock.app') {
+    tenantSlug = hostname.split('.')[0];
+  }
+} else {
+  tenantSlug = url.searchParams.get('tenant') || '';
+}
+
+// Si intenta entrar a /admin en la landing principal, lo mandamos al Hub de selección
+if (!tenantSlug) {
+    return Astro.redirect('/hub');
+}
+---
+
+<AppDashboard tenant={tenantSlug} />
