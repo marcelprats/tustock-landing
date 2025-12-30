@@ -10,13 +10,14 @@ declare namespace App {
       email: string;
       plan: string;
       url: string;
-      slug: string;    // <--- IMPORTANTE
-      isStore: boolean; // <--- IMPORTANTE
+      slug: string;
+      isStore: boolean;
+      web_plan: string; // <--- ¡AQUÍ ESTÁ LA CLAVE!
     } | null;
     
     runtime: {
         env: {
-            DB: D1Database; // <--- Base de datos D1
+            DB: D1Database;
             TURSO_DB_URL: string;
             TURSO_AUTH_TOKEN: string;
             MASTER_KEY: string;

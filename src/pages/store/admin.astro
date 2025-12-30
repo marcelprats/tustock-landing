@@ -1,0 +1,40 @@
+---
+import AdminLayout from '~/layouts/AdminLayout.astro';
+// Asumiendo que AppDashboard es tu panel super completo
+import AppDashboard from '~/components/app/AppDashboard.astro'; 
+
+const { currentShop } = Astro.locals;
+const session = Astro.cookies.get('session');
+
+// 1. LOGIN WALL
+if (!session || !session.value) {
+  // Redirigimos al login central, pero con return_to a ESTE subdominio
+  const returnUrl = `https://${currentShop.slug}.tustock.app/admin`;
+  return Astro.redirect(`/login?return_to=${encodeURIComponent(returnUrl)}`);
+}
+
+// 2. VERIFICACIÓN DE PROPIEDAD (SEGURIDAD)
+const userId = session.value;
+const db = Astro.locals.runtime?.env?.DB;
+let isOwner = false;
+
+if (db) {
+  const membership = await db.prepare(`
+    SELECT role FROM memberships m JOIN tenants t ON m.tenant_id = t.id
+    WHERE m.user_id = ? AND t.slug = ?
+  `).bind(userId, currentShop.slug).first();
+  
+  if (membership) isOwner = true;
+}
+
+if (!isOwner) {
+  return new Response("No tienes permiso para gestionar esta tienda.", { status: 403 });
+}
+
+// 3. DASHBOARD REAL
+const metadata = { title: `Gestión - ${currentShop.name}` };
+---
+
+<AdminLayout metadata={metadata}>
+  <AppDashboard tenantId={currentShop.slug} />
+</AdminLayout>
