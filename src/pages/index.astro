@@ -1,43 +1,30 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import MainHome from '~/components/landing/MainHome.astro';
-import StoreFront from '~/components/storefront/StoreFront.astro';
 
-// Obtenemos los datos inyectados por el middleware
-const { currentShop } = Astro.locals;
-const isSubdomain = currentShop?.isStore;
-
-// Datos de estadísticas solo para la Landing corporativa
+// 1. Estadísticas dinámicas desde D1 (Solo para la landing principal)
 let shopCount = "10+";
 let userCount = "50+";
 
-if (!isSubdomain) {
-  const db = Astro.locals.runtime?.env?.DB;
-  if (db) {
-    try {
-      const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
-      const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
-      if (shops?.total) shopCount = shops.total.toString();
-      if (users?.total) userCount = users.total.toString();
-    } catch(e) {
-      console.error("Stats Error:", e);
-    }
+const db = Astro.locals.runtime?.env?.DB;
+
+if (db) {
+  try {
+    const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
+    const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
+    
+    if (shops?.total) shopCount = shops.total.toString();
+    if (users?.total) userCount = users.total.toString();
+  } catch (e) {
+    console.error("Error al cargar estadísticas en Index:", e);
   }
 }
 
 const metadata = { 
-  title: isSubdomain ? currentShop.name : 'TuStock - Gestión de Stock con IA' 
+  title: 'TuStock - Gestión de Inventario Híbrida con IA' 
 };
 ---
 
-{
-  isSubdomain ? (
-    /* Si estamos en subdominio, cargamos solo el frontal de tienda */
-    <StoreFront tenant={currentShop.slug} shopName={currentShop.name} />
-  ) : (
-    /* Si estamos en tustock.app, cargamos la landing principal */
-    <Layout metadata={metadata}>
-      <MainHome shopCount={shopCount} userCount={userCount} />
-    </Layout>
-  )
-}
+<Layout metadata={metadata}>
+  <MainHome shopCount={shopCount} userCount={userCount} />
+</Layout>

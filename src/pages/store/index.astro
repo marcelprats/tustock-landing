@@ -1,0 +1,12 @@
+---
+import Layout from '~/layouts/Layout.astro';
+// Importa tus widgets (Hero, Features, etc.)
+const { currentShop } = Astro.locals;
+---
+<Layout metadata={{ title: currentShop?.name }}>
+  <header>
+    <h1>Bienvenido a {currentShop?.name}</h1>
+    </header>
+  <main>
+    </main>
+</Layout>
