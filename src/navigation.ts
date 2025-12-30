@@ -1,19 +1,38 @@
-import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
+import { getPermalink } from './utils/permalinks';
 
-// 1. MENÚ SUPERIOR (Navegación entre páginas globales)
+// 1. MENÚ CORPORATIVO (TuStock.app principal)
 export const headerData = {
   links: [
-    { text: 'Producto', href: '/product' }, // Ancla suave
-    { text: 'Precios', href: '/pricing' },   // Página real
+    { text: 'Producto', href: '/product' },
+    { text: 'Precios', href: '/pricing' },
     { text: 'Descargar', href: '/download' },
     { text: 'Sobre Nosotros', href: '/about' },
     { text: 'Contacto', href: '/contact' },
   ],
-  // Los botones de acción (Login/Register) los gestionaremos dinámicamente en el Header.astro
   actions: [], 
 };
 
-// 2. MENÚ LATERAL FLOTANTE (Secciones de la Landing)
+// 2. MENÚ DE LAS TIENDAS (frutpaco.tustock.app)
+// Esta es la WHITELIST: Solo estas rutas funcionan en un subdominio
+export const shopNavigation = {
+  links: [
+    { text: 'Catálogo', href: '/#catalogo' },
+    { text: 'Ubicación', href: '/#ubicacion' },
+  ],
+  // Whitelist de rutas permitidas para el Middleware
+  allowedPaths: [
+    '/', 
+    '/admin', 
+    '/settings', 
+    '/login', 
+    '/api/login', 
+    '/api/logout'
+  ],
+  actions: [
+    { text: 'Acceso Dueño', href: '/admin', type: 'ghost', icon: 'tabler:lock' },
+  ],
+};
+
 export const landingSections = [
   { text: 'Inicio', target: 'hero' },
   { text: 'Funcionalidades', target: 'features' },
@@ -49,7 +68,5 @@ export const footerData = {
     { ariaLabel: 'X', icon: 'tabler:brand-x', href: '#' },
     { ariaLabel: 'Instagram', icon: 'tabler:brand-instagram', href: '#' },
   ],
-  footNote: `
-    Hecho con ❤️ en Barcelona · Todos los derechos reservados TuStock © 2024.
-  `,
+  footNote: `Hecho con ❤️ en Barcelona · TuStock © 2025.`,
 };

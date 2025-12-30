@@ -1,29 +1,13 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import MainHome from '~/components/landing/MainHome.astro';
-import StoreFront from '~/components/storefront/StoreFront.astro'; // Componente nuevo (Punto 5)
+import StoreFront from '~/components/storefront/StoreFront.astro';
 
-const url = new URL(Astro.request.url);
-const hostname = url.hostname;
-let isSubdomain = false;
-let tenantSlug = '';
+// Obtenemos los datos inyectados por el middleware
+const { currentShop } = Astro.locals;
+const isSubdomain = currentShop?.isStore;
 
-// 1. DETECTAR SUBDOMINIO
-if (import.meta.env.PROD) {
-  // En producción, cualquier cosa que NO sea tustock.app es una tienda
-  if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
-    isSubdomain = true;
-    tenantSlug = hostname.split('.')[0];
-  }
-} else {
-  // En local simulamos con ?tenant=fruteria
-  if (url.searchParams.has('tenant')) {
-    isSubdomain = true;
-    tenantSlug = url.searchParams.get('tenant') || '';
-  }
-}
-
-// 2. DATOS PARA LA LANDING (Solo si no es subdominio)
+// Datos de estadísticas solo para la Landing corporativa
 let shopCount = "10+";
 let userCount = "50+";
 
@@ -41,16 +25,17 @@ if (!isSubdomain) {
   }
 }
 
-const metadata = { title: 'TuStock - Plataforma Retail' };
+const metadata = { 
+  title: isSubdomain ? currentShop.name : 'TuStock - Gestión de Stock con IA' 
+};
 ---
 
 {
   isSubdomain ? (
-    // CASO A: TIENDA PÚBLICA (Storefront)
-    // Aquí cargamos el escaparate para clientes
-    <StoreFront tenant={tenantSlug} />
+    /* Si estamos en subdominio, cargamos solo el frontal de tienda */
+    <StoreFront tenant={currentShop.slug} shopName={currentShop.name} />
   ) : (
-    // CASO B: LANDING PAGE CORPORATIVA
+    /* Si estamos en tustock.app, cargamos la landing principal */
     <Layout metadata={metadata}>
       <MainHome shopCount={shopCount} userCount={userCount} />
     </Layout>

@@ -1,27 +1,12 @@
 ---
-import Layout from '~/layouts/Layout.astro';
+import Layout from '~/layouts/Layout.astro'; // Layout base sin menús corporativos
 import Header from '~/components/widgets/Header.astro';
 import Footer from '~/components/widgets/Footer.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Features2 from '~/components/widgets/Features2.astro';
-import Steps from '~/components/widgets/Steps.astro';
+import { shopNavigation } from '~/navigation';
 
-const { tenant } = Astro.props;
-
-// Capitalizar nombre (ej: "fruteria" -> "Fruteria")
-const shopName = tenant.charAt(0).toUpperCase() + tenant.slice(1);
-
-// 1. CONFIGURACIÓN DEL MENÚ DE LA TIENDA (No de TuStock)
-const storeHeaderData = {
-  links: [
-    { text: 'Catálogo', href: '#catalogo' },
-    { text: 'Ubicación', href: '#ubicacion' },
-  ],
-  actions: [
-    // El botón Admin discreto para el dueño
-    { text: 'Acceso Dueño', href: '/admin', type: 'ghost', icon: 'tabler:lock' },
-  ],
-};
+const { tenant, shopName } = Astro.props;
 
 const storeFooterData = {
   links: [],
@@ -29,23 +14,19 @@ const storeFooterData = {
   socialLinks: [],
   footNote: `
     <span class="text-sm text-gray-500">
-      © 2025 <b>${shopName}</b> · Tecnología proporcionada por <a class="text-blue-600 hover:underline" href="https://tustock.app">TuStock</a>
+      © 2025 <b>${shopName}</b> · Tecnología por <a class="text-blue-600 font-bold" href="https://tustock.app">TuStock</a>
     </span>
   `,
 };
-
-const metadata = {
-  title: `${shopName} - Tienda Online`,
-};
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={{ title: `${shopName} - Tienda Online` }}>
   
   <Header 
-    links={storeHeaderData.links} 
-    actions={storeHeaderData.actions} 
+    links={shopNavigation.links} 
+    actions={shopNavigation.actions} 
     isSticky 
-    position="right"
+    showToggleTheme
   >
     <span slot="logo" class="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">
        🏪 {shopName}
@@ -54,76 +35,42 @@ const metadata = {
 
   <Hero
     title={`Bienvenido a <span class="text-blue-600 dark:text-blue-400">${shopName}</span>`}
-    subtitle="Calidad y servicio de confianza. Consulta nuestro catálogo online o visítanos en persona."
+    subtitle="Calidad y confianza en cada producto. Consulta nuestro catálogo en tiempo real."
     image={{ 
         src: 'https://images.unsplash.com/photo-1604719312566-b7cb0463d3a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 
-        alt: 'Tienda Interior' 
+        alt: shopName 
     }}
-    actions={[{ text: 'Ver Productos', href: '#catalogo', variant: 'primary' }]}
+    actions={[{ text: 'Ver Catálogo', href: '#catalogo', variant: 'primary' }]}
   />
 
-  <div id="catalogo" class="py-16 bg-gray-50 dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold tracking-tight mb-4">Nuestros Productos Destacados</h2>
-            <p class="text-gray-600 dark:text-gray-400">Selección de los mejores artículos disponibles hoy.</p>
-        </div>
-
+  <div id="catalogo" class="py-16 bg-gray-50 dark:bg-slate-900 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <h2 class="text-3xl font-bold mb-8">Nuestros Productos</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-lg transition-all overflow-hidden group">
-                    <div class="h-48 bg-gray-200 dark:bg-slate-700 relative overflow-hidden">
-                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 font-bold text-lg">
-                            FOTO PRODUCTO {i}
-                        </div>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-700">
+                    <div class="h-40 bg-slate-100 dark:bg-slate-700 rounded-xl mb-4 flex items-center justify-center">
+                        <span class="text-slate-400">Sin imagen</span>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold mb-2">Producto Ejemplo {i}</h3>
-                        <p class="text-sm text-gray-500 mb-4">Descripción corta del producto increíble que vende {shopName}.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xl font-bold text-blue-600">19.99€</span>
-                            <button class="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-bold rounded-lg hover:opacity-80">
-                                Añadir
-                            </button>
-                        </div>
-                    </div>
+                    <h3 class="font-bold">Producto Ejemplo {i}</h3>
+                    <p class="text-blue-600 font-black mt-2">Precio en tienda</p>
                 </div>
             ))}
-        </div>
-        
-        <div class="text-center mt-12">
-            <p class="text-xs text-gray-400 uppercase tracking-widest">
-                Catálogo sincronizado en tiempo real con TuStock
-            </p>
         </div>
     </div>
   </div>
 
-  <div id="ubicacion">
+  <div id="ubicacion" class="scroll-mt-16">
       <Features2
-        title="Visítanos"
-        subtitle="Estamos encantados de atenderte."
+        title="Contacto"
         columns={3}
         items={[
-          {
-            title: 'Horario',
-            description: 'Lunes a Viernes: 09:00 - 20:00<br>Sábados: 10:00 - 14:00',
-            icon: 'tabler:clock',
-          },
-          {
-            title: 'Dirección',
-            description: 'C/ Ejemplo 123<br>08001, Barcelona',
-            icon: 'tabler:map-pin',
-          },
-          {
-            title: 'Contacto',
-            description: 'Tel: 93 123 45 67<br>Email: hola@' + tenant + '.com',
-            icon: 'tabler:phone',
-          },
+          { title: 'Horarios', description: 'Consúltanos directamente', icon: 'tabler:clock' },
+          { title: 'Ubicación', description: 'Visítanos en nuestra tienda física', icon: 'tabler:map-pin' },
+          { title: 'Email', description: 'hola@' + tenant + '.tustock.app', icon: 'tabler:mail' },
         ]}
       />
   </div>
 
   <Footer {...storeFooterData} />
-
 </Layout>

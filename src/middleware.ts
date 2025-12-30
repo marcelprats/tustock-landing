@@ -1,66 +1,69 @@
 import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@libsql/client/web";
+import { shopNavigation } from "./navigation";
 
 export const onRequest = defineMiddleware(async (context, next) => {
-    // 1. OBTENER LAS VARIABLES DE ENTORNO (Cloudflare)
     const env = context.locals.runtime?.env || import.meta.env;
-    
-    // 2. DETECTAR EL DOMINIO
     const url = new URL(context.request.url);
-    // El worker nos pasa el dominio original en esta cabecera
     const host = context.request.headers.get("x-forwarded-host") || url.host;
     
     let subdomain = '';
     const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
 
-    // 3. EXTRAER SUBDOMINIO
     if (isLocalhost) {
-        // subdomain = 'fruteria-paco'; // Descomenta para probar en local
-        subdomain = ''; 
+        subdomain = url.searchParams.get('tenant') || ''; 
     } else {
-        // 'fruteria.tustock.app' -> ['fruteria', 'tustock', 'app']
         const parts = host.split('.');
         if (parts.length >= 3) {
             subdomain = parts[0];
         }
     }
 
-    // 4. IGNORAR SUBDOMINIOS DEL SISTEMA
     const systemSubdomains = ['www', 'app', 'api', 'admin', ''];
-    if (systemSubdomains.includes(subdomain)) {
-        return next(); // Pasa de largo, muestra la landing
-    }
+    const isStoreContext = subdomain !== '' && !systemSubdomains.includes(subdomain);
 
-    // 5. BUSCAR EN TURSO
-    if (env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
-        try {
-            const turso = createClient({
-                url: env.TURSO_DB_URL,
-                authToken: env.TURSO_AUTH_TOKEN
-            });
+    // 🚩 LÓGICA DE WHITELIST PARA TIENDAS
+    if (isStoreContext) {
+        // Miramos si la página actual está en la Whitelist de navigation.ts
+        const isPathAllowed = shopNavigation.allowedPaths.some(allowed => 
+            url.pathname === allowed || url.pathname.startsWith('/api/')
+        );
 
-            const fullUrl = `https://${subdomain}.tustock.app`;
-            
-            const result = await turso.execute({
-                sql: "SELECT company_name, owner_email, plan_type FROM licenses WHERE website_url = ? LIMIT 1",
-                args: [fullUrl]
-            });
+        if (!isPathAllowed) {
+            // Si no está permitida (ej: /about), lo mandamos al main del subdominio
+            return context.redirect('/'); 
+        }
 
-            if (result.rows.length > 0) {
-                const shop = result.rows[0];
-                // GUARDAMOS LOS DATOS EN LOCALS
-                context.locals.currentShop = {
-                    name: shop.company_name as string,
-                    email: shop.owner_email as string,
-                    plan: shop.plan_type as string,
-                    url: fullUrl
-                };
-            } else {
-                // TIENDA NO ENCONTRADA (404)
-                return new Response(`Tienda '${subdomain}' no encontrada`, { status: 404 });
+        // BUSCAR TIENDA EN TURSO
+        if (env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
+            try {
+                const turso = createClient({
+                    url: env.TURSO_DB_URL,
+                    authToken: env.TURSO_AUTH_TOKEN
+                });
+                const fullUrl = `https://${subdomain}.tustock.app`;
+                const result = await turso.execute({
+                    sql: "SELECT company_name, owner_email, plan_type FROM licenses WHERE website_url = ? LIMIT 1",
+                    args: [fullUrl]
+                });
+
+                if (result.rows.length > 0) {
+                    const shop = result.rows[0];
+                    // ASIGNACIÓN SEGURA CON TIPOS
+                    context.locals.currentShop = {
+                        name: (shop.company_name as string) || '',
+                        email: (shop.owner_email as string) || '',
+                        plan: (shop.plan_type as string) || 'FREE',
+                        url: fullUrl,
+                        slug: subdomain,
+                        isStore: true
+                    };
+                } else {
+                    return new Response(`Tienda '${subdomain}' no encontrada`, { status: 404 });
+                }
+            } catch (e) {
+                console.error("Error Middleware DB:", e);
             }
-        } catch (e) {
-            console.error("Error Middleware DB:", e);
         }
     }
 
