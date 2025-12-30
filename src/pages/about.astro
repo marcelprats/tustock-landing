@@ -5,10 +5,29 @@ import Content from '~/components/widgets/Content.astro';
 import Steps2 from '~/components/widgets/Steps2.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Features3 from '~/components/widgets/Features3.astro';
-import Brands from '~/components/widgets/Brands.astro';
+
+// 🔥 1. CONEXIÓN A BBDD REAL (D1)
+// Sacamos los datos reales. Nada de mentiras.
+const db = Astro.locals.runtime?.env?.DB;
+let shopCount = 0;
+let userCount = 0;
+
+if (db) {
+  try {
+    // Contamos tiendas creadas
+    const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
+    // Contamos usuarios registrados
+    const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
+    
+    shopCount = shops.total || 0;
+    userCount = users.total || 0;
+  } catch (e) {
+    console.error("Error obteniendo stats:", e);
+  }
+}
 
 const metadata = {
-  title: 'Sobre Nosotros - El futuro del Retail',
+  title: 'Sobre Nosotros - Código y Finanzas',
 };
 ---
 
@@ -16,45 +35,49 @@ const metadata = {
   
   <HeroText
     tagline="Nuestra Historia"
-    title="Democratizando la Inteligencia Artificial"
+    title="Cuando las Finanzas conocen a la Ingeniería"
   >
     <fragment slot="subtitle">
-      Nacimos con una obsesión: que una pequeña tienda de barrio tenga <span class="font-semibold text-blue-600 dark:text-blue-400">exactamente la misma tecnología</span> que el gigante más grande del mundo. 
-      <br class="hidden md:inline" />
-      Sin servidores complejos. Sin vender tus datos. Sin tonterías.
+      No somos una gran corporación. Somos <span class="font-bold text-blue-600 dark:text-blue-400">un Informático y un Contable</span> que se cansaron de ver cómo los pequeños negocios perdían dinero por falta de herramientas.
     </fragment>
   </HeroText>
 
   <Stats
-    title="Escalando a velocidad de vértigo"
+    title="Transparencia Radical"
+    subtitle="Acabamos de empezar, pero vamos muy en serio. Estos son nuestros números reales en tiempo real:"
     stats={[
-      { title: 'Comercios Activos', amount: '+2.4K' },
-      { title: 'Transacciones/Mes', amount: '€12M' },
-      { title: 'Países', amount: '8' },
-      { title: 'Privacidad', amount: '100%' },
+      { title: 'Tiendas Activas', amount: `${shopCount}` },
+      { title: 'Usuarios', amount: `${userCount}` },
+      { title: 'Lanzamiento', amount: '2025' },
+      { title: 'Compromiso', amount: '100%' },
     ]}
   />
 
   <Content
     isReversed
-    title="El retail tradicional está roto"
+    title="La Fusión Perfecta"
     items={[
       {
-        title: 'El Caos de los Datos',
-        description: 'La mayoría de tiendas usan 3 sistemas: un Excel para stock, un TPV antiguo para cobrar y una libreta para apuntar deudas. Es ineficiente y propenso a errores.',
+        title: 'El Cerebro Financiero',
+        description: 'Años viendo balances que no cuadran y stock perdido. La visión contable asegura que TuStock no solo gestione productos, sino que vigile la rentabilidad de tu negocio al céntimo.',
       },
       {
-        title: 'La brecha de la IA',
-        description: 'La predicción de demanda estaba reservada para empresas con equipos de datos de 50 personas. El pequeño comercio compraba a ciegas.',
+        title: 'El Cerebro Tecnológico',
+        description: 'Obsesionado con la eficiencia y la seguridad. La visión técnica asegura que el software vuele, no falle nunca y que tus datos estén blindados.',
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Retail Chaos',
+      src: 'https://images.unsplash.com/photo-1552581234-26160f608093?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      alt: 'Meeting Tech Finance',
     }}
   >
     <fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">¿Por qué nacimos?</h3>
+      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">¿Por qué TuStock?</h3>
+      <p>
+        Porque vimos un hueco enorme. O usabas un Excel propenso a errores, o pagabas una fortuna por un ERP complejo.
+        <br /><br />
+        Decidimos juntar nuestros dos mundos: <b>El rigor de la contabilidad financiera con la potencia de la Inteligencia Artificial moderna.</b>
+      </p>
     </fragment>
 
     <fragment slot="bg">
@@ -62,75 +85,45 @@ const metadata = {
     </fragment>
   </Content>
 
-  <Content
-    title="Sistema Operativo Híbrido"
-    subtitle="Reescribimos las reglas del software de gestión."
-    items={[
-      {
-        title: 'Cloud First, Local Power',
-        description: 'Usa la nube para la comodidad de gestionar desde el móvil. Usa la App Local para ejecutar modelos de IA pesados en tu propia GPU sin latencia.',
-      },
-      {
-        title: 'Privacidad Radical',
-        description: 'A diferencia de otros SaaS, tu base de datos de clientes es sagrada. Encriptamos todo y ofrecemos modo offline real.',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Tech Solution',
-    }}
-  />
-
   <Features3
-    title="ADN TuStock"
-    subtitle="No somos una consultora. Somos ingenieros y tenderos."
+    title="Nuestros principios"
+    subtitle="Lo que nos define como fundadores."
     columns={3}
     items={[
       {
-        title: 'Ingeniería de Élite',
-        description: 'Usamos Rust y bases de datos distribuidas en el borde (Edge). Velocidad <50ms en cualquier parte del mundo.',
-        icon: 'tabler:code',
+        title: 'Verdad ante todo',
+        description: 'No vendemos humo. Si el software tiene un fallo, te lo decimos y lo arreglamos. Sin letras pequeñas.',
+        icon: 'tabler:bulb',
       },
       {
-        title: 'Diseño Obsesivo',
-        description: 'Si necesitas un manual para usarlo, hemos fracasado. El software empresarial no tiene por qué ser feo.',
-        icon: 'tabler:brush',
+        title: 'Dato mata relato',
+        description: 'Tus decisiones de negocio deben basarse en números reales, no en intuiciones. Por eso la IA analiza tus datos.',
+        icon: 'tabler:chart-dots',
       },
       {
-        title: 'Soporte Humano',
-        description: 'Odiamos los bots que dan vueltas. Nuestro equipo de soporte trabaja codo con codo con el equipo de producto.',
+        title: 'Cercanía',
+        description: 'Al ser fundadores técnicos y financieros, entendemos tus problemas reales. Hablas con expertos, no con teleoperadores.',
         icon: 'tabler:users',
       },
     ]}
   />
 
   <Steps2
-    title="Nuestra Trayectoria"
-    subtitle="De un garaje en Barcelona al mundo."
+    title="Nuestro camino"
+    subtitle="Sin atajos."
     items={[
       {
-        title: '2023: El Origen',
-        description: 'Desarrollamos el primer prototipo para salvar la ferretería familiar de la quiebra optimizando el stock.',
+        title: 'Enero 2025: El inicio',
+        description: 'Lanzamos la primera versión pública. Dos personas, dos portátiles y una misión clara: salvar el retail.',
       },
       {
-        title: '2024: Expansión SaaS',
-        description: 'Lanzamos la beta pública. 500 tiendas se unen en el primer mes. Levantamos nuestra ronda Seed.',
+        title: 'Actualidad',
+        description: 'Trabajando codo con codo con los primeros clientes (Early Adopters) para pulir el producto perfecto.',
       },
       {
-        title: '2025: IA Local & Enterprise',
-        description: 'Lanzamiento del motor de IA on-device y herramientas para franquicias. El estándar del nuevo retail.',
+        title: 'Futuro Próximo',
+        description: 'Integración total de IA Local para predecir tus ventas antes de que ocurran.',
       },
-    ]}
-  />
-
-  <Brands
-    title="Partners Tecnológicos"
-    subtitle="Construimos sobre hombros de gigantes."
-    icons={[]}
-    images={[
-      { src: 'https://cdn.pixabay.com/photo/2013/02/12/09/07/microsoft-80658_1280.png', alt: 'Microsoft' },
-      { src: 'https://cdn.pixabay.com/photo/2015/10/31/12/54/google-1015751_1280.png', alt: 'Google Cloud' },
-      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png', alt: 'Stripe' },
     ]}
   />
 

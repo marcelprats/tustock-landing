@@ -1,56 +1,102 @@
 ---
-// 1. IMPORTANTE: Importar el Layout que trae el CSS
 import Layout from '~/layouts/PageLayout.astro';
-
 import MainHome from '~/components/landing/MainHome.astro';
 import AppDashboard from '~/components/app/AppDashboard.astro';
 
+// ==============================================
+// 1. LÓGICA DE ENRUTAMIENTO (Router)
+// ==============================================
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
 let isSubdomain = false;
 let tenantSlug = '';
 
-// --- LÓGICA DE SUBDOMINIOS ---
+// Detectar si estamos en un subdominio (Tienda) o en la Landing
 if (import.meta.env.PROD) {
+  // En producción: cualquier cosa que no sea tustock.app es una tienda
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
   }
 } else {
+  // En local (localhost): usamos el parámetro ?tenant=nombre
   if (url.searchParams.has('tenant')) {
     isSubdomain = true;
-    tenantSlug = url.searchParams.get('tenant');
+    tenantSlug = url.searchParams.get('tenant') || '';
   }
 }
 
+// ==============================================
+// 2. SEGURIDAD Y SESIÓN
+// ==============================================
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
+// Si intenta entrar a una tienda (subdominio) y NO está logueado -> Redirigir al Login
 if (isSubdomain && !isLoggedIn) {
   const loginUrl = import.meta.env.PROD 
     ? `https://tustock.app/login?return_to=${tenantSlug}` 
     : `/login?return_to=${tenantSlug}`;
+  
   return Astro.redirect(loginUrl);
 }
 
-// Metadatos para la Landing
+// ==============================================
+// 3. DATOS EN TIEMPO REAL (Solo para Landing)
+// ==============================================
+// Valores por defecto (Fallback visual)
+let shopCount = "10+";
+let userCount = "50+";
+
+// Solo gastamos recursos consultando la BBDD si estamos en la Landing Page
+if (!isSubdomain) {
+  const db = Astro.locals.runtime?.env?.DB;
+  
+  if (db) {
+    try {
+      // Consultas SQL directas a D1 (Súper rápidas)
+      const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
+      const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
+      
+      // Si tenemos datos, actualizamos las variables
+      // (Puedes poner una lógica: si es < 5 mostrar "Early Access", si no, el número)
+      if (shops && typeof shops.total === 'number') {
+         shopCount = shops.total.toString();
+      }
+      
+      if (users && typeof users.total === 'number') {
+         userCount = users.total.toString();
+      }
+
+    } catch(e) {
+      console.error("⚠️ Error obteniendo stats de D1:", e);
+      // Fallback silencioso: se quedan los valores por defecto
+    }
+  }
+}
+
+// Metadatos SEO para la Landing
 const metadata = {
-  title: 'TuStock - Gestión de Inventario con IA',
+  title: 'TuStock - Gestión de Inventario con IA Local',
   ignoreTitleTemplate: true,
 };
 ---
 
 {
+  /* ============================================== */
+  /* RENDERIZADO CONDICIONAL                        */
+  /* ============================================== */
+  
   isSubdomain && isLoggedIn ? (
-    /* CASO A: DASHBOARD (Tienda) */
-    /* Nota: Asegúrate de que AppDashboard también tenga su propio Layout interno 
-       o envuélvelo aquí si se ve sin estilos */
+    // CASO A: El usuario está en su tienda (fruteria.tustock.app) y logueado
+    // Renderizamos la App privada
     <AppDashboard tenant={tenantSlug} />
+    
   ) : (
-    /* CASO B: LANDING PAGE */
-    /* 🔥 AQUÍ ESTABA EL ERROR: Faltaba el <Layout> */
+    // CASO B: Estamos en la Landing Page (tustock.app)
+    // Renderizamos la web pública con los datos reales
     <Layout metadata={metadata}>
-      <MainHome />
+      <MainHome shopCount={shopCount} userCount={userCount} />
     </Layout>
   )
 }

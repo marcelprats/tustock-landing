@@ -13,6 +13,16 @@ import Stats from '~/components/widgets/Stats.astro';
 
 import { landingSections } from '~/navigation';
 ---
+const { shopCount = 0, userCount = 0 } = Astro.props;
+---
+<Stats
+      stats={[
+        { title: 'Productos Gestionados', amount: '+10K' }, // Esto puede ser estimado o hardcoded por ahora
+        { title: 'Tiendas Activas', amount: `${shopCount}` }, // DATO REAL
+        { title: 'Usuarios', amount: `${userCount}` },       // DATO REAL
+        { title: 'Estado del Sistema', amount: '100%' },
+      ]}
+    />
 
 <div class="relative overflow-hidden">
   
