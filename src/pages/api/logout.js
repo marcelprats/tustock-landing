@@ -1,12 +1,10 @@
-export const GET = async ({ cookies, redirect }) => {
-  // BORRAMOS LA COOKIE GLOBAL
-  cookies.delete('session', {
-    path: '/',
-    // ¡OJO! Esto debe coincidir con como la creaste en el login
-    domain: import.meta.env.PROD ? '.tustock.app' : undefined 
-  });
+export const POST = async ({ cookies, redirect }) => {
+  cookies.delete("session", { path: "/" });
+  return redirect("/login");
+};
 
-  // Redirigimos a la home pública (Landing)
-  const homeUrl = import.meta.env.PROD ? 'https://tustock.app/login' : '/login';
-  return redirect(homeUrl);
+// 🔥 AÑADIR ESTO: Para que funcione también si lo escribes en la barra o es un enlace
+export const GET = async ({ cookies, redirect }) => {
+  cookies.delete("session", { path: "/" });
+  return redirect("/login");
 };
