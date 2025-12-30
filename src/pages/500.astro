@@ -1,0 +1,16 @@
+---
+import ErrorTemplate from '~/components/common/ErrorTemplate.astro';
+
+interface Props {
+  error: unknown;
+}
+
+const { error } = Astro.props;
+
+// En desarrollo, mostramos el error real. En producción, un mensaje genérico por seguridad.
+const errorMessage = import.meta.env.DEV && error instanceof Error 
+  ? error.message 
+  : undefined;
+---
+
+<ErrorTemplate status={500} message={errorMessage} />

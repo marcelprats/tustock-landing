@@ -1,0 +1,75 @@
+---
+import Layout from '~/layouts/Layout.astro'; // Diseño Tienda (Limpio)
+import PageLayout from '~/layouts/PageLayout.astro'; // Diseño Landing (Con menús)
+import { getHomePermalink } from '~/utils/permalinks';
+
+interface Props {
+  status: 404 | 500;
+  message?: string;
+}
+
+const { status, message } = Astro.props;
+const { currentShop } = Astro.locals;
+const isStore = currentShop?.isStore;
+
+// Configuración según el tipo de error
+const config = {
+  404: {
+    title: isStore ? 'Producto no encontrado' : 'Página no encontrada',
+    subtitle: isStore 
+      ? `No encontramos lo que buscas en ${currentShop?.name}` 
+      : 'Esta página no existe en nuestro universo.',
+    icon: 'tabler:alert-circle'
+  },
+  500: {
+    title: 'Error del Sistema',
+    subtitle: isStore
+      ? 'Hubo un problema temporal en la tienda. Inténtalo de nuevo.'
+      : 'Nuestros servidores han tenido un problema inesperado.',
+    icon: 'tabler:server-off'
+  }
+};
+
+const currentConfig = config[status];
+const finalMessage = message || currentConfig.subtitle;
+
+const homeLink = isStore ? '/' : getHomePermalink();
+const homeText = isStore ? 'Volver a la tienda' : 'Ir al inicio';
+
+// Seleccionamos el Layout correcto dinámicamente
+const LayoutToUse = isStore ? Layout : PageLayout;
+const metadata = { title: `${status} - ${currentConfig.title}` };
+---
+
+<LayoutToUse metadata={metadata}>
+  <section class="flex items-center h-full p-16">
+    <div class="container flex flex-col items-center justify-center px-5 mx-auto my-8">
+      <div class="max-w-md text-center">
+        
+        {/* Icono gigante */}
+        <h2 class="mb-4 font-bold text-9xl text-gray-200 dark:text-slate-800 flex justify-center">
+           <span class="sr-only">Error</span>
+           {status}
+        </h2>
+
+        <p class="text-3xl font-semibold md:text-3xl text-gray-800 dark:text-slate-200 mb-4">
+          {currentConfig.title}
+        </p>
+        
+        <p class="text-lg text-gray-500 dark:text-slate-400 mb-8">
+          {finalMessage}
+        </p>
+
+        <a rel="noopener noreferrer" href={homeLink} class="btn bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto px-6 py-3 rounded-lg font-bold transition-all shadow-lg shadow-blue-500/30">
+          {homeText}
+        </a>
+
+        {isStore && (
+            <p class="text-xs text-gray-400 mt-8 border-t pt-4 border-gray-100 dark:border-slate-800">
+              ¿Eres el dueño? Revisa el panel de control o contacta con soporte si el error 500 persiste.
+            </p>
+        )}
+      </div>
+    </div>
+  </section>
+</LayoutToUse>
