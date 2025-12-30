@@ -1,106 +1,289 @@
 ---
 import Hero from '~/components/widgets/Hero.astro';
 import Features from '~/components/widgets/Features.astro';
+import Features2 from '~/components/widgets/Features2.astro';
 import Steps from '~/components/widgets/Steps.astro';
 import Content from '~/components/widgets/Content.astro';
 import Testimonials from '~/components/widgets/Testimonials.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import PricingSection from '~/components/widgets/PricingSection.astro'; // Asegúrate de tener este componente o usa Content
+import PricingSection from '~/components/widgets/PricingSection.astro'; 
+import Brands from '~/components/widgets/Brands.astro';
+import Stats from '~/components/widgets/Stats.astro';
 
 import { landingSections } from '~/navigation';
 ---
 
-<div class="relative max-w-7xl mx-auto px-4 sm:px-6 flex gap-8">
+<div class="relative overflow-hidden">
   
-  <aside class="hidden lg:block w-48 shrink-0 sticky top-24 h-fit py-8 self-start">
-    <nav class="flex flex-col gap-1 border-l-2 border-gray-200 dark:border-gray-800 pl-4" id="landing-menu">
+  <aside class="hidden xl:block fixed left-6 top-1/2 -translate-y-1/2 z-40">
+    <nav class="flex flex-col gap-3 p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-full shadow-2xl border border-white/20 dark:border-slate-700/30 transition-all duration-300" id="landing-menu">
       {landingSections.map(({ text, target }) => (
         <a 
           href={`#${target}`} 
-          class="text-sm font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors py-1 block nav-link border-l-2 border-transparent -ml-[18px] pl-4"
+          class="group flex items-center gap-3 p-2 transition-all nav-link rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50"
           data-target={target}
+          aria-label={text}
         >
-          {text}
+          <div class="w-2.5 h-2.5 rounded-full bg-slate-400/50 group-hover:bg-blue-600 group-[.active]:bg-blue-500 group-[.active]:shadow-[0_0_10px_rgba(59,130,246,0.6)] transition-all"></div>
+          
+          <span class="absolute left-14 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-50">
+            {text}
+          </span>
         </a>
       ))}
     </nav>
   </aside>
 
-  <div class="flex-1 min-w-0 pb-20">
+  <div class="flex-1 w-full">
     
-    <div id="hero" class="scroll-mt-24">
-      <Hero 
-        tagline="TuStock SaaS"
-        title="Gestiona tu negocio con Inteligencia Artificial"
-        subtitle="Todo lo que necesitas para vender, controlar stock y facturar en una sola plataforma."
-        actions={[{ text: 'Empezar Gratis', href: '/register', icon: 'tabler:rocket' }]}
-        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Hero' }}
-      />
+    <div id="hero">
+      <Hero
+        actions={[
+          {
+            variant: 'primary',
+            text: 'Empezar Gratis',
+            href: '/register',
+            icon: 'tabler:rocket',
+            class: 'shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300'
+          },
+          { text: 'Ver Demo en vivo', href: '#features' },
+        ]}
+        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Dashboard' }}
+      >
+        <fragment slot="title">
+          <span class="block text-blue-600 dark:text-blue-400 text-sm font-black uppercase tracking-[0.3em] mb-4">Sistema Operativo Retail</span>
+          Gestiona tu negocio con <span class="text-accent dark:text-white highlight">IA Privada</span>
+        </fragment>
+
+        <fragment slot="subtitle">
+          <span class="font-light text-lg">
+            La plataforma definitiva que une <b class="text-slate-900 dark:text-white">ERP</b>, <b class="text-slate-900 dark:text-white">TPV</b> e <b class="text-slate-900 dark:text-white">IA</b>. 
+            Controla stock, facturación y clientes desde la nube o en tu propio dispositivo local.
+          </span>
+        </fragment>
+      </Hero>
     </div>
 
-    <div id="features" class="scroll-mt-24">
+    <Stats
+      stats={[
+        { title: 'Productos Gestionados', amount: '+1.5M' },
+        { title: 'Tiendas Activas', amount: '2.4K' },
+        { title: 'Tiempo Ahorrado', amount: '40%' },
+        { title: 'IA Consultas/día', amount: '50K' },
+      ]}
+    />
+
+    <div id="features" class="scroll-mt-20">
       <Features
+        id="features"
+        tagline="Funcionalidades"
         title="Todo lo que necesitas"
-        subtitle="Herramientas potentes simplificadas para ti."
+        subtitle="Diseñado para sustituir a 5 herramientas diferentes."
         items={[
-          { title: 'Inventario IA', description: 'Predicción de stock inteligente.', icon: 'tabler:box' },
-          { title: 'Facturación', description: 'Genera facturas en un click.', icon: 'tabler:file-invoice' },
-          { title: 'TPV Web', description: 'Vende desde cualquier lugar.', icon: 'tabler:device-laptop' },
+          {
+            title: 'Inventario Predictivo',
+            description: 'La IA analiza tus ventas históricas y te avisa qué comprar antes de que se agote.',
+            icon: 'tabler:chart-arrows',
+          },
+          {
+            title: 'Facturación Legal',
+            description: 'Genera Facturas Simplificadas y Ordinarias que cumplen con la normativa vigente.',
+            icon: 'tabler:receipt-2',
+          },
+          {
+            title: 'TPV Universal',
+            description: 'Funciona en iPad, Android, PC o Mac. Escanea códigos de barras con la cámara.',
+            icon: 'tabler:device-tablet',
+          },
+          {
+            title: 'Multitienda Real',
+            description: 'Controla el stock de varios almacenes o tiendas físicas desde un solo panel.',
+            icon: 'tabler:building-warehouse',
+          },
+          {
+            title: 'CRM Clientes',
+            description: 'Guarda historial de compras y fideliza a tus clientes con descuentos automáticos.',
+            icon: 'tabler:users',
+          },
+          {
+            title: 'Reportes en Vivo',
+            description: 'Sabe cuánto ganas al segundo. Márgenes, beneficios e impuestos en tiempo real.',
+            icon: 'tabler:report-analytics',
+          },
         ]}
       />
     </div>
 
-    <div id="benefits" class="scroll-mt-24">
-      <Steps
-        title="Puesta en marcha en 3 pasos"
+    <div id="ai-core" class="scroll-mt-20">
+      <Content
+        isReversed
+        tagline="IA Generativa"
+        title="Tu nuevo empleado estrella"
         items={[
-          { title: 'Regístrate', description: 'Crea tu cuenta en 30 segundos.' },
-          { title: 'Sube tus productos', description: 'O impórtalos desde Excel.' },
-          { title: 'Empieza a vender', description: 'Tu tienda lista al instante.' },
+          {
+            title: 'Habla con tus datos',
+            description: 'Pregunta al chat: "¿Qué productos debo liquidar?" o "¿Cuál es mi mejor cliente?" y obtén respuestas inmediatas.',
+          },
+          {
+            title: 'Privacidad Total',
+            description: 'Si usas la App de Escritorio, la IA corre en tu GPU local. Tus datos nunca salen de tu ordenador.',
+          },
         ]}
         image={{
-            src: 'https://images.unsplash.com/photo-1616198814651-e71f960c3180?ixlib=rb-4.0.3&auto=format&fit=crop&w=987&q=80',
-            alt: 'Steps image',
+          src: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+          alt: 'AI Core',
+        }}
+      >
+        <fragment slot="content">
+          <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Potencia sin límites</h3>
+        </fragment>
+
+        <fragment slot="bg">
+          <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
+        </fragment>
+      </Content>
+    </div>
+
+    <div id="steps" class="scroll-mt-20">
+      <Steps
+        title="Lanza tu tienda hoy mismo"
+        items={[
+          {
+            title: 'Paso 1: <span class="font-medium">Crea tu Espacio</span>',
+            description: 'Regístrate gratis. Obtendrás tu propio subdominio (ej: fruteria.tustock.app).',
+            icon: 'tabler:user-plus',
+          },
+          {
+            title: 'Paso 2: <span class="font-medium">Importa el Catálogo</span>',
+            description: 'Sube un Excel o deja que la IA escanee tus facturas de compra.',
+            icon: 'tabler:file-spreadsheet',
+          },
+          {
+            title: 'Paso 3: <span class="font-medium">Empieza a Vender</span>',
+            description: 'Abre el TPV y empieza a cobrar. Todo se sincroniza al instante.',
+            icon: 'tabler:cash',
+          },
+        ]}
+        image={{
+          src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+          alt: 'Steps image',
         }}
       />
     </div>
 
-    <div id="testimonials" class="scroll-mt-24">
-      <Testimonials
-        title="Lo que dicen nuestros clientes"
-        testimonials={[
-          { testimonial: 'Ha cambiado mi forma de trabajar.', name: 'Paco', job: 'Frutería Paco' },
+    <div id="pricing" class="scroll-mt-20">
+      <PricingSection
+        title="Precios transparentes"
+        subtitle="Sin costes ocultos. Sin permanencia."
+        prices={[
+          {
+            title: 'Starter',
+            subtitle: 'Perfecto para empezar',
+            price: '0',
+            period: '/mes',
+            items: [
+              { description: 'Hasta 100 productos' },
+              { description: '1 Usuario' },
+              { description: 'TPV Web' },
+              { description: 'Soporte Comunitario' },
+            ],
+            callToAction: {
+              target: '_self',
+              text: 'Empezar Gratis',
+              href: '/register',
+            },
+          },
+          {
+            title: 'Pro',
+            subtitle: 'Negocios en marcha',
+            price: 29,
+            period: '/mes',
+            items: [
+              { description: 'Productos Ilimitados' },
+              { description: '3 Usuarios / Tiendas' },
+              { description: 'IA Avanzada (Cloud)' },
+              { description: 'Facturación PDF' },
+              { description: 'Soporte Prioritario' },
+            ],
+            callToAction: {
+              target: '_self',
+              text: 'Prueba 14 días',
+              href: '/register?plan=pro',
+            },
+            hasRibbon: true,
+            ribbonTitle: 'Recomendado',
+          },
+          {
+            title: 'Enterprise',
+            subtitle: 'Franquicias y Cadenas',
+            price: '99',
+            period: '/mes',
+            items: [
+              { description: 'Usuarios Ilimitados' },
+              { description: 'API REST Completa' },
+              { description: 'Servidor Dedicado' },
+              { description: 'IA Personalizada' },
+              { description: 'Manager Asignado' },
+            ],
+            callToAction: {
+              target: '_self',
+              text: 'Contactar Ventas',
+              href: '/contact',
+            },
+          },
         ]}
       />
     </div>
 
-    <div id="pricing" class="scroll-mt-24">
-       <Content title="Planes Flexibles" subtitle="Elige el que mejor se adapte a ti" /> 
-    </div>
-
-    <div id="faq" class="scroll-mt-24">
+    <div id="faq" class="scroll-mt-20">
       <FAQs
         title="Preguntas Frecuentes"
+        subtitle="Todo claro antes de empezar."
         items={[
-          { title: '¿Es gratis?', description: 'Sí, tenemos un plan gratuito para siempre.' },
+          {
+            title: '¿Qué hardware necesito?',
+            description: 'Ninguno especial. Funciona en cualquier ordenador, tablet o móvil con navegador. También es compatible con lectores de códigos USB estándar.',
+          },
+          {
+            title: '¿Cómo funciona la IA Local?',
+            description: 'Descargas nuestra App de Escritorio. El modelo de IA se ejecuta en tu tarjeta gráfica, por lo que no envías datos a la nube y funciona sin internet.',
+          },
+          {
+            title: '¿Puedo exportar mis datos?',
+            description: 'Siempre. Tus datos son tuyos. Puedes exportar todo a Excel/CSV en cualquier momento.',
+          },
         ]}
       />
     </div>
 
     <CallToAction
-      title="¿Listo para empezar?"
-      actions={[{ text: 'Crear Cuenta', href: '/register', icon: 'tabler:user-plus' }]}
-    />
+      actions={[
+        {
+          variant: 'primary',
+          text: 'Crear Tienda Ahora',
+          href: '/register',
+          target: '_self',
+          icon: 'tabler:rocket',
+        },
+      ]}
+    >
+      <fragment slot="title">
+        TuStock
+      </fragment>
+
+      <fragment slot="subtitle">
+        La herramienta que usan los negocios que crecen.
+      </fragment>
+    </CallToAction>
 
   </div>
 </div>
 
 <script>
-  // Configuración del observador
   const observerOptions = {
     root: null,
-    rootMargin: '-20% 0px -60% 0px', // Ajusta la zona activa de detección
+    rootMargin: '-20% 0px -60% 0px',
     threshold: 0
   };
 
@@ -109,26 +292,21 @@ import { landingSections } from '~/navigation';
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute('id');
         
-        // 1. Desactivar todos
+        // Reset
         document.querySelectorAll('.nav-link').forEach(link => {
-          link.classList.remove('text-blue-600', 'font-bold', 'border-blue-600', 'dark:text-blue-400');
-          link.classList.add('text-gray-500', 'border-transparent');
+          link.classList.remove('active'); 
         });
         
-        // 2. Activar el actual
+        // Activar
         const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
         if (activeLink) {
-          activeLink.classList.remove('text-gray-500', 'border-transparent');
-          activeLink.classList.add('text-blue-600', 'font-bold', 'border-blue-600', 'dark:text-blue-400'); 
+          activeLink.classList.add('active');
         }
       }
     });
   }, observerOptions);
 
-  // Observar todas las secciones definidas en navigation.ts
-  const sectionIds = ['hero', 'features', 'benefits', 'testimonials', 'pricing', 'faq'];
-  sectionIds.forEach((id) => {
-    const section = document.getElementById(id);
-    if (section) observer.observe(section);
+  document.querySelectorAll('#hero, #features, #ai-core, #steps, #pricing, #faq').forEach((section) => {
+    observer.observe(section);
   });
 </script>
