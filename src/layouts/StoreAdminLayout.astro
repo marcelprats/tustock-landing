@@ -1,0 +1,187 @@
+---
+import CustomStyles from "~/components/CustomStyles.astro";
+import Favicons from "~/components/Favicons.astro";
+import Metadata from "~/components/common/Metadata.astro";
+import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
+import BasicScripts from "~/components/common/BasicScripts.astro";
+import StoreSwitcher from '~/components/app/StoreSwitcher.astro';
+import ServerStatus from '~/components/app/dashboard/ServerStatus.astro';
+import { decryptLicense } from '~/utils/crypto';
+
+// Recibimos parámetros
+const { tenant, metadata = {} } = Astro.props;
+
+// 1. OBTENER DATOS (Igual que tenías)
+const session = Astro.cookies.get('session');
+const userId = session?.value;
+const env = Astro.locals.runtime?.env;
+const db = env?.DB;
+
+let tenantData = null;
+let userRole = null;
+let error = null;
+let isOnline = false;
+let containerClass = "bg-white dark:bg-slate-800";
+let statusBadge = "";
+let lastUpdateText = "---";
+
+if (userId && db && tenant) {
+  try {
+    const membership = await db.prepare(`
+      SELECT m.role, t.id, t.name, t.plan_type, t.license_encrypted, t.last_heartbeat, 
+             t.sales_today, t.data_updated_at
+      FROM memberships m
+      JOIN tenants t ON m.tenant_id = t.id
+      WHERE m.user_id = ? AND t.slug = ?
+    `).bind(userId, tenant).first();
+
+    if (membership) {
+      let realKey = "No disponible";
+      try {
+        if (membership.license_encrypted && env.MASTER_KEY) {
+            realKey = decryptLicense(membership.license_encrypted, env.MASTER_KEY);
+        }
+      } catch (err) {
+        console.error("Error desencriptando:", err);
+        realKey = "Error de clave";
+      }
+
+      tenantData = {
+        id: membership.id,
+        name: membership.name,
+        plan: membership.plan_type,
+        slug: tenant,
+        licenseKey: realKey,        
+        lastHeartbeat: membership.last_heartbeat,
+        salesToday: membership.sales_today || 0,
+        dataUpdatedAt: membership.data_updated_at
+      };
+      userRole = membership.role;
+
+      const now = Date.now();
+      isOnline = tenantData.lastHeartbeat && (now - tenantData.lastHeartbeat) < 120000;
+
+      containerClass = isOnline 
+        ? "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700" 
+        : "bg-gray-100 dark:bg-slate-900 border-gray-200 dark:border-slate-800 opacity-60 grayscale";
+
+      statusBadge = isOnline
+        ? '<span class="text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE</span>'
+        : '<span class="text-gray-500 bg-gray-200 dark:bg-slate-700 px-2 py-0.5 rounded text-xs font-bold">OFFLINE</span>';
+
+      lastUpdateText = tenantData.dataUpdatedAt 
+        ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', day: 'numeric', month: 'numeric'})
+        : '---';
+
+    } else {
+      error = "No tienes acceso a esta tienda o no existe.";
+    }
+  } catch (e) {
+    console.error("Error Dashboard:", e);
+    error = "Error de conexión con la base de datos.";
+  }
+}
+---
+
+<!doctype html>
+<html lang="es" class="motion-safe:scroll-smooth" dir="ltr">
+  <head>
+    <Metadata {...metadata} />
+    <CustomStyles />
+    <Favicons />
+    <ApplyColorMode />
+  </head>
+
+  <body class="antialiased text-default bg-gray-50 dark:bg-slate-900 tracking-tight h-screen overflow-hidden">
+    
+    {/* CASO ERROR */}
+    {error ? (
+        <div class="flex flex-col items-center justify-center h-full">
+            <h1 class="text-4xl font-bold text-red-500 mb-4">Acceso Denegado 🔒</h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-8">{error}</p>
+            <a href="/" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Volver
+            </a>
+        </div>
+    ) : (
+        /* CASO ÉXITO: EL DASHBOARD LIMPIO */
+        <div class="flex h-full w-full">
+            
+            {/* SIDEBAR - Aquí puedes personalizar el menú para la tienda */}
+            <aside class="w-64 flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col hidden md:flex">
+                <div class="h-16 flex items-center px-6 border-b border-gray-100 dark:border-slate-800">
+                    <span class="font-bold text-xl tracking-tight">TuStock <span class="text-blue-600">Store</span></span>
+                </div>
+
+                <div class="p-4">
+                    <StoreSwitcher currentTenant={tenantData.slug} />
+                </div>
+
+                <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                    <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Gestión</p>
+                    
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        Resumen
+                    </a>
+                    
+                    {/* Aquí pones los links específicos para el dueño de la tienda */}
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition">
+                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                         Inventario
+                    </a>
+                </nav>
+
+                <div class="p-4 border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
+                     <div class="flex items-center gap-3">
+                         <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                             {userId.slice(0,2).toUpperCase()}
+                         </div>
+                         <div class="overflow-hidden">
+                             <p class="text-sm font-bold truncate">Usuario</p>
+                             <a href="/api/logout" class="text-xs text-red-500 hover:underline">Cerrar Sesión</a>
+                         </div>
+                     </div>
+                </div>
+            </aside>
+
+            {/* ZONA PRINCIPAL */}
+            <main class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 dark:bg-slate-900 relative">
+                
+                {/* HEADER MÓVIL / TITULO */}
+                <header class="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 flex-shrink-0">
+                    <h1 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        {tenantData.name}
+                        {/* BADGE DE ONLINE/OFFLINE */}
+                        <div set:html={statusBadge} />
+                    </h1>
+                    <div class="flex items-center gap-4">
+                        <a href="/" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                            Ver Tienda <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </header>
+
+                {/* CONTENIDO SCROLLABLE (SLOT) */}
+                <div class="flex-1 overflow-y-auto p-6">
+                    
+                    {/* AVISO OFFLINE */}
+                    {!isOnline && (
+                        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-r">
+                             <p class="text-sm text-red-700 dark:text-red-200">
+                                <span class="font-bold">Tienda desconectada.</span> Mostrando datos del {lastUpdateText}.
+                             </p>
+                        </div>
+                    )}
+                    
+                    {/* AQUÍ SE INYECTA EL CONTENIDO DE LA PÁGINA */}
+                    <slot />
+
+                </div>
+            </main>
+        </div>
+    )}
+
+    <BasicScripts />
+  </body>
+</html>

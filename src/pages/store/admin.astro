@@ -1,40 +1,28 @@
 ---
-import AdminLayout from '~/layouts/AdminLayout.astro';
-// Asumiendo que AppDashboard es tu panel super completo
-import AppDashboard from '~/components/app/AppDashboard.astro'; 
+import StoreAdminLayout from '~/layouts/StoreAdminLayout.astro'; // <--- USAMOS EL NUEVO
+import AppDashboard from '~/components/app/AppDashboard.astro'; // Tu componente de gráficas
 
 const { currentShop } = Astro.locals;
 const session = Astro.cookies.get('session');
 
-// 1. LOGIN WALL
-if (!session || !session.value) {
-  // Redirigimos al login central, pero con return_to a ESTE subdominio
-  const returnUrl = `https://${currentShop.slug}.tustock.app/admin`;
-  return Astro.redirect(`/login?return_to=${encodeURIComponent(returnUrl)}`);
+// Validación de sesión básica (el resto lo hace el layout)
+if (!session) {
+  return Astro.redirect(`/login?return_to=${encodeURIComponent(Astro.request.url)}`);
 }
 
-// 2. VERIFICACIÓN DE PROPIEDAD (SEGURIDAD)
-const userId = session.value;
-const db = Astro.locals.runtime?.env?.DB;
-let isOwner = false;
-
-if (db) {
-  const membership = await db.prepare(`
-    SELECT role FROM memberships m JOIN tenants t ON m.tenant_id = t.id
-    WHERE m.user_id = ? AND t.slug = ?
-  `).bind(userId, currentShop.slug).first();
-  
-  if (membership) isOwner = true;
-}
-
-if (!isOwner) {
-  return new Response("No tienes permiso para gestionar esta tienda.", { status: 403 });
-}
-
-// 3. DASHBOARD REAL
-const metadata = { title: `Gestión - ${currentShop.name}` };
+const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
 
-<AdminLayout metadata={metadata}>
-  <AppDashboard tenantId={currentShop.slug} />
-</AdminLayout>
+{/* Pasamos el tenant slug al layout para que haga sus queries */}
+<StoreAdminLayout tenant={currentShop.slug} metadata={metadata}>
+  
+  {/* Aquí va el contenido central del Dashboard */}
+  <div class="grid grid-cols-1 gap-6">
+      
+      {/* Puedes meter aquí tu AppDashboard simplificado si quieres reutilizar sus widgets */}
+      {/* Ojo: AppDashboard ya no debería tener Layout dentro, solo divs */}
+      <AppDashboard tenantId={currentShop.slug} />
+
+  </div>
+
+</StoreAdminLayout>
