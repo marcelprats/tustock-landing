@@ -13,7 +13,6 @@ let tenantSlug = '';
 
 // Detectar si estamos en un subdominio (Tienda) o en la Landing
 if (import.meta.env.PROD) {
-  // En producción: cualquier cosa que no sea tustock.app es una tienda
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
@@ -32,69 +31,45 @@ if (import.meta.env.PROD) {
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
-// Si intenta entrar a una tienda (subdominio) y NO está logueado -> Redirigir al Login
 if (isSubdomain && !isLoggedIn) {
   const loginUrl = import.meta.env.PROD 
     ? `https://tustock.app/login?return_to=${tenantSlug}` 
     : `/login?return_to=${tenantSlug}`;
-  
   return Astro.redirect(loginUrl);
 }
 
 // ==============================================
 // 3. DATOS EN TIEMPO REAL (Solo para Landing)
 // ==============================================
-// Valores por defecto (Fallback visual)
 let shopCount = "10+";
 let userCount = "50+";
 
-// Solo gastamos recursos consultando la BBDD si estamos en la Landing Page
 if (!isSubdomain) {
   const db = Astro.locals.runtime?.env?.DB;
-  
   if (db) {
     try {
-      // Consultas SQL directas a D1 (Súper rápidas)
       const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
       const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
       
-      // Si tenemos datos, actualizamos las variables
-      // (Puedes poner una lógica: si es < 5 mostrar "Early Access", si no, el número)
-      if (shops && typeof shops.total === 'number') {
-         shopCount = shops.total.toString();
-      }
-      
-      if (users && typeof users.total === 'number') {
-         userCount = users.total.toString();
-      }
+      if (shops && typeof shops.total === 'number') shopCount = shops.total.toString();
+      if (users && typeof users.total === 'number') userCount = users.total.toString();
 
     } catch(e) {
       console.error("⚠️ Error obteniendo stats de D1:", e);
-      // Fallback silencioso: se quedan los valores por defecto
     }
   }
 }
 
-// Metadatos SEO para la Landing
 const metadata = {
-  title: 'TuStock - Gestión de Inventario con IA Local',
+  title: 'TuStock - Gestión Fiscal y de Stock con IA',
   ignoreTitleTemplate: true,
 };
 ---
 
-{ 
-  /* ============================================== */
-  /* RENDERIZADO CONDICIONAL t                       */
-  /* ============================================== */
-  
+{
   isSubdomain && isLoggedIn ? (
-    // CASO A: El usuario está en su tienda (fruteria.tustock.app) y logueado
-    // Renderizamos la App privada
     <AppDashboard tenant={tenantSlug} />
-    
   ) : (
-    // CASO B: Estamos en la Landing Page (tustock.app)
-    // Renderizamos la web pública con los datos reales
     <Layout metadata={metadata}>
       <MainHome shopCount={shopCount} userCount={userCount} />
     </Layout>

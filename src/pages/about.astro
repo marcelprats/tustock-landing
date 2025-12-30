@@ -7,18 +7,14 @@ import Stats from '~/components/widgets/Stats.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 
 // 🔥 1. CONEXIÓN A BBDD REAL (D1)
-// Sacamos los datos reales. Nada de mentiras.
 const db = Astro.locals.runtime?.env?.DB;
 let shopCount = 0;
 let userCount = 0;
 
 if (db) {
   try {
-    // Contamos tiendas creadas
     const shops = await db.prepare("SELECT COUNT(*) as total FROM tenants").first();
-    // Contamos usuarios registrados
     const users = await db.prepare("SELECT COUNT(*) as total FROM users").first();
-    
     shopCount = shops.total || 0;
     userCount = users.total || 0;
   } catch (e) {
@@ -35,20 +31,20 @@ const metadata = {
   
   <HeroText
     tagline="Nuestra Historia"
-    title="Cuando las Finanzas conocen a la Ingeniería"
+    title="Donde la Fiscalidad se une con la Inteligencia Artificial"
   >
     <fragment slot="subtitle">
-      No somos una gran corporación. Somos <span class="font-bold text-blue-600 dark:text-blue-400">un Informático y un Contable</span> que se cansaron de ver cómo los pequeños negocios perdían dinero por falta de herramientas.
+      No somos una gran corporación. Somos <span class="font-bold text-blue-600 dark:text-blue-400">un Equipo Técnico y Financiero</span> que se cansó de ver cómo los pequeños negocios perdían dinero por el caos administrativo y la falta de tecnología.
     </fragment>
   </HeroText>
 
   <Stats
     title="Transparencia Radical"
-    subtitle="Acabamos de empezar, pero vamos muy en serio. Estos son nuestros números reales en tiempo real:"
+    subtitle="Números reales en tiempo real desde nuestra base de datos:"
     stats={[
       { title: 'Tiendas Activas', amount: `${shopCount}` },
       { title: 'Usuarios', amount: `${userCount}` },
-      { title: 'Lanzamiento', amount: '2025' },
+      { title: 'Sede', amount: 'Barcelona' },
       { title: 'Compromiso', amount: '100%' },
     ]}
   />
@@ -59,24 +55,24 @@ const metadata = {
     items={[
       {
         title: 'El Cerebro Financiero',
-        description: 'Años viendo balances que no cuadran y stock perdido. La visión contable asegura que TuStock no solo gestione productos, sino que vigile la rentabilidad de tu negocio al céntimo.',
+        description: 'Experiencia real en auditoría y gestión fiscal. Conocemos el dolor de la Factura Electrónica que viene y el caos de los albaranes perdidos. TuStock nace para que Hacienda no sea un problema.',
       },
       {
         title: 'El Cerebro Tecnológico',
-        description: 'Obsesionado con la eficiencia y la seguridad. La visión técnica asegura que el software vuele, no falle nunca y que tus datos estén blindados.',
+        description: 'Obsesión por la automatización. ¿Por qué picar datos a mano si una IA puede leer una foto de un albarán? Creamos tecnología que te devuelve horas de vida.',
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1552581234-26160f608093?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      src: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
       alt: 'Meeting Tech Finance',
     }}
   >
     <fragment slot="content">
       <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">¿Por qué TuStock?</h3>
       <p>
-        Porque vimos un hueco enorme. O usabas un Excel propenso a errores, o pagabas una fortuna por un ERP complejo.
+        Vimos un hueco enorme. O usabas un Excel propenso a errores, o pagabas una fortuna por un ERP complejo que nadie sabe usar.
         <br /><br />
-        Decidimos juntar nuestros dos mundos: <b>El rigor de la contabilidad financiera con la potencia de la Inteligencia Artificial moderna.</b>
+        Decidimos juntar nuestros dos mundos: <b>El rigor de la ley fiscal española con la potencia de la Inteligencia Artificial generativa.</b>
       </p>
     </fragment>
 
@@ -86,43 +82,43 @@ const metadata = {
   </Content>
 
   <Features3
-    title="Nuestros principios"
-    subtitle="Lo que nos define como fundadores."
+    title="Más que un simple inventario"
+    subtitle="Construimos pensando en los problemas de hoy y las leyes de mañana."
     columns={3}
     items={[
       {
-        title: 'Verdad ante todo',
-        description: 'No vendemos humo. Si el software tiene un fallo, te lo decimos y lo arreglamos. Sin letras pequeñas.',
-        icon: 'tabler:bulb',
+        title: 'Cumplimiento Legal 2026',
+        description: 'España obligará a usar Factura Electrónica B2B. TuStock ya está preparado para generar y firmar digitalmente tus facturas sin que tengas que hacer nada.',
+        icon: 'tabler:gavel',
       },
       {
-        title: 'Dato mata relato',
-        description: 'Tus decisiones de negocio deben basarse en números reales, no en intuiciones. Por eso la IA analiza tus datos.',
-        icon: 'tabler:chart-dots',
+        title: 'IA de Stock (Ya disponible)',
+        description: 'Nuestro bot actual ya te permite consultar tu stock en lenguaje natural. "¿Cuántas manzanas quedan?" y te responde al instante.',
+        icon: 'tabler:robot',
       },
       {
-        title: 'Cercanía',
-        description: 'Al ser fundadores técnicos y financieros, entendemos tus problemas reales. Hablas con expertos, no con teleoperadores.',
-        icon: 'tabler:users',
+        title: 'Digitalización de Albaranes',
+        description: 'Olvídate de picar datos. A futuro, sacarás una foto al albarán de tu proveedor y TuStock actualizará el inventario solo.',
+        icon: 'tabler:scan',
       },
     ]}
   />
 
   <Steps2
     title="Nuestro camino"
-    subtitle="Sin atajos."
+    subtitle="Sin atajos, construyendo valor real."
     items={[
       {
-        title: 'Enero 2025: El inicio',
-        description: 'Lanzamos la primera versión pública. Dos personas, dos portátiles y una misión clara: salvar el retail.',
+        title: '2025: Nace el proyecto',
+        description: 'Unimos fuerzas para crear el MVP. Lanzamos la versión web para ayudar a los primeros comercios a digitalizarse.',
       },
       {
-        title: 'Actualidad',
-        description: 'Trabajando codo con codo con los primeros clientes (Early Adopters) para pulir el producto perfecto.',
+        title: 'Actualidad: Desarrollo Web & App',
+        description: 'Estamos perfeccionando la plataforma con feedback real. Implementando el motor de IA local y puliendo la experiencia de usuario.',
       },
       {
-        title: 'Futuro Próximo',
-        description: 'Integración total de IA Local para predecir tus ventas antes de que ocurran.',
+        title: 'Futuro: Ecosistema Total',
+        description: 'IA Predictiva de compras, subida automática de facturas a Hacienda (VeriFactu) y App nativa con escáner de albaranes.',
       },
     ]}
   />
