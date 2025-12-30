@@ -1,15 +1,31 @@
-import { getPermalink } from './utils/permalinks';
+import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
 
 // src/navigation.js
 
+// 1. MENÚ SUPERIOR (Páginas Reales)
 export const headerData = {
   links: [
     { text: 'Inicio', href: '/' },
-    { text: 'Características', href: '/#features' }, // El ancla que añadiremos abajo
-    { text: 'Precios', href: '/#pricing' },          // El ancla de precios
-    { text: 'Contacto', href: 'mailto:hola@tustock.app' },
+    { text: 'Precios', href: '/pricing' },
+    { text: 'Nosotros', href: '/about' },
+    { text: 'Contacto', href: '/contact' },
+    // { text: 'Blog', href: getBlogPermalink() },
+  ],
+  actions: [
+    { text: 'Acceder', href: '/login', type: 'ghost' },
+    { text: 'Crear Tienda', href: '/register', type: 'primary' },
   ],
 };
+
+// 2. MENÚ LATERAL (Anclas de la Landing) -> NUEVO
+export const landingSections = [
+  { text: 'Inicio', target: 'hero' },
+  { text: 'Características', target: 'features' },
+  { text: 'Ventajas', target: 'benefits' }, // Steps
+  { text: 'Testimonios', target: 'testimonials' },
+  { text: 'Precios', target: 'pricing' },
+  { text: 'FAQ', target: 'faq' },
+];
 
 export const footerData = {
   links: [

@@ -1,8 +1,6 @@
 ---
 import '~/assets/styles/tailwind.css';
-
 import { I18N } from 'astrowind:config';
-
 import CommonMeta from '~/components/common/CommonMeta.astro';
 import Favicons from '~/components/Favicons.astro';
 import CustomStyles from '~/components/CustomStyles.astro';
@@ -11,10 +9,7 @@ import Metadata from '~/components/common/Metadata.astro';
 import SiteVerification from '~/components/common/SiteVerification.astro';
 import Analytics from '~/components/common/Analytics.astro';
 import BasicScripts from '~/components/common/BasicScripts.astro';
-
-// Comment the line below to disable View Transitions
 import { ClientRouter } from 'astro:transitions';
-
 import type { MetaData as MetaDataType } from '~/types';
 
 export interface Props {
@@ -23,6 +18,9 @@ export interface Props {
 
 const { metadata = {} } = Astro.props;
 const { language, textDirection } = I18N;
+
+// 🔥 RECUPERAMOS LOS DATOS DE LA TIENDA (DEL MIDDLEWARE)
+const currentShop = Astro.locals.currentShop;
 ---
 
 <!doctype html>
@@ -35,13 +33,44 @@ const { language, textDirection } = I18N;
     <Metadata {...metadata} />
     <SiteVerification />
     <Analytics />
-
-    <!-- Comment the line below to disable View Transitions -->
     <ClientRouter fallback="swap" />
   </head>
 
   <body class="antialiased text-default bg-page tracking-tight">
-    <slot />
+    
+    {currentShop ? (
+      /* ========================================== */
+      /* 🛒 DISEÑO MODO TIENDA (DINÁMICO)           */
+      /* ========================================== */
+      <div class="min-h-screen bg-gray-50 text-gray-900">
+        <header class="bg-white shadow-sm p-4 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold uppercase tracking-wider">{currentShop.name}</h1>
+                <div class="flex items-center gap-2">
+                   {currentShop.plan === 'PRO' && <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">PRO</span>}
+                   <div class="text-xs font-bold bg-black text-white px-3 py-1 rounded-full">
+                      POWERED BY TUSTOCK
+                   </div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="max-w-7xl mx-auto p-6">
+            <div class="bg-white rounded-2xl p-10 shadow-lg text-center">
+               <h2 class="text-3xl font-bold mb-4">Bienvenido a {currentShop.name}</h2>
+               <p class="text-gray-600">Esta tienda está alojada en TuStock Platform.</p>
+               <slot /> 
+            </div>
+        </main>
+      </div>
+
+    ) : (
+      /* ========================================== */
+      /* 🚀 DISEÑO MODO LANDING (NORMAL)            */
+      /* ========================================== */
+      /* Renderizamos el contenido normal de AstroWind */
+      <slot />
+    )}
 
     <BasicScripts />
   </body>

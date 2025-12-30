@@ -1,101 +1,128 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
-import Hero2 from '~/components/widgets/Hero2.astro';
-import Features2 from '~/components/widgets/Features2.astro';
-import Stats from '~/components/widgets/Stats.astro';
-import Brands from '~/components/widgets/Brands.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import Features from '~/components/widgets/Features.astro';
+import Steps from '~/components/widgets/Steps.astro';
+import Content from '~/components/widgets/Content.astro';
+import Testimonials from '~/components/widgets/Testimonials.astro';
+import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import PricingSection from '~/components/widgets/PricingSection.astro'; 
+import PricingSection from '~/components/widgets/PricingSection.astro'; // Asegúrate de importar el tuyo
 
-const metadata = {
-  title: 'TuStock — El ERP Híbrido con IA que se adapta a tu escala',
-  ignoreTitleTemplate: true,
-};
+// Importamos la config del menú lateral
+import { landingSections } from '~/navigation';
 ---
 
-<Layout metadata={metadata}>
+<div class="relative max-w-7xl mx-auto px-4 sm:px-6 flex gap-8">
   
-  <Hero2
-    tagline="Gestión de Inventario Inteligente"
-    actions={[
-      { variant: 'primary', text: 'Empezar Gratis', href: '/pricing', icon: 'tabler:arrow-down' },
-      { text: 'Ver tecnología', href: '#features' },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80',
-      alt: 'TuStock Dashboard IA',
-    }}
-  >
-    <Fragment slot="title">
-      La potencia de la <span class="text-blue-600 dark:text-blue-400 highlight">IA</span> unida a la seguridad <span class="text-accent dark:text-purple-400 highlight">Local</span>
-    </Fragment>
+  <aside class="hidden lg:block w-48 shrink-0 sticky top-24 h-fit py-8">
+    <nav class="flex flex-col gap-1 border-l-2 border-gray-200 dark:border-gray-800 pl-4" id="landing-menu">
+      {landingSections.map(({ text, target }) => (
+        <a 
+          href={`#${target}`} 
+          class="text-sm font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors py-1 block nav-link"
+          data-target={target}
+        >
+          {text}
+        </a>
+      ))}
+    </nav>
+  </aside>
+
+  <div class="flex-1 min-w-0 pb-20">
     
-    <Fragment slot="subtitle">
-      El único sistema del mercado que escala desde una pequeña tienda de barrio hasta una multinacional logística sin cambiar de plataforma.
-    </Fragment>
-  </Hero2>
+    <div id="hero" class="scroll-mt-24">
+      <Hero 
+        tagline="TuStock SaaS"
+        title="Gestiona tu negocio con Inteligencia Artificial"
+        subtitle="Todo lo que necesitas para vender, controlar stock y facturar en una sola plataforma."
+        actions={[{ text: 'Empezar Gratis', href: '/register', icon: 'tabler:rocket' }]}
+        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Hero' }}
+      />
+    </div>
 
-  <Brands
-    title="Plataforma construida sobre gigantes"
-    icons={[]} 
-    images={[
-      { src: 'https://cdn.worldvectorlogo.com/logos/docker.svg', alt: 'Docker' },
-      { src: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg', alt: 'Cloudflare' },
-      { src: 'https://cdn.worldvectorlogo.com/logos/react-2.svg', alt: 'React' },
-      { src: 'https://cdn.worldvectorlogo.com/logos/stripe-4.svg', alt: 'Stripe' },
-    ]}
-  />
+    <div id="features" class="scroll-mt-24">
+      <Features
+        title="Todo lo que necesitas"
+        subtitle="Herramientas potentes simplificadas para ti."
+        items={[
+          { title: 'Inventario IA', description: 'Predicción de stock inteligente.', icon: 'tabler:box' },
+          { title: 'Facturación', description: 'Genera facturas en un click.', icon: 'tabler:file-invoice' },
+          { title: 'TPV Web', description: 'Vende desde cualquier lugar.', icon: 'tabler:device-laptop' },
+        ]}
+      />
+    </div>
 
-  <div id="features">
-    <Features2
-      title="¿Por qué TuStock?"
-      subtitle="La solución híbrida que lo cambia todo."
-      items={[
-        {
-          title: 'IA en tu bolsillo',
-          description: 'Escanea productos y facturas con la cámara del móvil. Nuestra IA reconoce los datos automáticamente.',
-          icon: 'tabler:scan',
-        },
-        {
-          title: 'Funciona Offline',
-          description: 'Si se cae internet, tu tienda sigue vendiendo. Los datos se sincronizan automáticamente al volver.',
-          icon: 'tabler:wifi-off',
-        },
-        {
-          title: 'Multitienda Real',
-          description: 'Gestiona N negocios desde un solo panel. Cambia de la ferretería a la cafetería en un clic.',
-          icon: 'tabler:building-store',
-        },
-      ]}
+    <div id="benefits" class="scroll-mt-24">
+      <Steps
+        title="Puesta en marcha en 3 pasos"
+        items={[
+          { title: 'Regístrate', description: 'Crea tu cuenta en 30 segundos.' },
+          { title: 'Sube tus productos', description: 'O impórtalos desde Excel.' },
+          { title: 'Empieza a vender', description: 'Tu tienda lista al instante.' },
+        ]}
+      />
+    </div>
+
+    <div id="testimonials" class="scroll-mt-24">
+      <Testimonials
+        title="Lo que dicen nuestros clientes"
+        testimonials={[
+          { testimonial: 'Ha cambiado mi forma de trabajar.', name: 'Paco', job: 'Frutería Paco' },
+        ]}
+      />
+    </div>
+
+    <div id="pricing" class="scroll-mt-24">
+       <Content title="Planes Flexibles" subtitle="Elige el que mejor se adapte a ti" /> 
+    </div>
+
+    <div id="faq" class="scroll-mt-24">
+      <FAQs
+        title="Preguntas Frecuentes"
+        items={[
+          { title: '¿Es gratis?', description: 'Sí, tenemos un plan gratuito para siempre.' },
+        ]}
+      />
+    </div>
+
+    <CallToAction
+      title="¿Listo para empezar?"
+      actions={[{ text: 'Crear Cuenta', href: '/register', icon: 'tabler:user-plus' }]}
     />
+
   </div>
+</div>
 
-  {/* SECCIÓN DE PRECIOS RESUMIDA (Con link a la página completa) */}
-  <PricingSection id="pricing" showLink={true} />
+<script>
+  const observerOptions = {
+    root: null,
+    rootMargin: '-20% 0px -60% 0px', // Ajusta cuándo se activa (cuando está arriba)
+    threshold: 0
+  };
 
-  <Stats
-    stats={[
-      { title: 'Peticiones API procesadas', amount: '+1M' },
-      { title: 'Nodos Locales Activos', amount: '+500' },
-      { title: 'Tiempo de respuesta (Local)', amount: '<10ms' },
-    ]}
-  />
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        // Quitar activo a todos
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('text-blue-600', 'font-bold', 'border-l-2', 'border-blue-600', '-ml-[18px]', 'pl-[14px]');
+          link.classList.add('text-gray-500');
+        });
+        
+        // Activar el actual
+        const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
+        if (activeLink) {
+          activeLink.classList.remove('text-gray-500');
+          // Añadimos estilos de "activo" (puedes personalizarlos)
+          activeLink.classList.add('text-blue-600', 'font-bold', 'border-l-2', 'border-blue-600', '-ml-[18px]', 'pl-[14px]'); 
+        }
+      }
+    });
+  }, observerOptions);
 
-  <CallToAction
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Empezar ahora',
-        href: '/register',
-        icon: 'tabler:rocket',
-      },
-    ]}
-  >
-    <Fragment slot="title">
-      ¿Preparado para escalar?
-    </Fragment>
-    <Fragment slot="subtitle">
-      Tanto si vendes tornillos en el barrio como si distribuyes palets en Europa, TuStock es tu motor.
-    </Fragment>
-  </CallToAction>
-</Layout>
+  // Observar todas las secciones
+  document.querySelectorAll('#hero, #features, #benefits, #testimonials, #pricing, #faq').forEach((section) => {
+    observer.observe(section);
+  });
+</script>
