@@ -1,0 +1,60 @@
+---
+import CustomStyles from "~/components/CustomStyles.astro";
+import Favicons from "~/components/Favicons.astro";
+import Metadata from "~/components/common/Metadata.astro";
+import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
+import BasicScripts from "~/components/common/BasicScripts.astro";
+
+const { metadata = {} } = Astro.props;
+const { currentShop } = Astro.locals;
+---
+
+<!doctype html>
+<html lang="es" class="motion-safe:scroll-smooth" dir="ltr">
+  <head>
+    <Metadata {...metadata} />
+    <CustomStyles />
+    <Favicons />
+    <ApplyColorMode />
+  </head>
+
+  <body class="antialiased text-default bg-gray-50 dark:bg-slate-900 tracking-tight">
+    
+    <nav class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
+      
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 group">
+           <div class="bg-blue-600 text-white p-1.5 rounded-lg group-hover:bg-blue-700 transition">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+           </div>
+           <div class="leading-tight">
+             <h1 class="font-bold text-gray-900 dark:text-white text-sm">{currentShop?.name || 'Mi Tienda'}</h1>
+             <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Panel de Control</span>
+           </div>
+        </a>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <a href="/" target="_blank" class="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          Ver Tienda Online
+        </a>
+        
+        <div class="h-6 w-px bg-gray-200 dark:bg-slate-700 mx-2"></div>
+
+        <a href="/settings" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600">Ajustes</a>
+        
+        <a href="/api/logout" class="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-100 dark:hover:bg-red-900/30 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Salir
+        </a>
+      </div>
+    </nav>
+
+    <main class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <slot />
+    </main>
+
+    <BasicScripts />
+  </body>
+</html>
