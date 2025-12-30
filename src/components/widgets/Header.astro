@@ -52,19 +52,18 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
 // --- 🔥 LÓGICA DE SESIÓN ---
 const session = Astro.cookies.get('session');
 const isLoggedIn = !!session?.value;
-
-// Simulación de nombre de usuario (en un caso real lo sacarías de la DB o el JWT)
 const userName = "Mi Cuenta"; 
 ---
 
 <header
   class:list={[
     { sticky: isSticky, relative: !isSticky, dark: isDark },
-    'top-0 z-40 flex-none mx-auto w-full border-b border-gray-50/0 transition-all ease-in-out',
+    'top-0 z-40 flex-none mx-auto w-full transition-all ease-in-out',
   ]}
   {...id ? { id } : {}}
 >
-  <div class="absolute inset-0"></div>
+  <div class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800"></div>
+  
   <div
     class:list={[
       'relative text-default py-3 px-3 md:px-6 mx-auto w-full md:flex md:justify-between',
@@ -93,16 +92,16 @@ const userName = "Mi Cuenta";
             <li class={links?.length ? 'dropdown' : ''}>
               {links?.length ? (
                 <>
-                  <button class="hover:text-link dark:hover:text-white px-4 py-3 flex items-center">
+                  <button class="hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors">
                     {text} <Icon name="tabler:chevron-down" class="w-3.5 h-3.5 ml-0.5 rtl:mr-0.5 hidden md:inline" />
                   </button>
-                  <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl">
+                  <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl border border-gray-100 dark:border-gray-700">
                     {links.map(({ text: text2, href: href2 }) => (
                       <li>
                         <a
                           class:list={[
-                            'first:rounded-t last:rounded-b md:hover:bg-gray-100 hover:text-link dark:hover:text-white dark:hover:bg-gray-700 py-2 px-5 block whitespace-no-wrap',
-                            { 'aw-link-active': href2 === currentPath },
+                            'first:rounded-t last:rounded-b md:hover:bg-gray-50 hover:text-blue-600 dark:hover:text-blue-400 dark:hover:bg-gray-800 py-2 px-5 block whitespace-no-wrap',
+                            { 'text-blue-600 font-bold': href2 === currentPath },
                           ]}
                           href={href2}
                         >
@@ -115,8 +114,8 @@ const userName = "Mi Cuenta";
               ) : (
                 <a
                   class:list={[
-                    'hover:text-link dark:hover:text-white px-4 py-3 flex items-centers',
-                    { 'aw-link-active': href === currentPath },
+                    'hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors',
+                    { 'text-blue-600 font-bold': href === currentPath },
                   ]}
                   href={href}
                 >
@@ -140,11 +139,9 @@ const userName = "Mi Cuenta";
           {showToggleTheme && <ToggleTheme iconClass="w-6 h-6 md:w-5 md:h-5 md:inline-block" />}
         </div>
         
-        {/* 🔥 LÓGICA DINÁMICA: LOGUEADO vs INVITADO */}
         {isLoggedIn ? (
-            
             <div class="relative group ml-4">
-                <button class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+                <button class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/50 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700 hover:shadow-lg transition-all duration-300 backdrop-blur-sm">
                     <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
                         {userName.charAt(0)}
                     </div>
@@ -152,25 +149,20 @@ const userName = "Mi Cuenta";
                     <Icon name="tabler:chevron-down" class="w-4 h-4 text-gray-500 transition-transform group-hover:rotate-180" />
                 </button>
 
-                <div class="absolute right-0 top-full mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
+                <div class="absolute right-0 top-full mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 pt-2">
                     <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-2 overflow-hidden">
-                        
                         <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
                             <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Mi Cuenta</span>
                         </div>
-
                         <a href="/hub" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition-colors">
                             <Icon name="tabler:building-store" class="w-5 h-5 text-blue-500" />
-                            Mis Tiendas (Hub)
+                            Mis Tiendas
                         </a>
-                        
                         <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <Icon name="tabler:settings" class="w-5 h-5 text-gray-500" />
                             Ajustes
                         </a>
-
                         <div class="my-1 border-t border-gray-100 dark:border-gray-800"></div>
-
                         <form action="/api/logout" method="POST">
                             <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                                 <Icon name="tabler:logout" class="w-5 h-5" />
@@ -180,20 +172,12 @@ const userName = "Mi Cuenta";
                     </div>
                 </div>
             </div>
-
         ) : (
-            
             <div class="flex items-center gap-3 ml-4">
-                <a href="/login" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors">
-                    Acceder
-                </a>
-                <a href="/register" class="btn-primary px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">
-                    Crear Tienda
-                </a>
+                <a href="/login" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors">Acceder</a>
+                <a href="/register" class="btn-primary px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">Crear Tienda</a>
             </div>
-
         )}
-
       </div>
     </div>
   </div>

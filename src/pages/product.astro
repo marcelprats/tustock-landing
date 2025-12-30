@@ -1,0 +1,84 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features3 from '~/components/widgets/Features3.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Producto - TuStock',
+};
+---
+
+<Layout metadata={metadata}>
+  
+  <Hero
+    tagline="Tour del Producto"
+    title="El Sistema Operativo para Retail"
+    subtitle="Diseñado desde cero para sustituir a tu ERP, tu Excel y tu TPV antiguo."
+    image={{ src: '~/assets/images/hero-image.png', alt: 'Product Interface' }}
+  />
+
+  <Content
+    isReversed
+    title="Inventario Predictivo"
+    subtitle="No solo cuenta stock. Predice el futuro."
+    items={[
+      { title: 'Alertas de Stock', description: 'Te avisa antes de que te quedes sin producto basándose en la velocidad de ventas.' },
+      { title: 'Importación Masiva', description: 'Arrastra tu Excel o conecta tu WooCommerce/Shopify en segundos.' },
+      { title: 'Etiquetado IA', description: 'Sube una foto del producto y la IA rellena nombre, categoría y precio estimado.' },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=2070&q=80',
+      alt: 'Inventory Feature',
+    }}
+  />
+
+  <Content
+    title="TPV Web Universal"
+    subtitle="Vende donde sea. Cobra como quieras."
+    items={[
+      { title: 'Multidispositivo', description: 'Funciona en iPad, Tablet Android, PC, Mac o incluso tu móvil.' },
+      { title: 'Modo Offline', description: '¿Se cayó internet? No pasa nada. Sigue vendiendo, se sincronizará cuando vuelva.' },
+      { title: 'Facturación Integrada', description: 'Envía el ticket por WhatsApp o email al cliente al instante.' },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&w=2070&q=80',
+      alt: 'POS Feature',
+    }}
+  />
+
+  <Content
+    isReversed
+    title="Inteligencia Artificial Privada"
+    subtitle="Potencia de chatGPT, pero con tus datos privados."
+    items={[
+      { title: 'Chat con tus Datos', description: 'Pregunta: "¿Qué vendí más el martes pasado?" y obtén el gráfico.' },
+      { title: 'Privacidad Total', description: 'Si usas la app de escritorio, el modelo corre en tu GPU. Nada sale de tu oficina.' },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=2070&q=80',
+      alt: 'AI Feature',
+    }}
+  />
+
+  <Features3
+    title="Especificaciones Técnicas"
+    subtitle="Para los que quieren saber qué hay bajo el capó."
+    columns={3}
+    items={[
+      { title: 'Cloud Sync', description: 'Sincronización en tiempo real vía WebSockets.', icon: 'tabler:cloud' },
+      { title: 'Seguridad', description: 'Encriptación AES-256 en reposo y tránsito.', icon: 'tabler:lock' },
+      { title: 'API Rest', description: 'Conecta con Zapier, Make o tu propio software.', icon: 'tabler:api' },
+      { title: 'Backups', description: 'Copias de seguridad automáticas cada hora.', icon: 'tabler:database' },
+      { title: 'Exportación', description: 'Tus datos son tuyos. Exporta a JSON/CSV siempre.', icon: 'tabler:download' },
+      { title: 'Multi-idioma', description: 'Interfaz disponible en Español, Catalán e Inglés.', icon: 'tabler:language' },
+    ]}
+  />
+
+  <CallToAction
+    title="Pruébalo tú mismo"
+    subtitle="Tienes 14 días gratis del plan PRO. Sin tarjeta."
+    actions={[{ text: 'Empezar Prueba Gratis', href: '/register', variant: 'primary' }]}
+  />
+</Layout>

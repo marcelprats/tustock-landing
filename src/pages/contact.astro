@@ -5,75 +5,90 @@ import ContactUs from '~/components/widgets/Contact.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
 const metadata = {
-  title: 'Contact',
+  title: 'Contacto y Soporte - TuStock',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- HeroText Widget ******************* -->
-
-  <HeroText tagline="Contact" title="Let's Connect!" />
-
-  <ContactUs
-    id="form"
-    title="Drop us a message today!"
-    subtitle="For quicker answers, explore our FAQs section. You may find the solution you're looking  for right there! If not, our support team is delighted to help you."
-    inputs={[
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Name',
-      },
-      {
-        type: 'email',
-        name: 'email',
-        label: 'Email',
-      },
-    ]}
-    textarea={{
-      label: 'Message',
-    }}
-    disclaimer={{
-      label:
-        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
-    }}
-    description="Our support team typically responds within 24 business hours."
+  
+  <HeroText 
+    tag="Centro de Ayuda" 
+    title="Hablemos de tu negocio" 
+    subtitle="Tenemos un equipo distribuido listo para ayudarte en tu zona horaria."
   />
-
-  <!-- Features2 Widget ************** -->
 
   <Features2
-    title="We are here to help!"
     items={[
       {
-        title: 'General support',
-        description: `Chat with us for inquiries related to account management, website navigation, payment issues, accessing purchased templates or general questions about the website's functionality.`,
+        title: 'Soporte Técnico',
+        description: '¿Algo no funciona como esperabas? Abre un ticket prioritario.',
+        icon: 'tabler:lifebuoy',
+        callToAction: { text: 'soporte@tustock.app', href: 'mailto:soporte@tustock.app', variant: 'link' },
       },
       {
-        title: 'Contact sales',
-        description:
-          'Chat with us for questions about purchases, customization options, licensing for commercial use, inquiries about specific template, etc.',
+        title: 'Ventas & Enterprise',
+        description: 'Para franquicias, grandes volúmenes o integraciones a medida.',
+        icon: 'tabler:businessplan',
+        callToAction: { text: 'Agendar Demo', href: '#form', variant: 'link' },
       },
       {
-        title: 'Technical support',
-        description:
-          'Chat with us when facing issues like template installation, problems editing difficulties, compatibility issues with software or download errors, or other technical challenges related to using the templates.',
+        title: 'Prensa y Partners',
+        description: '¿Quieres escribir sobre nosotros o integrar tu tecnología?',
+        icon: 'tabler:news',
+        callToAction: { text: 'press@tustock.app', href: 'mailto:press@tustock.app', variant: 'link' },
       },
       {
-        title: 'Phone',
-        description: '+1 (234) 567-890',
-        icon: 'tabler:headset',
-      },
-      {
-        title: 'Email',
-        description: 'contact@support.com',
-        icon: 'tabler:mail',
-      },
-      {
-        title: 'Location',
-        description: '1234 Lorem Ipsum St, 12345, Miami, EEUU',
+        title: 'Oficinas',
+        description: 'Pier 01, Barcelona Tech City. Ven a tomar un café con el equipo.',
         icon: 'tabler:map-pin',
+        callToAction: { text: 'Ver en mapa', href: 'https://goo.gl/maps/example', variant: 'link', target: '_blank' },
       },
     ]}
   />
+
+  <div id="form">
+    <ContactUs
+      title="Envíanos un mensaje directo"
+      subtitle="Solemos responder en menos de 2 horas durante horario laboral (9:00 - 18:00 CET)."
+      inputs={[
+        {
+          type: 'text',
+          name: 'name',
+          label: 'Nombre completo',
+          placeholder: 'Ej: Paco Martínez',
+        },
+        {
+          type: 'email',
+          name: 'email',
+          label: 'Correo electrónico corporativo',
+          placeholder: 'paco@fruteriaspaco.com',
+        },
+      ]}
+      textarea={{
+        label: '¿En qué podemos ayudarte?',
+        placeholder: 'Estoy interesado en el plan Enterprise para 5 tiendas...',
+      }}
+      disclaimer={{
+        label:
+          'Al enviar este formulario, aceptas nuestra Política de Privacidad. Odiamos el spam tanto como tú.',
+      }}
+      description="Tu mensaje será enrutado automáticamente al departamento correcto."
+      button='Enviar Mensaje'
+    />
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 py-12 text-center">
+    <h3 class="text-xl font-bold mb-4">Preguntas frecuentes antes de contactar</h3>
+    <div class="grid md:grid-cols-2 gap-6 text-left">
+        <div class="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg">
+            <h4 class="font-bold mb-2">¿Ofrecéis demos personalizadas?</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Sí, para planes PRO y Enterprise. Rellena el formulario y te enviaremos un calendario.</p>
+        </div>
+        <div class="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg">
+            <h4 class="font-bold mb-2">¿Dónde están mis facturas?</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Puedes descargarlas directamente desde tu Panel de Control > Configuración > Facturación.</p>
+        </div>
+    </div>
+  </div>
+
 </Layout>

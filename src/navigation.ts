@@ -3,8 +3,9 @@ import { getPermalink, getBlogPermalink, getAsset } from './utils/permalinks';
 // 1. MENÚ SUPERIOR (Navegación entre páginas globales)
 export const headerData = {
   links: [
-    { text: 'Producto', href: '#features' }, // Ancla suave
+    { text: 'Producto', href: '/product' }, // Ancla suave
     { text: 'Precios', href: '/pricing' },   // Página real
+    { text: 'Descargar', href: '/download' },
     { text: 'Sobre Nosotros', href: '/about' },
     { text: 'Contacto', href: '/contact' },
   ],
