@@ -1,51 +1,56 @@
 ---
-import MainHome from '../components/landing/MainHome.astro';
-import AppDashboard from '../components/app/AppDashboard.astro';
+// 1. IMPORTANTE: Importar el Layout que trae el CSS
+import Layout from '~/layouts/PageLayout.astro';
+
+import MainHome from '~/components/landing/MainHome.astro';
+import AppDashboard from '~/components/app/AppDashboard.astro';
 
 const url = new URL(Astro.request.url);
 const hostname = url.hostname;
 let isSubdomain = false;
 let tenantSlug = '';
 
-// 1. DETECCIÓN DE SUBDOMINIO
+// --- LÓGICA DE SUBDOMINIOS ---
 if (import.meta.env.PROD) {
-  // En producción, si no es tustock.app, asumimos que es un subdominio (ej: frutpaco.tustock.app)
   if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
     isSubdomain = true;
     tenantSlug = hostname.split('.')[0];
   }
 } else {
-  // En local simulamos subdominios con ?tenant=nombre
   if (url.searchParams.has('tenant')) {
     isSubdomain = true;
     tenantSlug = url.searchParams.get('tenant');
   }
 }
 
-// 2. RECUPERAR SESIÓN
 const session = Astro.cookies.get('session');
 const isLoggedIn = session && session.value;
 
-// 3. SEGURIDAD: SI ESTÁS EN UN SUBDOMINIO Y NO TIENES SESIÓN...
 if (isSubdomain && !isLoggedIn) {
-  // Te enviamos al login del dominio principal, recordando a dónde querías ir
   const loginUrl = import.meta.env.PROD 
     ? `https://tustock.app/login?return_to=${tenantSlug}` 
     : `/login?return_to=${tenantSlug}`;
-  
   return Astro.redirect(loginUrl);
 }
+
+// Metadatos para la Landing
+const metadata = {
+  title: 'TuStock - Gestión de Inventario con IA',
+  ignoreTitleTemplate: true,
+};
 ---
 
 {
-  /* LÓGICA DE RENDERIZADO SIMPLIFICADA */
-  
   isSubdomain && isLoggedIn ? (
-    /* CASO A: Estás en un subdominio (tienda) y logueado -> Ver Dashboard */
+    /* CASO A: DASHBOARD (Tienda) */
+    /* Nota: Asegúrate de que AppDashboard también tenga su propio Layout interno 
+       o envuélvelo aquí si se ve sin estilos */
     <AppDashboard tenant={tenantSlug} />
   ) : (
-    /* CASO B: Estás en el dominio principal (tustock.app) -> Ver Landing Page */
-    /* (Aunque estés logueado, mostramos la Landing. El botón "Mis Tiendas" del Header te llevará al Hub) */
-    <MainHome />
+    /* CASO B: LANDING PAGE */
+    /* 🔥 AQUÍ ESTABA EL ERROR: Faltaba el <Layout> */
+    <Layout metadata={metadata}>
+      <MainHome />
+    </Layout>
   )
 }
