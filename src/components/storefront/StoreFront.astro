@@ -1,36 +1,129 @@
 ---
-import Layout from '~/layouts/PageLayout.astro';
+import Layout from '~/layouts/Layout.astro';
+import Header from '~/components/widgets/Header.astro';
+import Footer from '~/components/widgets/Footer.astro';
 import Hero from '~/components/widgets/Hero.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import Steps from '~/components/widgets/Steps.astro';
 
 const { tenant } = Astro.props;
-const metadata = { title: `${tenant} - Powered by TuStock` };
+
+// Capitalizar nombre (ej: "fruteria" -> "Fruteria")
+const shopName = tenant.charAt(0).toUpperCase() + tenant.slice(1);
+
+// 1. CONFIGURACIÓN DEL MENÚ DE LA TIENDA (No de TuStock)
+const storeHeaderData = {
+  links: [
+    { text: 'Catálogo', href: '#catalogo' },
+    { text: 'Ubicación', href: '#ubicacion' },
+  ],
+  actions: [
+    // El botón Admin discreto para el dueño
+    { text: 'Acceso Dueño', href: '/admin', type: 'ghost', icon: 'tabler:lock' },
+  ],
+};
+
+const storeFooterData = {
+  links: [],
+  secondaryLinks: [],
+  socialLinks: [],
+  footNote: `
+    <span class="text-sm text-gray-500">
+      © 2025 <b>${shopName}</b> · Tecnología proporcionada por <a class="text-blue-600 hover:underline" href="https://tustock.app">TuStock</a>
+    </span>
+  `,
+};
+
+const metadata = {
+  title: `${shopName} - Tienda Online`,
+};
 ---
 
 <Layout metadata={metadata}>
   
-  <header class="bg-white shadow-sm p-4 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-blue-600 rounded-full"></div> <h1 class="text-xl font-bold uppercase tracking-wider">{tenant}</h1>
-        </div>
-        
-        <a href="/admin" class="text-xs font-medium text-gray-500 hover:text-black border border-gray-200 px-3 py-1 rounded-full transition-colors">
-            Administrar Tienda
-        </a>
-    </div>
-  </header>
+  <Header 
+    links={storeHeaderData.links} 
+    actions={storeHeaderData.actions} 
+    isSticky 
+    position="right"
+  >
+    <span slot="logo" class="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+       🏪 {shopName}
+    </span>
+  </Header>
 
   <Hero
-    title={`Bienvenido a ${tenant}`}
-    subtitle="Compra online o consulta nuestro catálogo en tiempo real."
+    title={`Bienvenido a <span class="text-blue-600 dark:text-blue-400">${shopName}</span>`}
+    subtitle="Calidad y servicio de confianza. Consulta nuestro catálogo online o visítanos en persona."
+    image={{ 
+        src: 'https://images.unsplash.com/photo-1604719312566-b7cb0463d3a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 
+        alt: 'Tienda Interior' 
+    }}
     actions={[{ text: 'Ver Productos', href: '#catalogo', variant: 'primary' }]}
   />
 
-  <section id="catalogo" class="py-16 px-4 max-w-7xl mx-auto">
-      <div class="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl">
-          <h2 class="text-2xl font-bold text-gray-400 mb-2">Catálogo en construcción</h2>
-          <p class="text-gray-500">Los productos de {tenant} aparecerán aquí pronto.</p>
-      </div>
-  </section>
+  <div id="catalogo" class="py-16 bg-gray-50 dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold tracking-tight mb-4">Nuestros Productos Destacados</h2>
+            <p class="text-gray-600 dark:text-gray-400">Selección de los mejores artículos disponibles hoy.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-lg transition-all overflow-hidden group">
+                    <div class="h-48 bg-gray-200 dark:bg-slate-700 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 font-bold text-lg">
+                            FOTO PRODUCTO {i}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2">Producto Ejemplo {i}</h3>
+                        <p class="text-sm text-gray-500 mb-4">Descripción corta del producto increíble que vende {shopName}.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-blue-600">19.99€</span>
+                            <button class="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-bold rounded-lg hover:opacity-80">
+                                Añadir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+        
+        <div class="text-center mt-12">
+            <p class="text-xs text-gray-400 uppercase tracking-widest">
+                Catálogo sincronizado en tiempo real con TuStock
+            </p>
+        </div>
+    </div>
+  </div>
+
+  <div id="ubicacion">
+      <Features2
+        title="Visítanos"
+        subtitle="Estamos encantados de atenderte."
+        columns={3}
+        items={[
+          {
+            title: 'Horario',
+            description: 'Lunes a Viernes: 09:00 - 20:00<br>Sábados: 10:00 - 14:00',
+            icon: 'tabler:clock',
+          },
+          {
+            title: 'Dirección',
+            description: 'C/ Ejemplo 123<br>08001, Barcelona',
+            icon: 'tabler:map-pin',
+          },
+          {
+            title: 'Contacto',
+            description: 'Tel: 93 123 45 67<br>Email: hola@' + tenant + '.com',
+            icon: 'tabler:phone',
+          },
+        ]}
+      />
+  </div>
+
+  <Footer {...storeFooterData} />
 
 </Layout>
