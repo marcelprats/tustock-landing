@@ -24,13 +24,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (isStoreContext) {
         
-        // 🔥 0. PASO CRÍTICO: DEJAR PASAR CSS, JS, IMÁGENES Y RUTAS DE ASTRO
-        // Si no ponemos esto, el navegador pide "styles.css" y el middleware intenta buscar una tienda con ese nombre.
+        // 🔥 0. EXCEPCIÓN CRÍTICA: Activos estáticos
+        // Esto permite que carguen los estilos, imágenes y scripts.
         if (
+            url.pathname.startsWith('/store') || 
             url.pathname.startsWith('/_astro') || 
             url.pathname.startsWith('/_image') || 
-            url.pathname.startsWith('/store') || 
-            url.pathname.match(/\.(css|js|jpg|png|svg|ico|json|woff2)$/)
+            url.pathname.startsWith('/favicon') ||
+            url.pathname.match(/\.(css|js|jpg|jpeg|png|svg|ico|json|woff2)$/)
         ) {
             return next();
         }
@@ -74,19 +75,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
              return new Response(`La tienda '${subdomain}' no existe.`, { status: 404 });
         }
 
-        // 4. LOGICA DE ACCESO
-        
-        // ADMIN entra siempre
+        // 4. LÓGICA DE REWRITE
         if (url.pathname.startsWith('/admin')) {
             return context.rewrite('/store/admin');
         }
 
-        // Bloqueo FREE
         if (shopData.web_plan === 'FREE') {
             return context.rewrite('/store/placeholder');
         }
 
-        // Acceso WEB PRO
         const targetPath = url.pathname === '/' ? '/store' : `/store${url.pathname}`;
         return context.rewrite(targetPath);
     }
