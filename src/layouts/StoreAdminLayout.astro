@@ -4,40 +4,13 @@ import Favicons from "~/components/Favicons.astro";
 import Metadata from "~/components/common/Metadata.astro";
 import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
 import BasicScripts from "~/components/common/BasicScripts.astro";
-import { decryptLicense } from '~/utils/crypto';
 
-// Recibimos parámetros
 const { tenant, metadata = {} } = Astro.props;
+const { currentShop } = Astro.locals; // El middleware ya nos da el nombre y plan
 
-// 1. OBTENER DATOS MÍNIMOS
-const session = Astro.cookies.get('session');
-const userId = session?.value;
-const env = Astro.locals.runtime?.env;
-const db = env?.DB;
-
-let tenantName = "Cargando...";
-let isOnline = false;
-let error = null;
-
-if (userId && db && tenant) {
-  try {
-    const data = await db.prepare(`
-      SELECT t.name, t.last_heartbeat FROM tenants t
-      JOIN memberships m ON t.id = m.tenant_id
-      WHERE m.user_id = ? AND t.slug = ?
-    `).bind(userId, tenant).first();
-
-    if (data) {
-      tenantName = data.name;
-      // Online si heartbeat < 2 min
-      isOnline = data.last_heartbeat && (Date.now() - data.last_heartbeat) < 120000;
-    } else {
-      error = "No tienes acceso.";
-    }
-  } catch (e) {
-    error = "Error DB";
-  }
-}
+// Datos simples para la cabecera
+const shopName = currentShop?.name || tenant;
+const shopPlan = currentShop?.plan || 'FREE';
 ---
 
 <!doctype html>
@@ -49,81 +22,70 @@ if (userId && db && tenant) {
     <ApplyColorMode />
   </head>
 
-  <body class="antialiased text-default bg-gray-50 dark:bg-slate-900 tracking-tight h-screen overflow-hidden">
+  <body class="antialiased text-gray-900 bg-gray-50 dark:bg-slate-900 dark:text-slate-300 tracking-tight h-screen flex flex-col overflow-hidden">
     
-    {error ? (
-        <div class="flex flex-col items-center justify-center h-full">
-            <h1 class="text-2xl font-bold text-red-500 mb-2">Acceso Restringido</h1>
-            <p class="text-gray-500 mb-6">{error}</p>
-            <a href="/" class="btn-primary px-4 py-2 rounded">Salir</a>
+    {/* --- 1. BARRA SUPERIOR (NAVBAR) --- */}
+    <nav class="h-16 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-6 flex-shrink-0 z-20">
+      
+      {/* IZQUIERDA: Identidad de la Tienda (LIMPIA) */}
+      <div class="flex items-center gap-3">
+        {/* Logo/Icono simple con la inicial */}
+        <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+           {shopName.charAt(0).toUpperCase()}
         </div>
-    ) : (
-        <div class="flex h-full w-full">
+        <div>
+           <h1 class="font-bold text-lg leading-tight">{shopName}</h1>
+           {/* Badge de Plan discreto (opcional, si no lo quieres borra esta línea) */}
+           <span class="text-[10px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 px-1.5 py-0.5 rounded uppercase tracking-wider">
+             Panel de Gestión
+           </span>
+        </div>
+      </div>
+
+      {/* DERECHA: Salida */}
+      <div class="flex items-center gap-4">
+         <a href="/" target="_blank" class="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            Ver Tienda
+         </a>
+         <div class="h-6 w-px bg-gray-200 dark:bg-slate-800 hidden md:block"></div>
+         <a href="/api/logout" class="text-sm font-bold text-red-500 hover:text-red-600">
+            Cerrar Sesión
+         </a>
+      </div>
+    </nav>
+
+    {/* --- 2. CUERPO PRINCIPAL (Con Sidebar Integrado) --- */}
+    <div class="flex flex-1 overflow-hidden">
+        
+        {/* SIDEBAR (Menú lateral sencillo) */}
+        <aside class="w-64 bg-white dark:bg-slate-950 border-r border-gray-200 dark:border-slate-800 hidden md:flex flex-col">
+            <div class="p-4 space-y-1">
+                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    Resumen
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                    Inventario
+                </a>
+                <a href="/settings" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Configuración
+                </a>
+            </div>
             
-            {/* --- SIDEBAR LIMPIO (Sin Powered By) --- */}
-            <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-950 border-r border-gray-200 dark:border-slate-800 flex flex-col hidden md:flex">
-                
-                {/* 1. CABECERA SIDEBAR: Nombre de la Tienda */}
-                <div class="h-16 flex items-center px-6 border-b border-gray-100 dark:border-slate-900">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                            {tenantName.charAt(0)}
-                        </div>
-                        <div class="leading-tight">
-                            <h2 class="font-bold text-gray-900 dark:text-white truncate w-32" title={tenantName}>
-                                {tenantName}
-                            </h2>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Admin Panel</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="mt-auto p-4 border-t border-gray-100 dark:border-slate-800">
+                <p class="text-xs text-gray-400 text-center">Soporte Técnico</p>
+            </div>
+        </aside>
 
-                {/* 2. MENÚ DE NAVEGACIÓN */}
-                <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                    
-                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-                        {/* Icono Home */}
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        Dashboard
-                    </a>
-                    
-                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-900 transition">
-                         {/* Icono Caja */}
-                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                         Productos
-                    </a>
+        {/* CONTENIDO DEL DASHBOARD (SLOT) */}
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 dark:bg-slate-900">
+             <slot />
+        </main>
 
-                </nav>
-
-                {/* 3. FOOTER SIDEBAR (Usuario) */}
-                <div class="p-4 border-t border-gray-100 dark:border-slate-900">
-                     <div class="flex items-center justify-between">
-                         <div class="flex items-center gap-2">
-                             <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                             <span class="text-xs text-gray-500">Usuario Activo</span>
-                         </div>
-                         <a href="/api/logout" class="text-xs font-bold text-red-500 hover:underline">Salir</a>
-                     </div>
-                </div>
-            </aside>
-
-            {/* --- ZONA PRINCIPAL --- */}
-            <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-900">
-                
-                {/* Header Móvil */}
-                <header class="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex md:hidden items-center justify-between px-4">
-                    <span class="font-bold">{tenantName}</span>
-                    <a href="/api/logout" class="text-sm text-red-500">Salir</a>
-                </header>
-
-                {/* SLOT DEL CONTENIDO */}
-                <div class="flex-1 overflow-y-auto p-6 md:p-8">
-                    <slot />
-                </div>
-
-            </main>
-        </div>
-    )}
+    </div>
 
     <BasicScripts />
   </body>
