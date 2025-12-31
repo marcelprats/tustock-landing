@@ -1,102 +1,41 @@
 ---
-import Layout from '~/layouts/Layout.astro'; // Usamos el Layout MAESTRO (el mismo de la landing)
+import Layout from '~/layouts/Layout.astro';
 import Hero from '~/components/widgets/Hero.astro';
-import Features2 from '~/components/widgets/Features2.astro';
-import Content from '~/components/widgets/Content.astro'; // Componente visual potente
-import CallToAction from '~/components/widgets/CallToAction.astro';
-import ItemGrid from '~/components/ui/ItemGrid.astro'; // Para el grid de productos
 
-// 1. DATOS REALES (Middleware)
 const { currentShop } = Astro.locals;
-
-// Protección
-if (currentShop?.web_plan === 'FREE') {
-  return Astro.redirect('/store/placeholder');
-}
-
 const shopName = currentShop?.name || "Tienda";
-const metadata = { title: `${shopName} - Catálogo`, ignoreTitleTemplate: true };
-
-// 2. MOCKUP PRODUCTOS (Lo conectaremos a BD después)
-const products = [
-  { title: 'Producto Premium', description: '29.99€', icon: 'tabler:package' },
-  { title: 'Pack Ahorro', description: '49.99€', icon: 'tabler:box' },
-  { title: 'Accesorio', description: '15.50€', icon: 'tabler:tag' },
-  { title: 'Novedad', description: 'Consultar', icon: 'tabler:star' },
-];
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={{ title: `${shopName}` }}>
   
-  {/* 1. HERO IDÉNTICO A LA LANDING (Mismos estilos) */}
-  <Hero
-    tagline="Comercio Oficial"
-    actions={[
-      { text: 'Ver Catálogo', href: '#catalogo', variant: 'primary', icon: 'tabler:shopping-cart' },
-      { text: 'WhatsApp', href: '#contacto', icon: 'tabler:brand-whatsapp' }
-    ]}
-    image={{ src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Tienda Cover' }}
-  >
-    <fragment slot="title">
-      Bienvenido a <span class="text-accent dark:text-white highlight">{shopName}</span>
-    </fragment>
+  {/* Contenedor Flex para centrar verticalmente y evitar scroll */}
+  <div class="min-h-screen flex items-center justify-center bg-page">
+      
+      <Hero
+        tagline="Tecnología TuStock"
+        title={shopName}
+        subtitle="Este comercio utiliza nuestro sistema de gestión de inventario, pero actualmente no tiene habilitada su tienda online pública."
+        actions={[
+          {
+            variant: 'primary',
+            text: 'Acceso Propietario',
+            href: '/admin',
+            icon: 'tabler:lock-access',
+          },
+          {
+            text: 'Ir a TuStock.app',
+            href: 'https://tustock.app',
+            target: '_blank',
+            icon: 'tabler:external-link',
+          }
+        ]}
+      >
+        {/* Slot para personalizar el título con estilos del tema */}
+        <fragment slot="title">
+            <span class="text-gray-900 dark:text-white">{shopName}</span>
+        </fragment>
+      </Hero>
 
-    <fragment slot="subtitle">
-      Descubre la mejor selección de productos con la garantía y confianza de siempre. 
-      Compra online o reserva y recoge en tienda.
-    </fragment>
-  </Hero>
-
-  {/* 2. CATÁLOGO USANDO LOS MISMOS ESTILOS DE "FEATURES" */}
-  <div id="catalogo" class="bg-blue-50 dark:bg-slate-900">
-      <Features2
-        title="Nuestros Productos Destacados"
-        subtitle="Calidad seleccionada para ti."
-        tagline="Catálogo"
-        items={products} 
-        columns={4}
-      />
   </div>
-
-  {/* 3. SECCIÓN VISUAL (Como la de 'Fiscalidad' de la Landing) */}
-  <Content
-    isReversed
-    tagline="Garantía"
-    title="¿Por qué comprar aquí?"
-    items={[
-      {
-        title: 'Atención Personalizada',
-        description: 'Somos un comercio real, con personas reales detrás.',
-      },
-      {
-        title: 'Pago Seguro',
-        description: 'Tecnología cifrada para proteger tus datos.',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Confianza',
-    }}
-  />
-
-  {/* 4. CALL TO ACTION (Igual que el de 'Digitalizar mi negocio') */}
-  <CallToAction
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Contactar ahora',
-        href: '#',
-        icon: 'tabler:message-circle',
-      },
-    ]}
-  >
-    <fragment slot="title">
-      ¿No encuentras lo que buscas?
-    </fragment>
-
-    <fragment slot="subtitle">
-      Escríbenos y te ayudaremos a encontrar el producto perfecto.
-    </fragment>
-  </CallToAction>
 
 </Layout>

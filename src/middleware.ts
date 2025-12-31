@@ -14,9 +14,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         subdomain = url.searchParams.get('tenant') || ''; 
     } else {
         const parts = host.split('.');
-        if (parts.length >= 3) {
-            subdomain = parts[0];
-        }
+        if (parts.length >= 3) subdomain = parts[0];
     }
 
     const systemSubdomains = ['www', 'app', 'api', 'admin'];
@@ -24,23 +22,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (isStoreContext) {
         
-        // 🔥 0. EXCEPCIÓN DE ACTIVOS (CRÍTICO PARA EL CSS)
-        // Si la URL pide estilos, imágenes o scripts, dejamos pasar inmediatamente.
-        // Si no está esto, el middleware intenta buscar una tienda llamada "tailwind.css" y falla.
-        if (
-            url.pathname.startsWith('/_astro') || 
-            url.pathname.startsWith('/_image') || 
-            url.pathname.startsWith('/store') || 
-            url.pathname.includes('.') // Si tiene punto (ej: style.css), asumimos que es archivo
-        ) {
+        // 0. EXCEPCIÓN DE ACTIVOS (CSS/JS)
+        if (url.pathname.match(/\.(css|js|jpg|png|svg|ico|json|woff2)$/) || url.pathname.startsWith('/_astro')) {
             return next();
         }
 
-        // 2. RUTAS DE SISTEMA
+        // 2. RUTAS SISTEMA
         const systemPaths = ['/api', '/login', '/settings']; 
-        if (systemPaths.some(p => url.pathname.startsWith(p))) {
-            return next();
-        }
+        if (systemPaths.some(p => url.pathname.startsWith(p))) return next();
 
         // 3. RECUPERAR DATOS
         let shopData: any = null; 
@@ -56,11 +45,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
                 if (result.rows.length > 0) {
                     const shop = result.rows[0];
+                    
+                    // --- 🔥 LÓGICA BLINDADA ---
+                    // Normalizamos a mayúsculas y si es null, asumimos 'FREE'
+                    const rawWebPlan = (shop.web_plan as string) || 'FREE';
+                    const webPlanNormalized = rawWebPlan.toUpperCase().trim(); 
+
                     shopData = {
                         name: (shop.company_name as string) || '',
                         email: (shop.owner_email as string) || '',
                         plan: (shop.plan_type as string) || 'FREE',
-                        web_plan: (shop.web_plan as string) || 'FREE', 
+                        web_plan: webPlanNormalized, // Guardamos el valor limpio
                         slug: subdomain,
                         isStore: true
                     };
@@ -71,19 +66,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        if (!shopData) {
-             return new Response(`La tienda '${subdomain}' no existe.`, { status: 404 });
-        }
+        if (!shopData) return new Response("Tienda no encontrada", { status: 404 });
 
-        // 4. REESCRITURAS
+        // 4. REGLAS DE TRÁFICO
+        
+        // A) ADMIN siempre entra
         if (url.pathname.startsWith('/admin')) {
             return context.rewrite('/store/admin');
         }
 
+        // B) SI ES FREE -> PLACEHOLDER (Sin excepción)
         if (shopData.web_plan === 'FREE') {
             return context.rewrite('/store/placeholder');
         }
 
+        // C) CUALQUIER OTRA COSA (PRO, PREMIUM, ENTERPRISE) -> TIENDA
         const targetPath = url.pathname === '/' ? '/store' : `/store${url.pathname}`;
         return context.rewrite(targetPath);
     }
