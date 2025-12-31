@@ -14,7 +14,7 @@ const { shopCount, userCount } = Astro.props;
 const navItems = [
   { text: 'Inicio', target: 'hero' },
   { text: 'Tecnología', target: 'features' },
-  { text: 'IA Local', target: 'ai-core' },
+  { text: 'IA Predictiva', target: 'ai-core' },
   { text: 'Fiscalidad', target: 'fiscalidad' },
   { text: 'Migración', target: 'steps' },
   { text: 'Precios', target: 'pricing' },
@@ -22,22 +22,16 @@ const navItems = [
 ];
 ---
 
-<div class="relative w-full">
+<div class="relative w-full bg-white dark:bg-slate-950">
   
   <aside class="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-6 pointer-events-none">
-    <nav class="pointer-events-auto flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-300">
-      
+    <nav class="pointer-events-auto flex flex-col gap-5 p-4 bg-white/20 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-gray-200/50 dark:border-white/10 shadow-2xl transition-all duration-700">
       {navItems.map(({ text, target }) => (
-        <a 
-          href={`#${target}`} 
-          class="nav-link group relative flex items-center justify-center w-4 h-full"
-          data-target={target}
-        >
+        <a href={`#${target}`} class="nav-link group relative flex items-center justify-center w-4 h-full" data-target={target}>
           <span class="absolute left-12 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
             {text}
           </span>
-          
-          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-300 ease-out group-hover:bg-blue-400"></div>
+          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
         </a>
       ))}
     </nav>
@@ -45,96 +39,193 @@ const navItems = [
 
   <div class="flex-1 w-full">
     
-    <div id="hero" class="scroll-target min-h-screen">
+    <div id="hero" class="scroll-target min-h-screen flex items-center">
       <Hero
         actions={[
-          { variant: 'primary', text: 'Descargar App Escritorio', href: '/download', icon: 'tabler:download' },
-          { text: 'Usar versión Web', href: '/register' },
+          { variant: 'primary', text: 'Descargar para Windows/Mac', href: '/download', icon: 'tabler:brand-windows' },
+          { text: 'Explorar Demo Web', href: '/register', icon: 'tabler:browser' },
         ]}
-        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock' }}
+        image={{ src: 'https://images.unsplash.com/photo-1551288049-bbdac8a28a1e?auto=format&fit=crop&w=2070&q=80', alt: 'TuStock Dashboard' }}
       >
         <fragment slot="title">
-          <span class="block animate-none">ERP Híbrido: Potencia Local</span>
-          <span class="text-accent dark:text-white highlight animate-none">Libertad en la Nube</span>
+          <span class="text-5xl md:text-6xl font-extrabold tracking-tighter leading-none block mb-4">
+            Vende sin límites. <br/> <span class="text-blue-600 dark:text-blue-400">Gestiona con inteligencia.</span>
+          </span>
         </fragment>
         <fragment slot="subtitle">
-            Gestión de stock con <b>App de Escritorio</b> y sincronización Cloud. IA local para máxima privacidad.
+            TuStock es el primer ERP diseñado para ser <b>híbrido por naturaleza</b>. Instala nuestra App en tu local para trabajar a máxima velocidad sin internet, y deja que la nube sincronice tus ventas para consultarlas desde cualquier parte del mundo.
         </fragment>
       </Hero>
     </div>
 
-    <div class="border-y border-gray-100 dark:border-slate-800 bg-blue-50/30 dark:bg-slate-900/30 backdrop-blur-sm">
+    <div class="py-12 bg-slate-50 dark:bg-slate-900/50">
       <Stats stats={[
-        { title: 'Tiendas', amount: shopCount },
-        { title: 'Usuarios', amount: userCount },
-        { title: 'IA Local', amount: 'Sí' },
-        { title: 'Fiscalidad', amount: '2026' }
+        { title: 'Negocios Conectados', amount: shopCount },
+        { title: 'Usuarios Diarios', amount: userCount },
+        { title: 'Uptime Sistema', amount: '99.9%' },
+        { title: 'Soporte España', amount: '24/7' }
       ]} />
     </div>
 
-    <div id="features" class="scroll-target"><Features3 title="Retail OS" subtitle="Offline & Online sync." tagline="Híbrido" columns={3} items={[{ title: 'Base Local', description: '0 latencia.', icon: 'tabler:database' }, { title: 'Sync Cloud', description: 'Respaldo total.', icon: 'tabler:cloud-upload' }, { title: 'IA', description: 'Habla con tus datos.', icon: 'tabler:message-chatbot' }, { title: 'TPV', description: 'Rápido.', icon: 'tabler:device-desktop-analytics' }, { title: 'Factura E', description: 'Legal 2026.', icon: 'tabler:certificate' }, { title: 'Privacidad', description: 'Cifrado On-Device.', icon: 'tabler:shield-lock' }]} /></div>
+    <div id="features" class="scroll-target py-24">
+      <Features3
+        title="Software que vuela, no que pesa."
+        subtitle="Hemos eliminado la latencia de los ERPs tradicionales. TuStock es instantáneo."
+        tagline="Rendimiento Industrial"
+        columns={3}
+        items={[
+          { title: 'Arquitectura Local-First', description: 'La base de datos vive en tu equipo. Las búsquedas de productos son inmediatas, incluso con catálogos de +50.000 referencias.', icon: 'tabler:bolt' },
+          { title: 'Sincronización Inteligente', description: '¿Se cortó el WiFi? No pasa nada. Sigue cobrando. El sistema enviará las facturas a la nube en cuanto detecte conexión.', icon: 'tabler:refresh' },
+          { title: 'TPV de Alto Flujo', description: 'Interfaz optimizada para pantallas táctiles y lectores láser. Reduce las colas en tu mostrador un 40%.', icon: 'tabler:device-desktop-analytics' },
+          { title: 'Gestión Multi-Almacén', description: 'Controla el stock de diferentes locales desde una única cuenta. Traspasos de mercancía en tiempo real.', icon: 'tabler:building-warehouse' },
+          { title: 'Etiquetado Térmico', description: 'Genera códigos de barras y etiquetas de precios directamente desde la recepción de mercancía.', icon: 'tabler:printer' },
+          { title: 'Seguridad Bancaria', description: 'Tus datos viajan y se almacenan bajo cifrado AES-256. Copias de seguridad automáticas cada hora.', icon: 'tabler:shield-check' }
+        ]}
+      />
+    </div>
 
-    <div id="ai-core" class="py-10 bg-slate-50 dark:bg-slate-800/20 scroll-target"><Content isReversed tagline="Edge AI" title="Potencia Real" items={[{ title: 'Local', description: 'Sin coste por token.' }, { title: 'Mapeo', description: 'Importa cualquier Excel.' }, { title: 'Stock', description: 'Predicciones reales.' }]} image={{ src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80', alt: 'AI' }} /></div>
+    <div id="ai-core" class="py-24 bg-blue-600 text-white scroll-target overflow-hidden">
+        <Content
+          isReversed
+          tagline="Tu Empleado del Mes es una IA"
+          title="Inteligencia Artificial que corre en TU hardware"
+          items={[
+            { title: 'Mapeo Genérico de Excels', description: 'Arrastra cualquier archivo de tus proveedores. Nuestra IA entiende los campos y mapea precios, costes e IVAs sin que tú hagas nada.' },
+            { title: 'Predicción de Roturas de Stock', description: 'Analizamos tendencias estacionales. TuStock te dirá: "Deberías pedir 50 unidades de este producto hoy para no quedarte sin nada el viernes".' },
+            { title: 'Auditoría de Márgenes', description: 'La IA detecta automáticamente productos que están perdiendo rentabilidad debido a la inflación o cambios de precio de proveedores.' }
+          ]}
+          image={{ src: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80', alt: 'AI Brain' }}
+        >
+          <fragment slot="content">
+            <h3 class="text-3xl font-bold mb-4">Privacidad total: Los datos no salen de tu local si así lo decides.</h3>
+          </fragment>
+        </Content>
+    </div>
 
-    <div id="fiscalidad" class="scroll-target"><Content tagline="Legal" title="Ley 2026" items={[{ title: 'VeriFactu', description: 'Envío AEAT.' }, { title: 'B2B', description: 'Facturae obligatoria.' }]} image={{ src: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80', alt: 'Fiscal' }} /></div>
+    <div id="fiscalidad" class="py-24 scroll-target">
+      <Content
+        tagline="Tranquilidad Legal"
+        title="Factura Electrónica y Ley 2026"
+        items={[
+          { title: 'Adaptado a VeriFactu', description: 'Cumplimos con el reglamento de sistemas de facturación de la AEAT. Cada ticket genera una huella inalterable.' },
+          { title: 'Kit Digital & Ley Crea y Crece', description: 'Emisión de facturas electrónicas en formato estructurado (Facturae) obligatorias para transacciones B2B.' },
+          { title: 'Conexión Directa con Gestorías', description: 'Exporta todos tus libros de IVA e IRPF en un segundo. Ahorra horas de contabilidad manual.' }
+        ]}
+        image={{ src: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80', alt: 'Legal Documents' }}
+      />
+    </div>
 
-    <div id="steps" class="scroll-target"><Steps title="Migración" items={[{ title: 'Excel', description: 'Sube tu archivo.', icon: 'tabler:file-upload' }, { title: 'Mapeo', description: 'IA lo ordena.', icon: 'tabler:wand' }, { title: 'Vende', description: 'Listo.', icon: 'tabler:refresh' }]} /></div>
+    <div id="steps" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target">
+      <Steps
+        title="Cambia de sistema en lo que dura un café"
+        items={[
+          { title: 'Paso 1: Exporta', description: 'Saca un Excel de tu antiguo programa (SAP, Sage, Holded o incluso un Excel manual).', icon: 'tabler:database-export' },
+          { title: 'Paso 2: IA Import', description: 'Nuestra IA lee tu archivo y organiza tus categorías, stock actual y precios de venta.', icon: 'tabler:wand' },
+          { title: 'Paso 3: ¡Listo!', description: 'Instala la App de escritorio, sincroniza y empieza a vender con la potencia de 2026.', icon: 'tabler:rocket' }
+        ]}
+        image={{ src: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=800&q=80', alt: 'Modern Store' }}
+      />
+    </div>
 
-    <div id="pricing" class="bg-blue-50 dark:bg-slate-900/40 scroll-target"><PricingSection title="Precios" prices={[{ title: 'Community', price: '0' }, { title: 'Pro', price: 29, hasRibbon: true }, { title: 'Enterprise', price: '99' }]} /></div>
+    <div id="pricing" class="py-24 scroll-target">
+      <PricingSection
+        title="Planes para cada etapa"
+        subtitle="Sin contratos de permanencia. Escala según crezca tu negocio."
+        prices={[
+          {
+            title: 'Starter', price: '0', subtitle: 'Para autónomos y micro-tiendas',
+            items: [{ description: 'Hasta 500 productos' }, { description: 'TPV Web Incluido' }, { description: 'Tickets PDF' }, { description: 'Soporte Comunidad' }],
+            callToAction: { text: 'Empezar Gratis', href: '/register' },
+          },
+          {
+            title: 'Profesional', price: 29, subtitle: 'El motor de los comercios modernos', hasRibbon: true, ribbonTitle: 'Más Popular',
+            items: [{ description: 'Productos Ilimitados' }, { description: 'App de Escritorio (Offline)' }, { description: 'IA Predictiva de Stock' }, { description: 'Factura Electrónica B2B' }, { description: 'Soporte Prioritario' }],
+            callToAction: { text: 'Prueba de 14 días', href: '/register?plan=pro' },
+          },
+          {
+            title: 'Enterprise', price: '99', subtitle: 'Para franquicias y multi-sedes',
+            items: [{ description: 'Multi-tienda centralizado' }, { description: 'API para E-commerce' }, { description: 'IA de Auditoría de Fraude' }, { description: 'Consultor Dedicado' }],
+            callToAction: { text: 'Contactar Ventas', href: '/contact' },
+          },
+        ]}
+      />
+    </div>
 
-    <div id="faq" class="scroll-target"><FAQs title="FAQ" items={[{ title: '¿Mac?', description: 'Sí.' }]} /></div>
+    <div id="faq" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target">
+      <FAQs
+        title="Respondemos a tus dudas"
+        items={[
+          { title: '¿Realmente funciona sin internet?', description: 'Sí. A diferencia de otros ERPs en la nube, TuStock descarga tu base de datos localmente. Puedes realizar ventas y gestionar stock sin conexión; los cambios se subirán solos cuando vuelvas a tener red.' },
+          { title: '¿Es compatible con mi impresora de tickets?', description: 'Nuestra App de escritorio es compatible con el 99% de impresoras térmicas ESC/POS (Epson, Star, Bixolon, etc.) mediante conexión USB, Red o Bluetooth.' },
+          { title: '¿Qué pasa con mis datos si decido irme?', description: 'Tus datos son tuyos. Puedes exportar todo tu catálogo, facturación y listado de clientes en formato CSV, JSON o PDF en cualquier momento desde el panel.' }
+        ]}
+      />
+    </div>
 
-    <CallToAction actions={[{ variant: 'primary', text: 'Empezar Gratis', href: '/register' }]}><fragment slot="title">Toma el control</fragment></CallToAction>
+    <CallToAction
+      actions={[{ variant: 'primary', text: 'Digitaliza tu negocio hoy', href: '/register', icon: 'tabler:rocket' }]}
+    >
+      <fragment slot="title">Deja de pelear con tu software.<br/> <span class="text-blue-600">Empieza a vender.</span></fragment>
+    </CallToAction>
 
   </div>
 </div>
 
+<style is:global>
+  html { scroll-behavior: smooth; }
+  /* Animación suave para el indicador */
+  .indicator {
+      will-change: height, transform, background-color;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+</style>
+
 <script is:inline>
-  function updateScrollSpy() {
+  function initScrollSpy() {
     const sections = document.querySelectorAll('.scroll-target');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    // El centro de la pantalla del usuario
-    const viewportCenter = window.innerHeight / 2;
+    // Variables para suavizar el cambio (evitar parpadeos)
+    let lastActiveId = "";
+
+    function update() {
+      const viewportCenter = window.innerHeight / 2;
+      let closestId = "";
+      let minDistance = Infinity;
+
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const sectionCenter = rect.top + (rect.height / 2);
+        const distance = Math.abs(viewportCenter - sectionCenter);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestId = section.getAttribute('id');
+        }
+      });
+
+      if (closestId !== lastActiveId) {
+        lastActiveId = closestId;
+        navLinks.forEach(link => {
+          const indicator = link.querySelector('.indicator');
+          const target = link.getAttribute('data-target');
+
+          if (target === closestId) {
+            indicator.className = "indicator w-2.5 h-8 rounded-full bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.8)]";
+          } else {
+            indicator.className = "indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40";
+          }
+        });
+      }
+    }
+
+    window.addEventListener('scroll', () => {
+        window.requestAnimationFrame(update);
+    }, { passive: true });
     
-    let closestSectionId = "";
-    let minDistance = Infinity;
-
-    sections.forEach(section => {
-      // Obtenemos la caja de la sección
-      const rect = section.getBoundingClientRect();
-      // Calculamos el centro de la sección relativo a la pantalla
-      const sectionCenter = rect.top + (rect.height / 2);
-      // Distancia entre el centro de la sección y el centro de la pantalla
-      const distance = Math.abs(viewportCenter - sectionCenter);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestSectionId = section.getAttribute('id');
-      }
-    });
-
-    // Pintar el menú
-    navLinks.forEach(link => {
-      const indicator = link.querySelector('.indicator');
-      const target = link.getAttribute('data-target');
-
-      if (target === closestSectionId) {
-        // ACTIVADO: Barra Vertical
-        indicator.className = "indicator w-2 h-8 rounded-full bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.8)] transition-all duration-300";
-      } else {
-        // DESACTIVADO: Punto Gris
-        indicator.className = "indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-300";
-      }
-    });
+    update();
   }
 
-  // Escuchar scroll y resize (el resize es importante por si giran el movil)
-  window.addEventListener('scroll', updateScrollSpy, { passive: true });
-  window.addEventListener('resize', updateScrollSpy);
-  
-  // Ejecutar al cargar
-  document.addEventListener('DOMContentLoaded', updateScrollSpy);
-  // Por si Astro hace cosas raras con el DOM, ejecutamos también a los 200ms
-  setTimeout(updateScrollSpy, 200);
+  document.addEventListener('DOMContentLoaded', initScrollSpy);
+  setTimeout(initScrollSpy, 500);
 </script>
