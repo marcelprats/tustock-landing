@@ -1,5 +1,5 @@
 ---
-import Hero from '~/components/widgets/Hero.astro';
+import { Icon } from 'astro-icon/components';
 import Features3 from '~/components/widgets/Features3.astro';
 import Steps from '~/components/widgets/Steps.astro';
 import Content from '~/components/widgets/Content.astro';
@@ -7,7 +7,6 @@ import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import PricingSection from '~/components/widgets/PricingSection.astro';
 import Stats from '~/components/widgets/Stats.astro';
-import Brands from '~/components/widgets/Brands.astro';
 
 const { shopCount, userCount } = Astro.props;
 
@@ -39,70 +38,61 @@ const navItems = [
   
   <div class="flex-1 w-full">
     
-  <div id="hero" class="scroll-target min-h-screen relative flex items-center justify-center pt-20 pb-12 overflow-hidden bg-white dark:bg-slate-950">
-    
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
-      <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 dark:bg-blue-600/10 rounded-full blur-[120px]"></div>
-      <div class="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 dark:bg-indigo-600/10 rounded-full blur-[120px]"></div>
-    </div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 text-center z-10">
-      
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-        </span>
-        Tecnología Híbrida 2026
+    <div id="hero" class="scroll-target min-h-screen relative flex items-center justify-center pt-20 pb-12 overflow-hidden bg-white dark:bg-slate-950">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 dark:bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 dark:bg-indigo-600/10 rounded-full blur-[120px]"></div>
       </div>
 
-      <h1 class="text-5xl md:text-8xl font-black tracking-tight text-slate-900 dark:text-white leading-[0.95] mb-8">
-        Vende en local. <br/> 
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Controla en la nube.</span>
-      </h1>
-
-      <p class="max-w-2xl mx-auto text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 leading-relaxed">
-        TuStock fusiona la velocidad de una <b>App de Escritorio</b> nativa con la flexibilidad de la gestión Cloud e IA local. El ERP definitivo para comercios que no se detienen.
-      </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-16">
-        
-        <a href="#fiscalidad" class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold hover:border-blue-500 hover:text-blue-600 transition-all group">
-          <Icon name="tabler:receipt-tax" class="w-7 h-7 transition-transform group-hover:scale-110" />
-          <span class="text-left leading-tight">
-            <span class="block text-[10px] uppercase opacity-60 font-black">Normativa</span>
-            VeriFactu Ready
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 text-center z-10">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
           </span>
-        </a>
+          Tecnología Híbrida 2026
+        </div>
 
-        <a href="/download" class="w-full sm:w-auto flex items-center justify-center gap-4 px-8 py-5 rounded-2xl bg-blue-600 text-white font-black shadow-2xl shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all group">
-          <Icon name="tabler:download" class="w-8 h-8 transition-transform group-hover:bounce" />
-          <div class="text-left leading-tight">
-            <span class="block text-[10px] uppercase opacity-80">Windows & Mac</span>
-            Descargar App
+        <h1 class="text-5xl md:text-8xl font-black tracking-tight text-slate-900 dark:text-white leading-[0.95] mb-8">
+          Vende en local. <br/> 
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Controla en la nube.</span>
+        </h1>
+
+        <p class="max-w-2xl mx-auto text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 leading-relaxed">
+          TuStock fusiona la velocidad de una <b>App de Escritorio</b> nativa con la flexibilidad de la gestión Cloud e IA local. El ERP definitivo para comercios que no se detienen.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-16">
+          <a href="#fiscalidad" class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold hover:border-blue-500 hover:text-blue-600 transition-all group">
+            <Icon name="tabler:receipt-tax" class="w-7 h-7 transition-transform group-hover:scale-110" />
+            <span class="text-left leading-tight">
+              <span class="block text-[10px] uppercase opacity-60 font-black text-center">Normativa</span>
+              VeriFactu Ready
+            </span>
+          </a>
+
+          <a href="/download" class="w-full sm:w-auto flex items-center justify-center gap-4 px-8 py-5 rounded-2xl bg-blue-600 text-white font-black shadow-2xl shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all group">
+            <Icon name="tabler:download" class="w-8 h-8" />
+            <div class="text-left leading-tight">
+              <span class="block text-[10px] uppercase opacity-80">Windows & Mac</span>
+              Descargar App
+            </div>
+          </a>
+
+          <a href="/register" class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold hover:shadow-lg transition-all group">
+            <Icon name="tabler:login" class="w-7 h-7 text-blue-600" />
+            Acceso Web
+          </a>
+        </div>
+
+        <div class="relative max-w-5xl mx-auto mt-4 group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+          <div class="relative bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=2000&q=80" alt="TuStock Interface" class="w-full h-auto opacity-95 group-hover:opacity-100 transition-opacity" />
           </div>
-        </a>
-
-        <a href="/register" class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold hover:shadow-lg transition-all group">
-          <Icon name="tabler:login" class="w-7 h-7 text-blue-600 transition-transform group-hover:translate-x-1" />
-          Acceso Web
-        </a>
-        
-      </div>
-
-      <div class="relative max-w-5xl mx-auto mt-4 group">
-        <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-        <div class="relative bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=2000&q=80" 
-            alt="TuStock Interface" 
-            class="w-full h-auto opacity-90 group-hover:opacity-100 transition-opacity"
-          />
         </div>
       </div>
-
     </div>
-  </div>
 
     <div class="py-16 border-y border-gray-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
       <Stats stats={[
@@ -116,29 +106,29 @@ const navItems = [
     <div id="features" class="scroll-target py-24">
       <Features3
         title="Software de grado industrial."
-        subtitle="Diseñado para trabajar a la velocidad de tu negocio, no de tu conexión."
+        subtitle="Diseñado para trabajar a la velocidad de tu negocio."
         tagline="Rendimiento"
         columns={3}
         items={[
-          { title: 'Local-First', description: 'Cero esperas. Tu base de datos vive en tu PC.', icon: 'tabler:cpu' },
-          { title: 'Sincronización Cloud', description: 'Respaldo automático y acceso remoto total.', icon: 'tabler:refresh' },
-          { title: 'TPV Nativo', description: 'Compatible con todo tu hardware actual.', icon: 'tabler:device-imac' },
-          { title: 'Seguridad AES-256', description: 'Cifrado local de extremo a extremo.', icon: 'tabler:shield-lock' },
-          { title: 'Multi-Almacén', description: 'Control centralizado de todas tus sedes.', icon: 'tabler:building-store' },
-          { title: 'Modo Offline', description: 'Sigue vendiendo aunque se caiga el mundo.', icon: 'tabler:wifi-off' }
+          { title: 'Local-First', description: 'Bases de datos en tu PC. Cero esperas.', icon: 'tabler:cpu' },
+          { title: 'Sincronización Cloud', description: 'Acceso total desde cualquier lugar.', icon: 'tabler:refresh' },
+          { title: 'TPV Nativo', description: 'Optimizado para hardware profesional.', icon: 'tabler:device-imac' },
+          { title: 'Seguridad AES-256', description: 'Cifrado local de alta seguridad.', icon: 'tabler:shield-lock' },
+          { title: 'Multi-Almacén', description: 'Control de inventario centralizado.', icon: 'tabler:building-store' },
+          { title: 'Modo Offline', description: 'Vende sin conexión a internet.', icon: 'tabler:wifi-off' }
         ]}
       />
     </div>
 
-    <div id="ai-core" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target transition-colors duration-500">
+    <div id="ai-core" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target">
         <Content
           isReversed
           tagline="Inteligencia Artificial"
           title="Tu inventario ahora piensa por ti."
           items={[
-            { title: 'Mapeo de Facturas', description: 'La IA lee tus albaranes y carga el stock sola.' },
-            { title: 'Predicción de Demanda', description: 'Anticípate a las roturas de stock antes de que ocurran.' },
-            { title: 'Consultas Naturales', description: 'Habla con tus datos como si fueras un analista.' }
+            { title: 'Mapeo de Facturas', description: 'Carga stock leyendo albaranes automáticamente.' },
+            { title: 'Predicción de Demanda', description: 'Anticípate a las roturas de stock.' },
+            { title: 'Consultas Naturales', description: 'Pregunta a tus datos en lenguaje normal.' }
           ]}
           image={{ src: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&w=800&q=80', alt: 'AI' }}
         />
@@ -149,66 +139,32 @@ const navItems = [
         tagline="Legal 2026"
         title="Tranquilidad total con Hacienda"
         items={[
-          { title: 'VeriFactu Ready', description: 'Cumplimiento estricto de la Ley Antifraude 11/2021.' },
-          { title: 'Factura Electrónica', description: 'Generación de ficheros Facturae para B2B.' },
-          { title: 'Libros de IVA', description: 'Exportación directa para tu gestoría en segundos.' }
+          { title: 'VeriFactu Ready', description: 'Cumple con la Ley Antifraude 11/2021.' },
+          { title: 'Factura Electrónica', description: 'Ficheros Facturae listos para B2B.' },
+          { title: 'Libros de IVA', description: 'Exportación directa para gestorías.' }
         ]}
         image={{ src: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80', alt: 'Legal' }}
       />
     </div>
 
     <div id="steps" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target">
-      <Steps
-        title="Comienza hoy mismo"
-        items={[
-          { title: '1. Exporta', description: 'Saca un Excel de tu sistema antiguo.', icon: 'tabler:file-download' },
-          { title: '2. Importa con IA', description: 'Nuestra IA organiza tu catálogo sola.', icon: 'tabler:wand' },
-          { title: '3. Vende', description: 'Instala la App y empieza a facturar.', icon: 'tabler:rocket' }
-        ]}
-      />
+      <Steps title="Comienza hoy mismo" items={[{ title: '1. Exporta', description: 'Tu Excel antiguo.', icon: 'tabler:file-download' }, { title: '2. Importa', description: 'Nuestra IA lo organiza.', icon: 'tabler:wand' }, { title: '3. Vende', description: 'Listo en minutos.', icon: 'tabler:rocket' }]} />
     </div>
 
     <div id="pricing" class="py-24 scroll-target">
-      <PricingSection
-        title="Precios claros"
-        prices={[
-          { title: 'Starter', price: '0', subtitle: 'Gratis para siempre', items: [{ description: 'Hasta 300 productos' }] },
-          { title: 'Pro', price: 29, subtitle: 'Para negocios reales', hasRibbon: true, items: [{ description: 'App Offline + IA' }] },
-          { title: 'Enterprise', price: '99', subtitle: 'Multi-tienda', items: [{ description: 'Soporte 24/7' }] },
-        ]}
-      />
+      <PricingSection title="Precios claros" prices={[{ title: 'Starter', price: '0', items: [{ description: 'Hasta 300 productos' }] }, { title: 'Pro', price: 29, hasRibbon: true, items: [{ description: 'App Offline + IA' }] }, { title: 'Enterprise', price: '99', items: [{ description: 'Soporte 24/7' }] }]} />
     </div>
 
     <div id="faq" class="py-24 bg-slate-50 dark:bg-slate-900 scroll-target">
-      <FAQs
-        title="Dudas frecuentes"
-        items={[
-          { title: '¿Funciona sin internet?', description: 'Sí, es el corazón de TuStock. La App local no necesita red para vender.' },
-          { title: '¿Es legal?', description: 'Cumplimos al 100% con VeriFactu y la Ley Crea y Crece 2026.' }
-        ]}
-      />
+      <FAQs title="Dudas frecuentes" items={[{ title: '¿Funciona sin internet?', description: 'Sí, la App local no necesita red para vender.' }, { title: '¿Es legal?', description: 'Cumple VeriFactu y Ley Crea y Crece.' }]} />
     </div>
 
-    <CallToAction
-      actions={[{ variant: 'primary', text: 'Probar Gratis', href: '/register', icon: 'tabler:rocket' }]}
-    >
-      <fragment slot="title">Toma el control de tu negocio</fragment>
-    </CallToAction>
-
+    <CallToAction actions={[{ variant: 'primary', text: 'Probar Gratis', href: '/register', icon: 'tabler:rocket' }]}><fragment slot="title">Toma el control de tu negocio</fragment></CallToAction>
   </div>
 </div>
 
 <style is:global>
   html { scroll-behavior: smooth; }
-  
-  /* ELIMINAR RETARDOS DEL HERO */
-  #hero [data-aw-reveal] {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
   .indicator {
       will-change: height, transform, background-color;
       transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, box-shadow 0.4s ease;
