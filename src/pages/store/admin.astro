@@ -1,28 +1,27 @@
 ---
-import StoreAdminLayout from '~/layouts/StoreAdminLayout.astro'; // <--- USAMOS EL NUEVO
-import AppDashboard from '~/components/app/AppDashboard.astro'; // Tu componente de gráficas
+import StoreAdminLayout from '~/layouts/StoreAdminLayout.astro';
+// Tu dashboard (asegúrate que SOLO tenga divs, no layouts)
+import AppDashboard from '~/components/app/AppDashboard.astro'; 
 
 const { currentShop } = Astro.locals;
 const session = Astro.cookies.get('session');
 
-// Validación de sesión básica (el resto lo hace el layout)
-if (!session) {
-  return Astro.redirect(`/login?return_to=${encodeURIComponent(Astro.request.url)}`);
-}
+if (!session) return Astro.redirect('/login');
 
-const metadata = { title: `Admin - ${currentShop?.name}` };
+const metadata = { title: `Admin ${currentShop?.name}` };
 ---
 
-{/* Pasamos el tenant slug al layout para que haga sus queries */}
 <StoreAdminLayout tenant={currentShop.slug} metadata={metadata}>
   
-  {/* Aquí va el contenido central del Dashboard */}
-  <div class="grid grid-cols-1 gap-6">
-      
-      {/* Puedes meter aquí tu AppDashboard simplificado si quieres reutilizar sus widgets */}
-      {/* Ojo: AppDashboard ya no debería tener Layout dentro, solo divs */}
-      <AppDashboard tenantId={currentShop.slug} />
+  {/* Aquí inyectamos el contenido limpio */}
+  <div class="max-w-6xl mx-auto">
+      <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Panel General</h1>
+          <p class="text-gray-500 text-sm">Bienvenido a la gestión de {currentShop.name}</p>
+      </div>
 
+      {/* El dashboard se carga aquí dentro */}
+      <AppDashboard tenantId={currentShop.slug} />
   </div>
 
 </StoreAdminLayout>
