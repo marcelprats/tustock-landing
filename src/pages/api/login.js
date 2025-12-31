@@ -1,16 +1,16 @@
 import bcrypt from "bcryptjs"; 
 
 export const POST = async ({ request, cookies, redirect, locals }) => {
+  console.log("--> INTENTO DE LOGIN RECIBIDO (POST)"); // Debug en logs
+
   try {
     const formData = await request.formData();
     const email = formData.get("email");
     const password = formData.get("password");
-    
-    // Obtener "return_to" si venía en el formulario
     const returnUrl = formData.get("return_to");
 
     const db = locals.runtime?.env?.DB; 
-    if (!db) return new Response("Error DB", { status: 500 });
+    if (!db) return new Response("Error Base de Datos", { status: 500 });
 
     // 1. Validar Usuario
     const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
@@ -19,7 +19,7 @@ export const POST = async ({ request, cookies, redirect, locals }) => {
         return redirect("/login?error=invalid_credentials");
     }
 
-    // 2. Crear Cookie Global (.tustock.app)
+    // 2. Crear Cookie Global
     const isProd = import.meta.env.PROD;
     cookies.set("session", user.id, {
         path: "/",
@@ -30,34 +30,30 @@ export const POST = async ({ request, cookies, redirect, locals }) => {
         domain: isProd ? ".tustock.app" : undefined
     });
 
-    // 3. REDIRECCIÓN INTELIGENTE (Aquí estaba el fallo del 404)
-    // Si ya teníamos un destino claro, vamos allí.
+    // 3. Redirección Inteligente
     if (returnUrl && returnUrl.startsWith('/')) {
         return redirect(returnUrl);
     }
 
-    // Si no, decidimos según el dominio donde estemos:
     const url = new URL(request.url);
-    const host = url.host; // ej: frutpaco.tustock.app
+    const host = url.host;
 
-    // Si es un subdominio de tienda (tiene 3 partes o más y no es www/app)
-    if (host.split('.').length >= 3 && !host.startsWith('www') && !host.startsWith('app')) {
-        // Estamos en una tienda -> Vamos al Admin de la tienda
+    // Si es una tienda (subdominio), vamos al Admin
+    if (host.split('.').length >= 3 && !host.startsWith('www')) {
         return redirect("/admin");
-    } else {
-        // Estamos en la web principal -> Vamos al Hub general
-        return redirect("/hub");
-    }
+    } 
+    
+    // Si es la web principal, al Hub
+    return redirect("/hub");
 
   } catch (error) {
     console.error("Login Error:", error);
-    return new Response("Error Interno", { status: 500 });
+    return new Response(`Error Interno: ${error.message}`, { status: 500 });
   }
 };
 
-// Pequeño truco: Si alguien entra por GET a la API, le decimos que existe
-export const GET = async () => {
-    return new Response(JSON.stringify({ status: "Login API Ready" }), {
-        headers: { "Content-Type": "application/json" }
-    });
+// 🔥 ELIMINAMOS EL GET PARA NO CONFUNDIRNOS
+// Si entras por GET, te mandamos al formulario de login de nuevo
+export const GET = async ({ redirect }) => {
+    return redirect("/login");
 }

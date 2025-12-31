@@ -21,7 +21,7 @@ const returnTo = Astro.url.searchParams.get('redirect') || '';
         />
       </div>
 
-      <form action="/api/login" method="POST" class="space-y-6">
+      <form action="/api/login/" method="POST" class="space-y-6">
         
         <input type="hidden" name="return_to" value={returnTo} />
 
