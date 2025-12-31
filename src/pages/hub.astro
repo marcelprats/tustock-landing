@@ -8,7 +8,7 @@ if (!session || !session.value) {
   return Astro.redirect('/login');
 }
 
-// 2. OBTENER DATOS REALES (Lógica de tu HubSelector)
+// 2. OBTENER DATOS REALES
 const userId = session.value;
 const db = Astro.locals.runtime?.env?.DB;
 
@@ -17,13 +17,11 @@ let userName = "Usuario";
 
 if (userId && db) {
   try {
-    // Nombre del usuario
     const userRes = await db.prepare("SELECT full_name FROM users WHERE id = ?").bind(userId).first();
     if (userRes) userName = userRes.full_name;
 
-    // Tiendas
     const storesRes = await db.prepare(`
-      SELECT t.name, t.slug, t.status, t.plan_type, m.role 
+      SELECT t.name, t.slug, t.status, t.web_plan, m.role 
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ?
@@ -34,7 +32,6 @@ if (userId && db) {
         const isPending = s.status === 'PENDING';
         return {
           ...s, 
-          // Si es PROD: https://tienda.tustock.app | Si es DEV: /?tenant=tienda
           url: isPending 
                ? '#' 
                : (import.meta.env.PROD ? `https://${s.slug}.tustock.app` : `/?tenant=${s.slug}`),
@@ -51,101 +48,129 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
 ---
 
 <Layout metadata={metadata}>
-  <section class="relative min-h-screen px-4 py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-slate-900">
+  <section class="relative min-h-screen px-4 py-16 sm:px-6 lg:px-8 bg-slate-50 dark:bg-[#0b1120] overflow-hidden">
     
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Hola, {userName} 👋
+                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+                    Hola, <span class="text-blue-600 dark:text-blue-400">{userName.split(' ')[0]}</span> 👋
                 </h1>
-                <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
-                    Gestiona tus negocios desde un único lugar.
+                <p class="mt-3 text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+                    Bienvenido de nuevo. Selecciona el ecosistema que deseas gestionar hoy.
                 </p>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex items-center gap-4">
                 <form action="/api/logout" method="POST">
-                    <button type="submit" class="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border border-transparent hover:border-red-200">
+                    <button type="submit" class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                         <Icon name="tabler:logout" class="w-5 h-5" />
-                        Salir
+                        Cerrar Sesión
                     </button>
                 </form>
-                <a href="/new-store" class="btn-primary flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-lg hover:translate-y-[-2px] transition-all">
+                <a href="/new-store" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:translate-y-[-2px] active:scale-95 transition-all">
                     <Icon name="tabler:plus" class="w-5 h-5" />
-                    Nueva Tienda
+                    Nueva Unidad
                 </a>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         
-        {userStores.length > 0 ? userStores.map((store) => (
+        {userStores.map((store) => (
             <a 
                 href={store.url} 
                 target={store.isPending ? "_self" : "_blank"}
-                class={`group relative bg-white dark:bg-slate-800 border rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-blue-500/50 flex flex-col justify-between h-full min-h-[220px]
-                    ${store.isPending ? 'border-yellow-200 opacity-90 cursor-not-allowed' : 'border-gray-200 dark:border-gray-800'}`}
+                class={`group relative flex flex-col justify-between min-h-[260px] p-8 rounded-3xl transition-all duration-500
+                    ${store.isPending 
+                        ? 'bg-slate-100 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-700 cursor-wait animate-pulse' 
+                        : 'bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-400 shadow-sm hover:shadow-2xl hover:-translate-y-2'
+                    }`}
             >
-            
-            {/* ETIQUETA DE ESTADO */}
-            <div class="flex justify-between items-start mb-6">
-                <div class={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors
-                    ${store.isPending ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'}`}>
-                    <Icon name="tabler:building-store" class="w-6 h-6" />
-                </div>
-                
-                <div class="flex gap-2">
-                    <span class={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide 
-                        ${store.plan_type === 'PRO' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
-                        {store.plan_type || 'FREE'}
-                    </span>
-                    {store.isPending && (
-                        <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-[10px] font-bold">
-                            CREANDO...
+                <div class="flex justify-between items-start">
+                    <div class={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500
+                        ${store.isPending 
+                            ? 'bg-slate-200 dark:bg-slate-700 text-slate-400' 
+                            : 'bg-slate-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-6'}`}>
+                        <Icon name={store.isPending ? "tabler:loader-quarter" : "tabler:building-store"} class={`w-7 h-7 ${store.isPending ? 'animate-spin' : ''}`} />
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                        <span class={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border
+                            ${store.web_plan === 'PRO' 
+                                ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400' 
+                                : 'bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'}`}>
+                            {store.web_plan || 'FREE'}
                         </span>
+                        {store.role === 'OWNER' && (
+                            <span class="text-[9px] font-bold text-blue-500 uppercase tracking-tighter bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">Propietario</span>
+                        )}
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {store.name}
+                    </h3>
+                    <div class="mt-2 flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium">
+                        <Icon name="tabler:world" class="w-4 h-4" />
+                        <span class="text-sm">{store.slug}.tustock.app</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-between">
+                    {store.isPending ? (
+                        <span class="text-sm font-bold text-amber-600 flex items-center gap-2">
+                            Configurando entorno...
+                        </span>
+                    ) : (
+                        <>
+                            <span class="text-xs font-semibold text-slate-400 group-hover:text-blue-500 transition-colors uppercase tracking-widest">Entrar</span>
+                            <div class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-300">
+                                <Icon name="tabler:chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-white" />
+                            </div>
+                        </>
                     )}
                 </div>
-            </div>
 
-            <div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
-                    {store.name}
-                </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <Icon name="tabler:world" class="w-4 h-4" />
-                    {store.slug}.tustock.app
-                </p>
-            </div>
-
-            {!store.isPending && (
-                <div class="mt-6 pt-6 border-t border-gray-100 dark:border-slate-700 flex items-center text-sm font-medium text-blue-600 group-hover:underline">
-                    Entrar al Dashboard <Icon name="tabler:arrow-right" class="w-4 h-4 ml-auto transition-transform group-hover:translate-x-1" />
-                </div>
-            )}
+                {/* Brillo sutil PRO */}
+                {store.web_plan === 'PRO' && !store.isPending && (
+                    <div class="absolute inset-0 border-2 border-amber-500/0 group-hover:border-amber-500/10 rounded-3xl transition-all duration-500 pointer-events-none"></div>
+                )}
             </a>
-        )) : (
-            /* EMPTY STATE */
-            <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 text-center">
-                <div class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
-                    <Icon name="tabler:building-store-off" class="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No tienes tiendas todavía</h3>
-                <p class="text-gray-500 mb-6">Empieza creando tu primer negocio en la plataforma.</p>
-                <a href="/new-store" class="btn-primary px-6 py-2 rounded-lg">Crear Primera Tienda</a>
-            </div>
-        )}
+        ))}
 
-        {userStores.length > 0 && (
-            <a href="/new-store" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-all group h-full min-h-[220px]">
-                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Icon name="tabler:plus" class="w-6 h-6 text-gray-500 group-hover:text-blue-500" />
-                </div>
-                <span class="font-medium text-gray-500 group-hover:text-blue-600">Crear otra tienda</span>
-            </a>
-        )}
+        <a href="/new-store" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-3xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-white dark:hover:bg-slate-900/50 transition-all group min-h-[260px]">
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-600 transition-all duration-500">
+                <Icon name="tabler:plus" class="w-8 h-8 text-slate-400 group-hover:text-white" />
+            </div>
+            <span class="text-lg font-bold text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Añadir Negocio</span>
+            <p class="text-sm text-slate-400 mt-1">Expande tu ecosistema</p>
+        </a>
 
         </div>
     </div>
   </section>
 </Layout>
+
+<style>
+    /* Efecto de entrada suave para las tarjetas */
+    .grid > a {
+        animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Retraso escalonado para las tarjetas */
+    .grid > a:nth-child(1) { animation-delay: 0.1s; }
+    .grid > a:nth-child(2) { animation-delay: 0.2s; }
+    .grid > a:nth-child(3) { animation-delay: 0.3s; }
+</style>
