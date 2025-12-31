@@ -1,4 +1,5 @@
 ---
+// PARTE SUPERIOR DEL HUB.ASTRO
 import Layout from '~/layouts/PageLayout.astro';
 import { Icon } from 'astro-icon/components';
 
@@ -24,43 +25,39 @@ if (userId && db) {
     `).bind(userId).all();
     
     if (storesRes.results) {
-      // PROCESAMIENTO CON AUTO-ACTIVACIÓN
-      userStores = await Promise.all(storesRes.results.map(async (s) => {
+      // Usamos un bucle for...of para evitar líos de sintaxis en el map con async
+      const processedStores = [];
+      for (const s of storesRes.results) {
         let currentStatus = s.status;
 
-        // Si está PENDING, intentamos validarla ahora mismo en el servidor
         if (currentStatus === 'PENDING') {
           try {
             const checkUrl = import.meta.env.PROD 
               ? `https://${s.slug}.tustock.app` 
               : `http://localhost:4321/?tenant=${s.slug}`;
 
-            // Timeout corto de 800ms para no retrasar la carga del Hub
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 800);
-
-            const check = await fetch(checkUrl, { method: 'HEAD', signal: controller.signal });
-            clearTimeout(timeoutId);
+            // Petición rápida al servidor
+            const check = await fetch(checkUrl, { method: 'HEAD' });
 
             if (check.ok || check.status === 404 || check.status === 200) {
-              // Si responde algo, la activamos en la DB silenciosamente
               await db.prepare("UPDATE tenants SET status = 'ACTIVE' WHERE id = ?").bind(s.id).run();
               currentStatus = 'ACTIVE';
             }
           } catch (e) {
-            // Sigue caída, mantenemos PENDING
+            // Sigue sin responder, no pasa nada
           }
         }
 
-        return {
+        processedStores.push({
           ...s,
           status: currentStatus,
           isPending: currentStatus === 'PENDING',
           url: currentStatus === 'ACTIVE' 
                ? (import.meta.env.PROD ? `https://${s.slug}.tustock.app` : `/?tenant=${s.slug}`)
                : '#'
-        };
-      }));
+        });
+      }
+      userStores = processedStores;
     }
   } catch (e) {
     console.error("Error cargando Hub:", e);
