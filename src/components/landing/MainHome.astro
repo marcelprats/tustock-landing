@@ -30,7 +30,7 @@ const navItems = [
       {navItems.map(({ text, target }) => (
         <a 
           href={`#${target}`} 
-          class="group relative nav-link flex items-center justify-center w-4 h-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          class="nav-link group relative flex items-center justify-center w-4 h-full transition-all duration-300"
           data-target={target}
           aria-label={text}
         >
@@ -38,7 +38,7 @@ const navItems = [
             {text}
           </span>
           
-          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:bg-blue-400 group-hover:scale-110"></div>
+          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-300 ease-out group-hover:bg-blue-400 group-hover:scale-110"></div>
         </a>
       ))}
 
@@ -47,7 +47,7 @@ const navItems = [
 
   <div class="flex-1 w-full">
     
-    <div id="hero" class="scroll-mt-20">
+    <div id="hero" class="scroll-mt-20 section-scroll">
       <Hero
         actions={[
           {
@@ -62,12 +62,14 @@ const navItems = [
         image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Desktop App Interface' }}
       >
         <fragment slot="title">
-          ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
-          <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
+            <span class="block animate-fade-in duration-300 ease-out">
+                ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
+                <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
+            </span>
         </fragment>
 
         <fragment slot="subtitle">
-          <span class="font-light text-lg">
+          <span class="font-light text-lg block animate-fade-in duration-500 delay-100">
             La gestión de stock que combina una <b>App de Escritorio de alto rendimiento</b> con sincronización Cloud.
             <br/>
             Ejecuta la <b>Inteligencia Artificial en tu propio PC</b> para máxima privacidad y velocidad.
@@ -87,7 +89,7 @@ const navItems = [
       />
     </div>
 
-    <div id="features" class="scroll-mt-20">
+    <div id="features" class="scroll-mt-20 section-scroll">
       <Features3
         title="Más que una web. Un Sistema Operativo."
         subtitle="Diseñado para trabajar offline y sincronizar cuando vuelvas."
@@ -105,7 +107,7 @@ const navItems = [
       />
     </div>
 
-    <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20">
+    <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20 section-scroll">
       <Content
         isReversed
         tagline="Inteligencia Artificial On-Device"
@@ -119,7 +121,7 @@ const navItems = [
       />
     </div>
 
-    <div id="fiscalidad" class="scroll-mt-20">
+    <div id="fiscalidad" class="scroll-mt-20 section-scroll">
       <Content
         tagline="Cumplimiento Normativo"
         title="Fiscalidad Automatizada 2026"
@@ -132,7 +134,7 @@ const navItems = [
       />
     </div>
 
-    <div id="steps" class="scroll-mt-20">
+    <div id="steps" class="scroll-mt-20 section-scroll">
       <Steps
         title="Migración inteligente"
         items={[
@@ -144,7 +146,7 @@ const navItems = [
       />
     </div>
 
-    <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40">
+    <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40 section-scroll">
       <PricingSection
         title="Precios claros"
         prices={[
@@ -167,7 +169,7 @@ const navItems = [
       />
     </div>
 
-    <div id="faq" class="scroll-mt-20">
+    <div id="faq" class="scroll-mt-20 section-scroll">
       <FAQs
         title="Preguntas Frecuentes"
         items={[
@@ -198,77 +200,53 @@ const navItems = [
 </div>
 
 <style is:global>
-  /* Scroll suave para toda la página */
   html {
       scroll-behavior: smooth;
   }
 </style>
 
 <script is:inline>
-  function initScrollSpy() {
-    console.log("--> Iniciando ScrollSpy");
+  // Esta función se ejecutará cada vez que muevas la rueda
+  function onScroll() {
+    const sections = document.querySelectorAll('.section-scroll');
+    const navLinks = document.querySelectorAll('.nav-link');
 
-    const observerOptions = {
-      root: null,
-      // Hemos ampliado la zona: detecta si el elemento está en el 30% central de la pantalla
-      rootMargin: '-30% 0px -30% 0px', 
-      threshold: 0
-    };
+    let currentSectionId = '';
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.getAttribute('id');
-          // console.log("Sección activa detectada:", id); // Descomentar para depurar
+    // Calculamos qué sección está ocupando más pantalla
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      
+      // Si el scroll ha bajado más allá del inicio de la sección (menos un margen de 200px para anticipar)
+      if (window.scrollY >= (sectionTop - 300)) {
+        currentSectionId = section.getAttribute('id');
+      }
+    });
 
-          // Buscar todos los links
-          const allLinks = document.querySelectorAll('.nav-link');
+    // Actualizamos el menú
+    navLinks.forEach((link) => {
+      const indicator = link.querySelector('.indicator');
+      // Limpiamos estilos (RESET)
+      if (indicator) {
+        indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
+        indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
+      }
 
-          allLinks.forEach(link => {
-            const indicator = link.querySelector('.indicator');
-            const linkTarget = link.getAttribute('data-target');
-
-            // ¿Es este el link de la sección actual?
-            if (linkTarget === id) {
-              // SÍ -> ACTIVAR (Barra Grande)
-              link.classList.add('active');
-              if (indicator) {
-                // Quitamos clases de punto pequeño
-                indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-                // Añadimos clases de BARRA GRANDE AZUL
-                indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-              }
-            } else {
-              // NO -> DESACTIVAR (Punto Pequeño)
-              link.classList.remove('active');
-              if (indicator) {
-                // Quitamos clases de barra grande
-                indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-                // Añadimos clases de punto pequeño
-                indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-              }
-            }
-          });
+      // Si coincide con la sección actual
+      if (link.getAttribute('data-target') === currentSectionId) {
+        if (indicator) {
+          // APLICAMOS ESTILO BARRA (ACTIVADO)
+          indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
+          indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
         }
-      });
-    }, observerOptions);
-
-    // Lista de IDs a observar
-    const sections = ['hero', 'features', 'ai-core', 'fiscalidad', 'steps', 'pricing', 'faq'];
-    sections.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        observer.observe(element);
-      } else {
-        console.warn(`ScrollSpy: No se encontró la sección con id="${id}"`);
       }
     });
   }
 
-  // Ejecutar cuando el navegador esté listo
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollSpy);
-  } else {
-    initScrollSpy();
-  }
+  // Escuchamos el evento de scroll globalmente
+  window.addEventListener('scroll', onScroll);
+  
+  // Ejecutamos una vez al inicio para iluminar la portada
+  onScroll();
 </script>
