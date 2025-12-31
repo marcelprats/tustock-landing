@@ -86,9 +86,13 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
             <a 
                 href={store.url} 
                 target={store.isPending ? "_self" : "_blank"}
+                /* 🔥 ATRIBUTOS CRÍTICOS PARA EL SCRIPT 🔥 */
+                data-status={store.status} 
+                data-slug={store.slug} 
+                data-id={store.id} 
                 class={`group relative flex flex-col justify-between min-h-[260px] p-8 rounded-3xl transition-all duration-500
                     ${store.isPending 
-                        ? 'bg-slate-100 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-700 cursor-wait animate-pulse' 
+                        ? 'bg-slate-100 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-700 cursor-wait' 
                         : 'bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-400 shadow-sm hover:shadow-2xl hover:-translate-y-2'
                     }`}
             >
@@ -97,6 +101,7 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                         ${store.isPending 
                             ? 'bg-slate-200 dark:bg-slate-700 text-slate-400' 
                             : 'bg-slate-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-6'}`}>
+                        {/* Si está pendiente, animamos el icono de carga */}
                         <Icon name={store.isPending ? "tabler:loader-quarter" : "tabler:building-store"} class={`w-7 h-7 ${store.isPending ? 'animate-spin' : ''}`} />
                     </div>
 
@@ -125,9 +130,19 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
 
                 <div class="mt-8 flex items-center justify-between">
                     {store.isPending ? (
-                        <span class="text-sm font-bold text-amber-600 flex items-center gap-2">
-                            Configurando entorno...
-                        </span>
+                        <div class="flex flex-col gap-2 w-full">
+                            <span class="text-sm font-bold text-amber-600 flex items-center gap-2">
+                                <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                </span>
+                                Configurando entorno...
+                            </span>
+                            {/* Barra de progreso visual sutil */}
+                            <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-amber-500 animate-[loading_2s_ease-in-out_infinite]"></div>
+                            </div>
+                        </div>
                     ) : (
                         <>
                             <span class="text-xs font-semibold text-slate-400 group-hover:text-blue-500 transition-colors uppercase tracking-widest">Entrar</span>
@@ -137,11 +152,6 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                         </>
                     )}
                 </div>
-
-                {/* Brillo sutil PRO */}
-                {store.web_plan === 'PRO' && !store.isPending && (
-                    <div class="absolute inset-0 border-2 border-amber-500/0 group-hover:border-amber-500/10 rounded-3xl transition-all duration-500 pointer-events-none"></div>
-                )}
             </a>
         ))}
 
@@ -169,8 +179,54 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
         to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes loading {
+    0% { width: 0%; transform: translateX(-100%); }
+    50% { width: 100%; transform: translateX(0); }
+    100% { width: 0%; transform: translateX(100%); }
+    }
+
     /* Retraso escalonado para las tarjetas */
     .grid > a:nth-child(1) { animation-delay: 0.1s; }
     .grid > a:nth-child(2) { animation-delay: 0.2s; }
     .grid > a:nth-child(3) { animation-delay: 0.3s; }
 </style>
+
+<script is:inline>
+  async function checkPendingStores() {
+    // 1. Buscamos todas las tarjetas que están en estado "PENDING"
+    const pendingCards = document.querySelectorAll('[data-status="PENDING"]');
+    
+    if (pendingCards.length === 0) return;
+
+    for (const card of pendingCards) {
+      const slug = card.getAttribute('data-slug');
+      const storeId = card.getAttribute('data-id');
+
+      try {
+        // 2. Hacemos un "ping" a la tienda
+        // En local usamos /?tenant=slug, en prod la URL real
+        const checkUrl = window.location.hostname.includes('localhost') 
+          ? `/?tenant=${slug}` 
+          : `https://${slug}.tustock.app`;
+
+        const res = await fetch(checkUrl, { method: 'HEAD', mode: 'no-cors' });
+
+        // 3. Si responde (aunque sea opaque por no-cors), consideramos que está viva
+        // Enviamos señal a nuestra API para activar en D1
+        await fetch('/api/activate-store', {
+          method: 'POST',
+          body: JSON.stringify({ storeId })
+        });
+
+        // 4. Recargamos la página para que el usuario vea el botón de ENTRAR
+        window.location.reload();
+        
+      } catch (e) {
+        console.log(`Tienda ${slug} aún no responde...`);
+      }
+    }
+  }
+
+  // Ejecutar cada 3 segundos si hay pendientes
+  setInterval(checkPendingStores, 3000);
+</script>
