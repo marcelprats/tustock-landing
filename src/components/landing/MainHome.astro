@@ -30,7 +30,9 @@ const navItems = [
       {navItems.map(({ text, target }) => (
         <a href={`#${target}`} class="nav-link group relative flex items-center justify-center w-4 h-full" data-target={target}>
           
-          <span class="nav-label absolute left-12 opacity-0 -translate-x-4 transition-all duration-500 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
+          <span class="nav-label absolute left-12 opacity-0 -translate-x-4 transition-all duration-500 
+            bg-slate-900 text-slate-50 dark:bg-slate-50 dark:text-slate-900 
+            text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
             {text}
           </span>
           
@@ -39,31 +41,25 @@ const navItems = [
       ))}
     </nav>
   </aside>
-  
+
   <div class="flex-1 w-full">
     
-    <div id="hero" class="scroll-target min-h-screen flex items-center justify-center text-center">
-      <div class="w-full">
-        <Hero
-          actions={[
-            { variant: 'primary', text: 'Descargar Software', href: '/download', icon: 'tabler:download' },
-            { text: 'Acceso Cloud', href: '/register', icon: 'tabler:login' },
+    <div id="ai-core" class="py-24 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white scroll-target overflow-hidden transition-colors duration-500">
+        <Content
+          isReversed
+          tagline="Tu Empleado del Mes es una IA"
+          title="Inteligencia Artificial que corre en TU hardware"
+          items={[
+            { title: 'Mapeo Genérico de Excels', description: 'Nuestra IA interpreta albaranes y facturas de proveedores automáticamente, eliminando el error humano.' },
+            { title: 'Predicción de Roturas', description: 'Analizamos tendencias estacionales para sugerir pedidos óptimos antes de quedarte sin stock.' },
+            { title: 'Auditoría de Márgenes', description: 'Detecta automáticamente productos que pierden rentabilidad por inflación o cambios de proveedor.' }
           ]}
-          image={{ src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=2000&q=80', alt: 'TuStock Analytics' }}
+          image={{ src: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80', alt: 'AI Brain' }}
         >
-          <fragment slot="title">
-            <span class="text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] block mx-auto max-w-4xl">
-              El sistema operativo <br/> 
-              <span class="text-blue-600 dark:text-blue-400">para el retail moderno.</span>
-            </span>
+          <fragment slot="content">
+            <h3 class="text-3xl font-bold mb-4">Privacidad total: El procesado local garantiza que tus datos sensibles no salgan de tu local.</h3>
           </fragment>
-          <fragment slot="subtitle">
-              <p class="max-w-2xl mx-auto text-center">
-                Gestión de inventario de alto rendimiento que fusiona la potencia del <b>procesamiento local</b> con la ubicuidad de la nube.
-              </p>
-          </fragment>
-        </Hero>
-      </div>
+        </Content>
     </div>
 
     <div class="py-16 border-y border-gray-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
