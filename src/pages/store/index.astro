@@ -6,51 +6,34 @@ import CallToAction from '~/components/widgets/CallToAction.astro';
 
 // 1. OBTENER DATOS DE LA TIENDA
 const { currentShop } = Astro.locals;
+
+// --- PROTECCIÓN EXTRA ---
+// Si el plan es FREE, redirigimos al placeholder (por seguridad)
+if (currentShop?.web_plan === 'FREE') {
+  return Astro.redirect('/store/placeholder');
+}
+// ------------------------
+
 const shopName = currentShop?.name || "Nuestra Tienda";
 const shopEmail = currentShop?.email || "contacto@tustock.app";
 
 const metadata = { 
   title: `${shopName} - Catálogo Online`,
-  ignoreTitleTemplate: true // Para que no salga "— TuStock" al final
+  ignoreTitleTemplate: true 
 };
 
-// 2. MOCKUP DE PRODUCTOS (Simulando lo que vendrá de la Base de Datos)
-// En el futuro aquí harás: const products = await db.query("SELECT * FROM products...");
+// 2. MOCKUP DE PRODUCTOS
 const featuredProducts = [
-  {
-    id: 1,
-    name: 'Producto Destacado 1',
-    price: 29.99,
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80',
-    category: 'Novedad'
-  },
-  {
-    id: 2,
-    name: 'Pack Especial',
-    price: 49.50,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80',
-    category: 'Oferta'
-  },
-  {
-    id: 3,
-    name: 'Edición Limitada',
-    price: 15.00,
-    image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=500&q=80',
-    category: 'Exclusivo'
-  },
-   {
-    id: 4,
-    name: 'Accesorio Premium',
-    price: 12.99,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80',
-    category: 'Básico'
-  }
+  { id: 1, name: 'Producto Destacado 1', price: 29.99, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80', category: 'Novedad' },
+  { id: 2, name: 'Pack Especial', price: 49.50, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80', category: 'Oferta' },
+  { id: 3, name: 'Edición Limitada', price: 15.00, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=500&q=80', category: 'Exclusivo' },
+  { id: 4, name: 'Accesorio Premium', price: 12.99, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80', category: 'Básico' }
 ];
 ---
 
 <StoreLayout metadata={metadata}>
   
-  {/* --- 1. HERO: PORTADA DE LA TIENDA --- */}
+  {/* --- 1. HERO: PORTADA --- */}
   <Hero
     tagline="Tienda Oficial"
     title={`Bienvenido a <span class="text-blue-600 dark:text-blue-400">${shopName}</span>`}
@@ -65,87 +48,49 @@ const featuredProducts = [
     ]}
   />
 
-  {/* --- 2. CATÁLOGO DE PRODUCTOS (GRID) --- */}
+  {/* --- 2. CATÁLOGO (GRID) --- */}
   <div id="catalogo" class="py-16 bg-gray-50 dark:bg-slate-800/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
-          
           <div class="text-center mb-12">
             <h2 class="text-3xl font-bold font-heading mb-4">Nuestros Productos</h2>
-            <p class="text-xl text-gray-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Explora nuestra selección actualizada al momento.
-            </p>
+            <p class="text-xl text-gray-600 dark:text-slate-400 max-w-2xl mx-auto">Explora nuestra selección.</p>
           </div>
 
-          {/* GRID DE PRODUCTOS */}
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map((product) => (
               <div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 dark:border-slate-800 flex flex-col">
-                
-                {/* Imagen del producto */}
                 <div class="relative h-64 overflow-hidden bg-gray-100">
-                  <span class="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
-                    {product.category}
-                  </span>
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
+                  <span class="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">{product.category}</span>
+                  <img src={product.image} alt={product.name} class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                 </div>
-
-                {/* Info del producto */}
                 <div class="p-5 flex-1 flex flex-col">
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition">
-                    {product.name}
-                  </h3>
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition">{product.name}</h3>
                   <div class="mt-auto flex items-center justify-between pt-4">
-                    <span class="text-xl font-bold text-gray-900 dark:text-white">
-                      {product.price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                    </span>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">{product.price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
                     <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition shadow-lg shadow-blue-500/30">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 17h-11v-14h-2" /><path d="M6 5l14 1l-1 7h-13" /></svg>
                     </button>
                   </div>
                 </div>
-
               </div>
             ))}
           </div>
-
-          <div class="mt-12 text-center">
-            <a href="#" class="btn-secondary px-6 py-3 rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition">
-              Ver todo el inventario
-            </a>
-          </div>
-
       </div>
   </div>
 
-  {/* --- 3. VALORES / CONFIANZA --- */}
+  {/* --- 3. CONFIANZA --- */}
   <Features2
     title="¿Por qué confiar en nosotros?"
     subtitle={`En ${shopName} nos preocupamos por ofrecerte lo mejor.`}
     columns={3}
     items={[
-      {
-        title: 'Calidad Garantizada',
-        description: 'Revisamos cada producto personalmente para asegurar su excelencia.',
-        icon: 'tabler:award',
-      },
-      {
-        title: 'Atención Personal',
-        description: 'Somos un comercio local. Si tienes dudas, te atendemos directamente.',
-        icon: 'tabler:users',
-      },
-      {
-        title: 'Pago Seguro',
-        description: 'Transacciones protegidas y diferentes métodos de pago disponibles.',
-        icon: 'tabler:lock',
-      },
+      { title: 'Calidad Garantizada', description: 'Revisamos cada producto personalmente.', icon: 'tabler:award' },
+      { title: 'Atención Personal', description: 'Somos un comercio local.', icon: 'tabler:users' },
+      { title: 'Pago Seguro', description: 'Transacciones protegidas.', icon: 'tabler:lock' },
     ]}
   />
 
-  {/* --- 4. CONTACTO / UBICACIÓN --- */}
+  {/* --- 4. CONTACTO --- */}
   <div id="contacto" class="scroll-mt-16">
     <Features2
       title="Estamos cerca de ti"
@@ -159,18 +104,10 @@ const featuredProducts = [
     />
   </div>
 
-  {/* --- 5. CALL TO ACTION (WHATSAPP) --- */}
   <CallToAction
     title="¿Tienes alguna duda?"
-    subtitle="Escríbenos directamente por WhatsApp y te ayudaremos con tu pedido."
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Chatear por WhatsApp',
-        href: '#', // Aquí iría el enlace wa.me/numero
-        icon: 'tabler:brand-whatsapp',
-      },
-    ]}
+    subtitle="Escríbenos por WhatsApp."
+    actions={[{ variant: 'primary', text: 'Chatear', href: '#', icon: 'tabler:brand-whatsapp' }]}
   />
 
 </StoreLayout>
