@@ -9,7 +9,6 @@ import PricingSection from '~/components/widgets/PricingSection.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 
-// Recibimos los datos reales
 const { shopCount = "10+", userCount = "50+" } = Astro.props;
 
 const navItems = [
@@ -23,10 +22,10 @@ const navItems = [
 ];
 ---
 
-<div class="relative overflow-hidden scroll-smooth-wrapper">
+<div class="relative overflow-hidden">
   
   <aside class="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-6">
-    <nav class="flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60" id="landing-menu">
+    <nav class="flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60">
       
       {navItems.map(({ text, target }) => (
         <a 
@@ -199,54 +198,77 @@ const navItems = [
 </div>
 
 <style is:global>
+  /* Scroll suave para toda la página */
   html {
       scroll-behavior: smooth;
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-      
-      const observerOptions = {
-        root: null,
-        // Detectamos el centro exacto de la pantalla
-        rootMargin: '-45% 0px -45% 0px', 
-        threshold: 0
-      };
+<script is:inline>
+  function initScrollSpy() {
+    console.log("--> Iniciando ScrollSpy");
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('id');
-            
-            document.querySelectorAll('.nav-link').forEach(link => {
-              const indicator = link.querySelector('.indicator');
-              const linkTarget = link.getAttribute('data-target');
+    const observerOptions = {
+      root: null,
+      // Hemos ampliado la zona: detecta si el elemento está en el 30% central de la pantalla
+      rootMargin: '-30% 0px -30% 0px', 
+      threshold: 0
+    };
 
-              // 🔥 AQUÍ ESTÁ LA MAGIA DE LA BARRA
-              if (linkTarget === id) {
-                // ACTIVO: Quitamos clase de punto pequeño, ponemos barra grande (h-8)
-                link.classList.add('active');
-                if (indicator) {
-                  indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-                  indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-                }
-              } else {
-                // INACTIVO: Quitamos barra, ponemos punto pequeño
-                link.classList.remove('active');
-                if (indicator) {
-                  indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-                  indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-                }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          // console.log("Sección activa detectada:", id); // Descomentar para depurar
+
+          // Buscar todos los links
+          const allLinks = document.querySelectorAll('.nav-link');
+
+          allLinks.forEach(link => {
+            const indicator = link.querySelector('.indicator');
+            const linkTarget = link.getAttribute('data-target');
+
+            // ¿Es este el link de la sección actual?
+            if (linkTarget === id) {
+              // SÍ -> ACTIVAR (Barra Grande)
+              link.classList.add('active');
+              if (indicator) {
+                // Quitamos clases de punto pequeño
+                indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
+                // Añadimos clases de BARRA GRANDE AZUL
+                indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
               }
-            });
-          }
-        });
-      }, observerOptions);
-
-      ['hero', 'features', 'ai-core', 'fiscalidad', 'steps', 'pricing', 'faq'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
+            } else {
+              // NO -> DESACTIVAR (Punto Pequeño)
+              link.classList.remove('active');
+              if (indicator) {
+                // Quitamos clases de barra grande
+                indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
+                // Añadimos clases de punto pequeño
+                indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
+              }
+            }
+          });
+        }
       });
-  });
+    }, observerOptions);
+
+    // Lista de IDs a observar
+    const sections = ['hero', 'features', 'ai-core', 'fiscalidad', 'steps', 'pricing', 'faq'];
+    sections.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        observer.observe(element);
+      } else {
+        console.warn(`ScrollSpy: No se encontró la sección con id="${id}"`);
+      }
+    });
+  }
+
+  // Ejecutar cuando el navegador esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollSpy);
+  } else {
+    initScrollSpy();
+  }
 </script>
