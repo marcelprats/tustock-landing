@@ -6,46 +6,38 @@ export const POST = async ({ request, cookies, redirect, locals }) => {
     const email = formData.get("email");
     const password = formData.get("password");
     
-    // 🔥 ACCESO A BBDD D1 DE CLOUDFLARE
     const db = locals.runtime?.env?.DB; 
     
     if (!db) {
-      console.error("❌ No se encontró la base de datos DB en locals.runtime.env");
-      return new Response("Error de configuración de base de datos", { status: 500 });
+      return new Response("Error de BBDD", { status: 500 });
     }
 
-    // 1. BUSCAR USUARIO EN D1
     const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
 
-    if (!user) {
-        console.log("❌ Usuario no encontrado:", email);
-        return redirect("/login?error=invalid_credentials"); 
-    }
-
-    // 2. VERIFICAR CONTRASEÑA
-    const validPassword = await bcrypt.compare(password, user.password_hash);
-    if (!validPassword) {
-        console.log("❌ Contraseña incorrecta para:", email);
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
         return redirect("/login?error=invalid_credentials");
     }
 
-    // 3. CREAR SESIÓN
+    // 🔥 FIX: AÑADIR 'domain' PARA QUE SEA GLOBAL
+    // Esto permite que te loguees en 'tustock.app' y entres a 'paco.tustock.app' sin loguearte de nuevo.
+    // También facilita el borrado.
     cookies.set("session", user.id, {
         path: "/",
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 días
+        maxAge: 60 * 60 * 24 * 7,
+        // Detectamos si estamos en producción para poner el dominio correcto
+        domain: import.meta.env.PROD ? '.tustock.app' : undefined
     });
 
-    // 4. REDIRIGIR
     const url = new URL(request.url);
     const returnTo = url.searchParams.get("return_to") || "/hub";
     
     return redirect(returnTo);
 
   } catch (error) {
-    console.error("🔥 Error crítico en Login:", error);
-    return new Response("Error interno del servidor", { status: 500 });
+    console.error("Login Error:", error);
+    return new Response("Error", { status: 500 });
   }
 };

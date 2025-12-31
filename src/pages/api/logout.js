@@ -1,6 +1,10 @@
 export const POST = async ({ cookies, redirect, request }) => {
-  // 1. BORRADO AGRESIVO
-  // Es fundamental path: "/" para que borre la cookie global
+  // 1. INTENTO DE BORRADO MULTIPLE (Para matar cookies zombies)
+  
+  // A) Borrar cookie global (producción)
+  cookies.delete("session", { path: "/", domain: ".tustock.app" });
+  
+  // B) Borrar cookie local/host-only (por si acaso)
   cookies.delete("session", { path: "/" });
 
   // 2. REDIRECCIÓN INTELIGENTE
@@ -10,21 +14,17 @@ export const POST = async ({ cookies, redirect, request }) => {
   if (referer) {
     try {
       const url = new URL(referer);
-      // Si estamos en un subdominio (tienda), vamos al login de la tienda
+      // Si venía de una tienda, le mandamos al login de esa tienda
       if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
-         // Añadimos un timestamp para evitar cachés del navegador que hagan parecer que sigues logueado
+         // Añadimos timestamp para romper caché del navegador
          targetUrl = `/login?redirect=/admin&t=${Date.now()}`;
       }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }
 
   return redirect(targetUrl, 302);
 };
 
-// 🔥 ESTO ES LO QUE TE FALTABA PARA QUE EL LINK DEL HEADER FUNCIONE
-// Permite que un simple enlace <a href="/api/logout"> funcione igual que un form
 export const GET = async (ctx) => {
     return POST(ctx);
 }
