@@ -1,30 +1,30 @@
 export const POST = async ({ cookies, redirect, request }) => {
-  // 1. FORZAR BORRADO DE COOKIE
-  // Es crítico poner { path: "/" } porque la cookie de sesión es global.
+  // 1. BORRADO AGRESIVO
+  // Es fundamental path: "/" para que borre la cookie global
   cookies.delete("session", { path: "/" });
 
-  // 2. DETECTAR ORIGEN PARA REDIRECCIÓN INTELIGENTE
-  // Si el usuario estaba en "paco.tustock.app", le mandamos al login de Paco.
+  // 2. REDIRECCIÓN INTELIGENTE
   const referer = request.headers.get('referer');
   let targetUrl = '/login';
 
   if (referer) {
     try {
       const url = new URL(referer);
-      // Si venía del admin de una tienda, le devolvemos al login de esa tienda
-      // para que vea "Acceder a Paco" y no el login genérico.
+      // Si estamos en un subdominio (tienda), vamos al login de la tienda
       if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
-         targetUrl = '/login?redirect=/admin';
+         // Añadimos un timestamp para evitar cachés del navegador que hagan parecer que sigues logueado
+         targetUrl = `/login?redirect=/admin&t=${Date.now()}`;
       }
     } catch (e) {
-      // Si falla la detección, fallback al login normal
+      console.error(e);
     }
   }
 
   return redirect(targetUrl, 302);
 };
 
-// Soportar GET por si alguien entra directo a /api/logout
+// 🔥 ESTO ES LO QUE TE FALTABA PARA QUE EL LINK DEL HEADER FUNCIONE
+// Permite que un simple enlace <a href="/api/logout"> funcione igual que un form
 export const GET = async (ctx) => {
     return POST(ctx);
 }
