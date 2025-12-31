@@ -1,30 +1,28 @@
 ---
 import Layout from '~/layouts/Layout.astro';
-import HeroText from '~/components/widgets/HeroText.astro';
-import StoreDashboard from '~/components/store/admin/StoreDashboard.astro'; 
 import { createClient } from "@libsql/client/web";
+import { Icon } from 'astro-icon/components';
 
-const { currentShop } = Astro.locals;
+// 1. OBTENER SESIÓN Y TIENDA ACTUAL
 const session = Astro.cookies.get('session');
+const { currentShop } = Astro.locals;
+const env = Astro.locals.runtime?.env;
 
-// 1. SI NO HAY SESIÓN -> AL LOGIN
+// Si no hay sesión, al login recordando volver aquí
 if (!session) {
-  // Guardamos a dónde quería ir para volver después
   return Astro.redirect(`/login?redirect=/admin`);
 }
 
-// 2. SEGURIDAD: ¿ES EL DUEÑO O TIENE PERMISO?
 const userId = session.value;
-const env = Astro.locals.runtime?.env; 
 let isAuthorized = false;
+let errorMsg = "";
 
+// 2. SEGURIDAD: ¿ES EL DUEÑO?
+// Conectamos a BD para ver si el usuario logueado coincide con el dueño de la tienda
 if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
   try {
     const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
 
-    // CONSULTA DE SEGURIDAD
-    // Buscamos si el usuario actual es el propietario de esta licencia específica.
-    // Ajusta esta query si tienes un sistema de roles más complejo (tabla memberships).
     const result = await turso.execute({
         sql: `
             SELECT id FROM licenses 
@@ -37,30 +35,85 @@ if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
 
     if (result.rows.length > 0) {
         isAuthorized = true;
+    } else {
+        errorMsg = "No tienes permisos para administrar esta tienda.";
     }
 
   } catch (e) {
-    console.error("Error comprobando permisos en Admin:", e);
+    console.error("Error Admin Check:", e);
+    errorMsg = "Error de conexión verificando permisos.";
   }
 }
 
-// 3. SI NO ESTÁ AUTORIZADO -> EXPULSAR
-if (!isAuthorized) {
-    // Si está logueado pero no es su tienda, lo mandamos al Hub central
+// Si no está autorizado (y no es error técnico), lo mandamos al Hub central
+if (!isAuthorized && !errorMsg) {
     return Astro.redirect('https://tustock.app/hub');
 }
 
 const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
 
-<Layout tenant={currentShop.slug} metadata={metadata}>
+<Layout metadata={metadata}>
   
-  <HeroText
-    tagline="Panel de Control"
-    title={currentShop.name}
-    subtitle="Gestión segura de tu negocio."
-  />
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center py-20 px-4">
+    
+    <div class="w-full max-w-4xl text-center mb-12">
+        <div class="inline-flex items-center justify-center p-3 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 mb-4 shadow-lg">
+            <Icon name="tabler:dashboard" class="w-10 h-10" />
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+            Panel de Control
+        </h1>
+        <p class="text-xl text-gray-500 dark:text-gray-400">
+            Gestionando: <span class="font-bold text-blue-600">{currentShop?.name}</span> ({currentShop?.slug})
+        </p>
+    </div>
 
-  <StoreDashboard tenantId={currentShop.slug} />
+    {/* Si hay error de permisos mostramos alerta */}
+    {errorMsg ? (
+        <div class="p-6 bg-red-100 border border-red-300 text-red-800 rounded-lg max-w-lg text-center">
+            <Icon name="tabler:alert-triangle" class="w-12 h-12 mx-auto mb-2" />
+            <h3 class="text-lg font-bold">Acceso Denegado</h3>
+            <p>{errorMsg}</p>
+            <a href="https://tustock.app/hub" class="mt-4 inline-block px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Volver al Hub</a>
+        </div>
+    ) : (
+        /* DASHBOARD REAL */
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            
+            {/* Tarjeta 1: Ir al HUB Central */}
+            <a href="https://tustock.app/hub" class="group relative p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center">
+                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Icon name="tabler:external-link" class="w-5 h-5 text-gray-400" />
+                </div>
+                <div class="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition-transform">
+                    <Icon name="tabler:apps" class="w-8 h-8" />
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mis Tiendas (Hub)</h3>
+                <p class="text-gray-500 text-sm">Vuelve al panel central para ver todas tus licencias.</p>
+            </a>
 
+            {/* Tarjeta 2: Configuración (Placeholder) */}
+            <div class="p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm opacity-60 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-4">
+                    <Icon name="tabler:settings" class="w-8 h-8" />
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Configuración</h3>
+                <p class="text-gray-500 text-sm">Próximamente podrás editar productos aquí.</p>
+            </div>
+
+            {/* BOTÓN LOGOUT GRANDE */}
+            <div class="col-span-1 md:col-span-2 mt-8 flex justify-center">
+                <form action="/api/logout" method="POST">
+                    <button type="submit" class="flex items-center gap-2 px-8 py-3 rounded-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-red-500/30">
+                        <Icon name="tabler:logout" class="w-5 h-5" />
+                        Cerrar Sesión en {currentShop?.name}
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    )}
+
+  </div>
 </Layout>
