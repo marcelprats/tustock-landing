@@ -1,36 +1,30 @@
-export const POST = async ({ cookies, redirect, request }) => {
-  console.log("--> EJECUTANDO LOGOUT NUCLEAR...");
-
-  // 1. Borrado MULTI-DOMINIO (Dispara a todo lo que se mueva)
+export const POST = async ({ cookies, redirect }) => {
+  const isProd = import.meta.env.PROD;
   
-  // Opción A: Dominio global con punto (El estándar de Prod)
-  cookies.delete("session", { path: "/", domain: ".tustock.app" });
-  
-  // Opción B: Dominio global SIN punto (A veces los navegadores son raros)
-  cookies.delete("session", { path: "/", domain: "tustock.app" });
+  // 🔥 CLAVE DEL PROBLEMA: 
+  // Para borrar una cookie segura, hay que repetir sus atributos EXACTOS.
+  const cookieOptions = {
+    path: "/",
+    domain: isProd ? ".tustock.app" : undefined,
+    secure: isProd,   // <--- ¡ESTO FALTABA!
+    httpOnly: true    // <--- ¡ESTO TAMBIÉN!
+  };
 
-  // Opción C: Dominio Local / Host actual (Para cookies zombies locales)
-  cookies.delete("session", { path: "/" });
+  // 1. Borrado estándar (delete)
+  cookies.delete("session", cookieOptions);
 
-  // 2. Redirección
-  const referer = request.headers.get('referer');
-  let targetUrl = '/login';
+  // 2. Borrado por sobrescritura (doble seguridad)
+  // Forzamos la caducidad a una fecha pasada con los mismos atributos de seguridad
+  cookies.set("session", "deleted", {
+    ...cookieOptions,
+    expires: new Date(0),
+    maxAge: 0
+  });
 
-  // Si vienes de una tienda, te manda al login de esa tienda con un parámetro de tiempo
-  // para obligar al navegador a refrescar la caché.
-  if (referer) {
-    try {
-      const url = new URL(referer);
-      if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
-          targetUrl = `/login?redirect=/admin&cache_buster=${Date.now()}`;
-      }
-    } catch (e) { console.error(e); }
-  }
-
-  return redirect(targetUrl, 302);
+  // 3. Redirección simple al login
+  return redirect('/login', 302);
 };
 
-// Permite que funcione con enlaces simples <a> también
 export const GET = async (ctx) => {
     return POST(ctx);
 }
