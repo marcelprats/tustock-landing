@@ -1,0 +1,118 @@
+---
+import ServerStatus from '~/components/app/dashboard/ServerStatus.astro'; 
+import { decryptLicense } from '~/utils/crypto'; 
+
+// Recibimos el tenantId (slug) obligatorio
+const { tenantId } = Astro.props; 
+
+const session = Astro.cookies.get('session');
+const userId = session?.value;
+const env = Astro.locals.runtime?.env; 
+const db = env?.DB;
+
+let tenantData = null;
+let error = null;
+let isOnline = false;
+let statusBadge = "";
+let lastUpdateText = "---";
+
+// --- LÓGICA DE DATOS ESPECÍFICA PARA TIENDAS ---
+if (userId && db && tenantId) {
+  try {
+    const membership = await db.prepare(`
+      SELECT t.id, t.name, t.plan_type, t.license_encrypted, t.last_heartbeat, 
+             t.sales_today, t.data_updated_at
+      FROM memberships m
+      JOIN tenants t ON m.tenant_id = t.id
+      WHERE m.user_id = ? AND t.slug = ?
+    `).bind(userId, tenantId).first();
+
+    if (membership) {
+      let realKey = "Error";
+      try {
+        if (membership.license_encrypted && env.MASTER_KEY) {
+            realKey = decryptLicense(membership.license_encrypted, env.MASTER_KEY);
+        }
+      } catch (err) { console.error(err); }
+
+      tenantData = {
+        id: membership.id,
+        name: membership.name,
+        slug: tenantId,
+        licenseKey: realKey,        
+        lastHeartbeat: membership.last_heartbeat,
+        salesToday: membership.sales_today || 0,
+        dataUpdatedAt: membership.data_updated_at
+      };
+
+      const now = Date.now();
+      isOnline = tenantData.lastHeartbeat && (now - tenantData.lastHeartbeat) < 120000;
+
+      statusBadge = isOnline
+        ? '<span class="text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE</span>'
+        : '<span class="text-gray-500 bg-gray-200 dark:bg-slate-700 px-2 py-0.5 rounded text-xs font-bold">OFFLINE</span>';
+
+      lastUpdateText = tenantData.dataUpdatedAt 
+        ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', day: 'numeric', month: 'numeric'})
+        : '---';
+
+    } else {
+      error = "No se encontraron datos de la tienda.";
+    }
+  } catch (e) {
+    error = "Error de conexión.";
+  }
+}
+---
+
+{/* --- VISTA EXCLUSIVA DEL STORE ADMIN --- */}
+
+{error ? (
+  <div class="p-6 bg-red-50 text-red-700 rounded-lg border border-red-200">
+    <strong>Error:</strong> {error}
+  </div>
+) : (
+  <div class="flex flex-col gap-6">
+
+      {/* 1. SECCIÓN DE ALERTAS */}
+      {!isOnline && (
+          <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r">
+              <p class="text-sm text-amber-700 dark:text-amber-200 flex items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span class="font-bold">Modo Desconectado:</span> Mostrando datos cacheados ({lastUpdateText}).
+              </p>
+          </div>
+      )}
+
+      {/* 2. KPIs PRINCIPALES (Ventas, Pedidos, etc) */}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Card Ventas */}
+          <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+              <div class="flex justify-between items-start mb-2">
+                  <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ventas Hoy</span>
+                  <div set:html={statusBadge} />
+              </div>
+              <div class="text-3xl font-bold text-gray-900 dark:text-white">
+                 {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday)}
+              </div>
+          </div>
+
+          {/* Card Servidor (Reutilizamos el componente porque es útil) */}
+          <div class="md:col-span-2">
+             <ServerStatus licenseKey={tenantData.licenseKey} isOnline={isOnline} />
+          </div>
+
+      </div>
+
+      {/* 3. AQUÍ IRÍAN MÁS SECCIONES ESPECÍFICAS DE TIENDA */}
+      <div class="bg-white dark:bg-slate-800 p-8 rounded-xl border border-gray-100 dark:border-slate-700 text-center">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Gestión de Productos</h3>
+          <p class="text-gray-500 mb-4">Aquí aparecerá el listado de inventario sincronizado.</p>
+          <button class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100 transition">
+              Ver Inventario
+          </button>
+      </div>
+
+  </div>
+)}

@@ -1,26 +1,33 @@
 ---
 import StoreAdminLayout from '~/layouts/StoreAdminLayout.astro';
-// Si quieres usar widgets del dashboard, impórtalos sueltos o asegúrate que AppDashboard NO tenga Layout
-import AppDashboard from '~/components/app/AppDashboard.astro'; 
+// CAMBIO IMPORTANTE: Usamos el Dashboard específico de tienda
+import StoreDashboard from '~/components/store/admin/StoreDashboard.astro'; 
 
 const { currentShop } = Astro.locals;
 const session = Astro.cookies.get('session');
 
-// Seguridad básica
 if (!session) return Astro.redirect('/login');
 
-const metadata = { title: `Admin - ${currentShop?.name}` };
+const metadata = { title: `Panel - ${currentShop?.name}` };
 ---
 
 <StoreAdminLayout tenant={currentShop.slug} metadata={metadata}>
   
-  {/* Cabecera interna del Dashboard */}
-  <div class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Resumen de Actividad</h2>
-      <p class="text-gray-500">Bienvenido de nuevo a tu panel.</p>
+  {/* Cabecera de Página */}
+  <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Panel de Tienda</h1>
+        <p class="text-sm text-gray-500">Gestión diaria de {currentShop.name}</p>
+      </div>
+      {/* Botones de acción rápida específicos de tienda */}
+      <div class="flex gap-2">
+         <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">
+            Nuevo Pedido
+         </button>
+      </div>
   </div>
 
-  {/* Aquí carga el Dashboard. IMPORTANTE: Que AppDashboard NO tenga <Layout> dentro */}
-  <AppDashboard tenantId={currentShop.slug} />
+  {/* Cargamos el Dashboard Específico */}
+  <StoreDashboard tenantId={currentShop.slug} />
 
 </StoreAdminLayout>

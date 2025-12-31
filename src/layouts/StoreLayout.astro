@@ -1,0 +1,69 @@
+---
+import CustomStyles from "~/components/CustomStyles.astro"; // Compartimos estilos base (Tailwind)
+import Favicons from "~/components/Favicons.astro";
+import Metadata from "~/components/common/Metadata.astro";
+import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
+import BasicScripts from "~/components/common/BasicScripts.astro";
+
+const { metadata = {} } = Astro.props;
+const { currentShop } = Astro.locals; // Datos automáticos del middleware
+
+const shopName = currentShop?.name || "Mi Tienda";
+---
+
+<!doctype html>
+<html lang="es" class="motion-safe:scroll-smooth" dir="ltr">
+  <head>
+    <Metadata {...metadata} />
+    <CustomStyles /> {/* <-- ESTO MANTIENE LA COHERENCIA VISUAL */}
+    <Favicons />
+    <ApplyColorMode />
+  </head>
+
+  <body class="antialiased text-default bg-white dark:bg-slate-900 tracking-tight">
+    
+    {/* CABECERA DE LA TIENDA (No de TuStock) */}
+    <header class="sticky top-0 z-40 flex-none mx-auto w-full border-b border-gray-50/0 transition-[opacity] ease-in-out">
+        <div class="relative md:px-6">
+            <div class="flex justify-between items-center py-4 px-4 mx-auto max-w-7xl">
+                
+                {/* Logo / Nombre de la Tienda */}
+                <a href="/" class="flex items-center gap-2 font-bold text-2xl text-gray-900 dark:text-white">
+                    <span class="text-3xl">🏪</span> {shopName}
+                </a>
+
+                {/* Menú de la Tienda (Simple) */}
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <a href="#catalogo" class="hover:text-blue-600 transition">Catálogo</a>
+                    <a href="#contacto" class="hover:text-blue-600 transition">Contacto</a>
+                </nav>
+
+                {/* Acciones (Carrito / Admin) */}
+                <div class="flex items-center gap-4">
+                    <a href="/admin" class="text-xs font-bold text-gray-500 hover:text-blue-600 flex items-center gap-1 border border-gray-200 dark:border-slate-700 px-3 py-1.5 rounded-full transition">
+                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> Dueño
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    {/* CONTENIDO DE LA PLANTILLA */}
+    <main>
+      <slot />
+    </main>
+
+    {/* FOOTER DE LA TIENDA */}
+    <footer class="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm text-gray-500">© {new Date().getFullYear()} <b>{shopName}</b>.</p>
+            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">
+                Tecnología proporcionada por <a href="https://tustock.app" target="_blank" class="hover:underline">TuStock</a>
+            </p>
+        </div>
+    </footer>
+
+    <BasicScripts />
+  </body>
+</html>

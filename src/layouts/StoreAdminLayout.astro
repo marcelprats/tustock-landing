@@ -6,11 +6,9 @@ import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
 import BasicScripts from "~/components/common/BasicScripts.astro";
 
 const { tenant, metadata = {} } = Astro.props;
-const { currentShop } = Astro.locals; // El middleware ya nos da el nombre y plan
+const { currentShop } = Astro.locals;
 
-// Datos simples para la cabecera
 const shopName = currentShop?.name || tenant;
-const shopPlan = currentShop?.plan || 'FREE';
 ---
 
 <!doctype html>
@@ -22,67 +20,99 @@ const shopPlan = currentShop?.plan || 'FREE';
     <ApplyColorMode />
   </head>
 
-  <body class="antialiased text-gray-900 bg-gray-50 dark:bg-slate-900 dark:text-slate-300 tracking-tight h-screen flex flex-col overflow-hidden">
+  <body class="antialiased text-gray-900 bg-gray-50 dark:bg-slate-900 dark:text-slate-300 tracking-tight h-screen flex overflow-hidden">
     
-    {/* --- 1. BARRA SUPERIOR (NAVBAR) --- */}
-    <nav class="h-16 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-6 flex-shrink-0 z-20">
-      
-      {/* IZQUIERDA: Identidad de la Tienda (LIMPIA) */}
-      <div class="flex items-center gap-3">
-        {/* Logo/Icono simple con la inicial */}
-        <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-           {shopName.charAt(0).toUpperCase()}
-        </div>
-        <div>
-           <h1 class="font-bold text-lg leading-tight">{shopName}</h1>
-           {/* Badge de Plan discreto (opcional, si no lo quieres borra esta línea) */}
-           <span class="text-[10px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 px-1.5 py-0.5 rounded uppercase tracking-wider">
-             Panel de Gestión
-           </span>
-        </div>
-      </div>
-
-      {/* DERECHA: Salida */}
-      <div class="flex items-center gap-4">
-         <a href="/" target="_blank" class="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            Ver Tienda
-         </a>
-         <div class="h-6 w-px bg-gray-200 dark:bg-slate-800 hidden md:block"></div>
-         <a href="/api/logout" class="text-sm font-bold text-red-500 hover:text-red-600">
-            Cerrar Sesión
-         </a>
-      </div>
-    </nav>
-
-    {/* --- 2. CUERPO PRINCIPAL (Con Sidebar Integrado) --- */}
-    <div class="flex flex-1 overflow-hidden">
+    {/* --- SIDEBAR IZQUIERDO (PROFESIONAL) --- */}
+    <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex shadow-xl z-20">
         
-        {/* SIDEBAR (Menú lateral sencillo) */}
-        <aside class="w-64 bg-white dark:bg-slate-950 border-r border-gray-200 dark:border-slate-800 hidden md:flex flex-col">
-            <div class="p-4 space-y-1">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    Resumen
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                    Inventario
-                </a>
-                <a href="/settings" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    Configuración
-                </a>
+        {/* LOGO AREA */}
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <div class="font-bold text-lg tracking-tight flex items-center gap-2">
+                <span class="text-blue-500">TuStock</span>
+                <span class="text-slate-500 text-xs uppercase tracking-wider border border-slate-700 px-1 rounded">Admin</span>
             </div>
-            
-            <div class="mt-auto p-4 border-t border-gray-100 dark:border-slate-800">
-                <p class="text-xs text-gray-400 text-center">Soporte Técnico</p>
-            </div>
-        </aside>
+        </div>
 
-        {/* CONTENIDO DEL DASHBOARD (SLOT) */}
-        <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 dark:bg-slate-900">
-             <slot />
+        {/* TIENDA ACTUAL */}
+        <div class="p-4 border-b border-slate-800 bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center font-bold text-white shadow-lg">
+                    {shopName.charAt(0).toUpperCase()}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="font-bold text-sm text-white truncate w-36">{shopName}</p>
+                    <p class="text-[10px] text-green-400 font-mono flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> ONLINE
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {/* NAVEGACIÓN */}
+        <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+            <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Principal</p>
+            
+            <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md bg-blue-600 text-white shadow-md shadow-blue-900/20">
+                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                Resumen
+            </a>
+            
+            <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-400 hover:bg-slate-800 hover:text-white transition group">
+                <svg class="w-5 h-5 opacity-70 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                Inventario
+            </a>
+            
+            <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-400 hover:bg-slate-800 hover:text-white transition group">
+                <svg class="w-5 h-5 opacity-70 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Ventas
+            </a>
+
+            <div class="pt-6">
+                <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Configuración</p>
+                <a href="/settings" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-400 hover:bg-slate-800 hover:text-white transition group">
+                    <svg class="w-5 h-5 opacity-70 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Ajustes
+                </a>
+            </div>
+        </nav>
+
+        {/* FOOTER SIDEBAR */}
+        <div class="p-4 border-t border-slate-800">
+            <a href="/api/logout" class="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+
+    {/* --- ZONA CENTRAL DE CONTENIDO --- */}
+    <div class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
+        
+        {/* TOPBAR (Móvil y Escritorio) */}
+        <header class="h-16 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-6 flex-shrink-0 z-10">
+            
+            {/* Título de la página actual */}
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <span class="md:hidden text-blue-600">TuStock</span>
+                <span class="hidden md:inline">Dashboard</span>
+            </h1>
+
+            {/* Acciones Derecha */}
+            <div class="flex items-center gap-4">
+                <a href="/" target="_blank" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full transition">
+                    Ver Tienda <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden border border-gray-300 dark:border-slate-600">
+                    {/* Avatar usuario */}
+                    <svg class="w-full h-full text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+            </div>
+        </header>
+
+        {/* CONTENIDO SCROLLABLE */}
+        <main class="flex-1 overflow-y-auto p-6 md:p-8">
+            <slot />
         </main>
 
     </div>
