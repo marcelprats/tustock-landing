@@ -24,19 +24,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (isStoreContext) {
         
-        // 🔥 0. EXCEPCIÓN CRÍTICA: Activos estáticos
-        // Esto permite que carguen los estilos, imágenes y scripts.
+        // 🔥 0. EXCEPCIÓN DE ACTIVOS (CRÍTICO PARA EL CSS)
+        // Si la URL pide estilos, imágenes o scripts, dejamos pasar inmediatamente.
+        // Si no está esto, el middleware intenta buscar una tienda llamada "tailwind.css" y falla.
         if (
-            url.pathname.startsWith('/store') || 
             url.pathname.startsWith('/_astro') || 
             url.pathname.startsWith('/_image') || 
-            url.pathname.startsWith('/favicon') ||
-            url.pathname.match(/\.(css|js|jpg|jpeg|png|svg|ico|json|woff2)$/)
+            url.pathname.startsWith('/store') || 
+            url.pathname.includes('.') // Si tiene punto (ej: style.css), asumimos que es archivo
         ) {
             return next();
         }
 
-        // 2. RUTAS DE SISTEMA (Login/API/Settings)
+        // 2. RUTAS DE SISTEMA
         const systemPaths = ['/api', '/login', '/settings']; 
         if (systemPaths.some(p => url.pathname.startsWith(p))) {
             return next();
@@ -67,7 +67,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
                     context.locals.currentShop = shopData;
                 }
             } catch (e) { 
-                console.error("Error Middleware Turso:", e); 
+                console.error("Error Middleware:", e); 
             }
         }
 
@@ -75,7 +75,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
              return new Response(`La tienda '${subdomain}' no existe.`, { status: 404 });
         }
 
-        // 4. LÓGICA DE REWRITE
+        // 4. REESCRITURAS
         if (url.pathname.startsWith('/admin')) {
             return context.rewrite('/store/admin');
         }

@@ -1,5 +1,5 @@
 ---
-import StoreAdminLayout from '~/layouts/StoreAdminLayout.astro';
+import Layout from '~/layouts/layout.astro';
 import StoreDashboard from '~/components/store/admin/StoreDashboard.astro'; 
 
 const { currentShop } = Astro.locals;
@@ -11,7 +11,7 @@ if (!session) return Astro.redirect('/login');
 const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
 
-<StoreAdminLayout tenant={currentShop.slug} metadata={metadata}>
+<Layout tenant={currentShop.slug} metadata={metadata}>
   <div class="max-w-6xl mx-auto">
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Resumen</h2>
@@ -20,4 +20,4 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
 
       <StoreDashboard tenantId={currentShop.slug} />
   </div>
-</StoreAdminLayout>
+</Layout>
