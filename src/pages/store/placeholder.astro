@@ -5,6 +5,16 @@ import { Icon } from 'astro-icon/components';
 const { currentShop } = Astro.locals;
 const shopName = currentShop?.name || "Comercio";
 
+// 1. DETECTAR SESIÓN
+// Miramos si el usuario ya tiene la cookie "session"
+const session = Astro.cookies.get('session');
+const isLoggedIn = !!session?.value;
+
+// 2. CONFIGURAR BOTÓN SEGÚN ESTADO
+const buttonTarget = isLoggedIn ? '/admin' : '/login?redirect=/admin';
+const buttonText = isLoggedIn ? 'Ir al Panel de Control' : 'Acceso Privado';
+const buttonIcon = isLoggedIn ? 'tabler:dashboard' : 'tabler:lock';
+
 const metadata = {
   title: `${shopName} - Portal de Gestión`,
   ignoreTitleTemplate: true,
@@ -23,28 +33,39 @@ const metadata = {
 
     <div class="relative z-10 max-w-2xl px-6 text-center">
       
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-black/50 mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-black/50 mb-8 animate-fade-in-up">
         <Icon name="tabler:server-cog" class="w-8 h-8 text-slate-400" />
       </div>
 
-      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6 animate-fade-in-up">
         {shopName}
       </h1>
       
-      <div class="space-y-4 text-slate-400 text-lg md:text-xl font-light leading-relaxed border-l-2 border-slate-800 pl-6 text-left mx-auto max-w-lg">
+      <div class="space-y-4 text-slate-400 text-lg md:text-xl font-light leading-relaxed border-l-2 border-slate-800 pl-6 text-left mx-auto max-w-lg animate-fade-in-up">
         <p>
           Este dominio está operativo y conectado a la red de <strong>TuStock</strong> para labores de control de inventario y gestión interna.
         </p>
         <p class="text-slate-500 text-base">
-          El acceso público o venta online no está habilitado en este momento.
+          El acceso público o venta online no está habilitado en este momento (Plan FREE).
         </p>
       </div>
 
-      <div class="mt-12 flex justify-center">
-        <a href="/login" class="group flex items-center gap-3 px-6 py-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800 transition-all duration-300">
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="text-sm font-medium text-slate-300 group-hover:text-white">Acceso Privado</span>
-          <Icon name="tabler:arrow-right" class="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+      <div class="mt-12 flex justify-center animate-fade-in-up">
+        <a href={buttonTarget} class="group flex items-center gap-3 px-6 py-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-indigo-500/10">
+          
+          {isLoggedIn ? (
+            /* Icono verde si está dentro */
+            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          ) : (
+             /* Icono naranja si está fuera */
+            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+          )}
+
+          <span class="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
+            {buttonText}
+          </span>
+          
+          <Icon name={buttonIcon} class="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
         </a>
       </div>
 

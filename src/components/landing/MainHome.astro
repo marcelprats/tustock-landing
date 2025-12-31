@@ -1,7 +1,5 @@
 ---
 import Hero from '~/components/widgets/Hero.astro';
-import Features from '~/components/widgets/Features.astro';
-import Features2 from '~/components/widgets/Features2.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import Steps from '~/components/widgets/Steps.astro';
 import Content from '~/components/widgets/Content.astro';
@@ -10,8 +8,8 @@ import CallToAction from '~/components/widgets/CallToAction.astro';
 import PricingSection from '~/components/widgets/PricingSection.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
-import Layout from '~/layouts/Layout.astro'; // Asegúrate de envolver en Layout si no lo haces fuera
 
+// Recibimos los datos reales
 const { shopCount = "10+", userCount = "50+" } = Astro.props;
 
 const navItems = [
@@ -23,205 +21,196 @@ const navItems = [
   { text: 'Precios', target: 'pricing' },
   { text: 'FAQ', target: 'faq' },
 ];
-
-const metadata = { title: 'TuStock - ERP Híbrido con IA' };
 ---
 
-<Layout metadata={metadata}>
+<div class="relative overflow-hidden scroll-smooth-wrapper">
   
-  <div class="relative overflow-hidden scroll-smooth-container">
-    
-    <aside class="hidden xl:flex fixed left-8 top-1/2 -translate-y-1/2 z-50 flex-col gap-6">
-      <nav class="flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60" id="landing-menu">
-        
-        {navItems.map(({ text, target }) => (
-          <a 
-            href={`#${target}`} 
-            class="group relative nav-link flex items-center justify-center w-4 h-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
-            data-target={target}
-            aria-label={text}
-          >
-            <span class="absolute left-12 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
-              {text}
-            </span>
-            
-            <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:bg-blue-400 group-hover:scale-110"></div>
-          </a>
-        ))}
-
-      </nav>
-    </aside>
-
-    <div class="flex-1 w-full">
+  <aside class="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-6">
+    <nav class="flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60" id="landing-menu">
       
-      <div id="hero" class="scroll-mt-20">
-        <Hero
-          actions={[
-            {
-              variant: 'primary',
-              text: 'Descargar App Escritorio',
-              href: '/download',
-              icon: 'tabler:download',
-              class: 'shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300'
-            },
-            { text: 'Usar versión Web', href: '/register' },
-          ]}
-          image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Desktop App Interface' }}
+      {navItems.map(({ text, target }) => (
+        <a 
+          href={`#${target}`} 
+          class="group relative nav-link flex items-center justify-center w-4 h-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          data-target={target}
+          aria-label={text}
         >
-          <fragment slot="title">
-            ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
-            <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
-          </fragment>
+          <span class="absolute left-12 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
+            {text}
+          </span>
+          
+          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:bg-blue-400 group-hover:scale-110"></div>
+        </a>
+      ))}
 
-          <fragment slot="subtitle">
-            <span class="font-light text-lg">
-              La gestión de stock que combina una <b>App de Escritorio de alto rendimiento</b> con sincronización Cloud.
-              <br/>
-              Ejecuta la <b>Inteligencia Artificial en tu propio PC</b> para máxima privacidad y velocidad.
-            </span>
-          </fragment>
-        </Hero>
-      </div>
+    </nav>
+  </aside>
 
-      <div class="border-y border-gray-100 dark:border-slate-800 bg-blue-50/30 dark:bg-slate-900/30 backdrop-blur-sm">
-        <Stats
-          stats={[
-            { title: 'Tiendas Conectadas', amount: `${shopCount}` },
-            { title: 'Usuarios Activos', amount: `${userCount}` },
-            { title: 'IA On-Device', amount: 'Disponible' },
-            { title: 'Ley Crea y Crece', amount: 'Ready' },
-          ]}
-        />
-      </div>
+  <div class="flex-1 w-full">
+    
+    <div id="hero" class="scroll-mt-20">
+      <Hero
+        actions={[
+          {
+            variant: 'primary',
+            text: 'Descargar App Escritorio',
+            href: '/download',
+            icon: 'tabler:download',
+            class: 'shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300'
+          },
+          { text: 'Usar versión Web', href: '/register' },
+        ]}
+        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Desktop App Interface' }}
+      >
+        <fragment slot="title">
+          ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
+          <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
+        </fragment>
 
-      <div id="features" class="scroll-mt-20">
-        <Features3
-          title="Más que una web. Un Sistema Operativo."
-          subtitle="Diseñado para trabajar offline y sincronizar cuando vuelvas."
-          tagline="Tecnología Híbrida"
-          columns={3}
-          isBeforeContent={true}
-          items={[
-            { title: 'Base de Datos Local', description: 'Tus datos viven en tu PC. Búsqueda instantánea (0 latencia).', icon: 'tabler:database' },
-            { title: 'Sincronización Cloud', description: 'Todo se sube a la nube automáticamente cuando hay conexión.', icon: 'tabler:cloud-upload' },
-            { title: 'Consultas Stock IA', description: 'Pregunta a tu inventario en lenguaje natural.', icon: 'tabler:message-chatbot' },
-            { title: 'TPV Rápido', description: 'Optimizado para teclado y lector de códigos.', icon: 'tabler:device-desktop-analytics' },
-            { title: 'Factura Electrónica', description: 'XML estructurado y firma digital normativa 2026.', icon: 'tabler:certificate' },
-            { title: 'Privacidad Real', description: 'Cifrado local de extremo a extremo.', icon: 'tabler:shield-lock' },
-          ]}
-        />
-      </div>
+        <fragment slot="subtitle">
+          <span class="font-light text-lg">
+            La gestión de stock que combina una <b>App de Escritorio de alto rendimiento</b> con sincronización Cloud.
+            <br/>
+            Ejecuta la <b>Inteligencia Artificial en tu propio PC</b> para máxima privacidad y velocidad.
+          </span>
+        </fragment>
+      </Hero>
+    </div>
 
-      <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20">
-        <Content
-          isReversed
-          tagline="Inteligencia Artificial On-Device"
-          title="Tu PC es más potente de lo que crees."
-          items={[
-            { title: 'Procesamiento Local', description: 'TuStock corre los modelos de IA directamente en tu hardware.' },
-            { title: 'Asistente de Importación', description: 'La IA mapea tus Excels antiguos automáticamente.' },
-            { title: 'Predicción de Demanda', description: 'Analizamos tu histórico para sugerir compras.' },
-          ]}
-          image={{ src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1965&q=80', alt: 'AI' }}
-        />
-      </div>
-
-      <div id="fiscalidad" class="scroll-mt-20">
-        <Content
-          tagline="Cumplimiento Normativo"
-          title="Fiscalidad Automatizada 2026"
-          items={[
-            { title: 'VeriFactu Ready', description: 'Envío inmediato a Hacienda (cuando sea obligatorio).' },
-            { title: 'Formatos Estructurados', description: 'Generamos Facturae y formatos europeos B2B.' },
-            { title: 'Detección de Errores', description: 'Validación fiscal previa al envío.' },
-          ]}
-          image={{ src: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Legal' }}
-        />
-      </div>
-
-      <div id="steps" class="scroll-mt-20">
-        <Steps
-          title="Migración inteligente"
-          items={[
-            { title: 'Paso 1: <span class="font-medium">Arrastra tu Excel</span>', description: 'Cualquier formato sirve.', icon: 'tabler:file-upload' },
-            { title: 'Paso 2: <span class="font-medium">La IA Mapea</span>', description: 'Organizamos tus columnas solos.', icon: 'tabler:wand' },
-            { title: 'Paso 3: <span class="font-medium">Vende</span>', description: 'Tu catálogo listo en segundos.', icon: 'tabler:refresh' },
-          ]}
-          image={{ src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Import' }}
-        />
-      </div>
-
-      <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40">
-        <PricingSection
-          title="Precios claros"
-          prices={[
-            {
-              title: 'Community', price: '0', period: '/mes',
-              items: [{ description: 'Hasta 100 productos' }, { description: 'TPV Básico' }],
-              callToAction: { target: '_self', text: 'Gratis', href: '/register' },
-            },
-            {
-              title: 'Profesional', price: 29, period: '/mes', hasRibbon: true, ribbonTitle: 'Top',
-              items: [{ description: 'Ilimitado' }, { description: 'IA Fiscal' }, { description: 'Soporte' }],
-              callToAction: { target: '_self', text: 'Prueba 14 días', href: '/register?plan=pro' },
-            },
-            {
-              title: 'Enterprise', price: '99', period: '/mes',
-              items: [{ description: 'Servidor Dedicado' }, { description: 'API Rest' }],
-              callToAction: { target: '_self', text: 'Contactar', href: '/contact' },
-            },
-          ]}
-        />
-      </div>
-
-      <div id="faq" class="scroll-mt-20">
-        <FAQs
-          title="Preguntas Frecuentes"
-          items={[
-            { title: '¿Qué necesito?', description: 'Un PC moderno para la IA local. Si no, usa la nube.' },
-            { title: '¿Mac y Windows?', description: 'Sí, somos multiplataforma.' },
-            { title: '¿Factura Electrónica?', description: 'Sí, estamos adaptados para 2026.' },
-          ]}
-        />
-      </div>
-
-      <Brands
-        title="Tecnología"
-        icons={[]}
-        images={[
-          { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png', alt: 'PostgreSQL' },
-          { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png', alt: 'Stripe' },
-          { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png', alt: 'React Native' },
+    <div class="border-y border-gray-100 dark:border-slate-800 bg-blue-50/30 dark:bg-slate-900/30 backdrop-blur-sm">
+      <Stats
+        stats={[
+          { title: 'Tiendas Conectadas', amount: `${shopCount}` },
+          { title: 'Usuarios Activos', amount: `${userCount}` },
+          { title: 'IA On-Device', amount: 'Disponible' },
+          { title: 'Ley Crea y Crece', amount: 'Ready' },
         ]}
       />
-
-      <CallToAction
-        actions={[{ variant: 'primary', text: 'Empezar ahora', href: '/register', icon: 'tabler:download' }]}
-      >
-        <fragment slot="title">Control total hoy mismo</fragment>
-      </CallToAction>
-
     </div>
-  </div>
-</Layout>
 
-<style>
-  /* Forzamos el scroll suave globalmente en este contenedor */
-  .scroll-smooth-container {
-      scroll-behavior: smooth;
-  }
+    <div id="features" class="scroll-mt-20">
+      <Features3
+        title="Más que una web. Un Sistema Operativo."
+        subtitle="Diseñado para trabajar offline y sincronizar cuando vuelvas."
+        tagline="Tecnología Híbrida"
+        columns={3}
+        isBeforeContent={true}
+        items={[
+          { title: 'Base de Datos Local', description: 'Tus datos viven en tu PC. Búsqueda instantánea (0 latencia).', icon: 'tabler:database' },
+          { title: 'Sincronización Cloud', description: 'Todo se sube a la nube automáticamente cuando hay conexión.', icon: 'tabler:cloud-upload' },
+          { title: 'Consultas Stock IA', description: 'Pregunta a tu inventario en lenguaje natural.', icon: 'tabler:message-chatbot' },
+          { title: 'TPV Rápido', description: 'Optimizado para teclado y lector de códigos.', icon: 'tabler:device-desktop-analytics' },
+          { title: 'Factura Electrónica', description: 'XML estructurado y firma digital normativa 2026.', icon: 'tabler:certificate' },
+          { title: 'Privacidad Real', description: 'Cifrado local de extremo a extremo.', icon: 'tabler:shield-lock' },
+        ]}
+      />
+    </div>
+
+    <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20">
+      <Content
+        isReversed
+        tagline="Inteligencia Artificial On-Device"
+        title="Tu PC es más potente de lo que crees."
+        items={[
+          { title: 'Procesamiento Local', description: 'TuStock corre los modelos de IA directamente en tu hardware.' },
+          { title: 'Asistente de Importación', description: 'La IA mapea tus Excels antiguos automáticamente.' },
+          { title: 'Predicción de Demanda', description: 'Analizamos tu histórico para sugerir compras.' },
+        ]}
+        image={{ src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1965&q=80', alt: 'AI' }}
+      />
+    </div>
+
+    <div id="fiscalidad" class="scroll-mt-20">
+      <Content
+        tagline="Cumplimiento Normativo"
+        title="Fiscalidad Automatizada 2026"
+        items={[
+          { title: 'VeriFactu Ready', description: 'Envío inmediato a Hacienda (cuando sea obligatorio).' },
+          { title: 'Formatos Estructurados', description: 'Generamos Facturae y formatos europeos B2B.' },
+          { title: 'Detección de Errores', description: 'Validación fiscal previa al envío.' },
+        ]}
+        image={{ src: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Legal' }}
+      />
+    </div>
+
+    <div id="steps" class="scroll-mt-20">
+      <Steps
+        title="Migración inteligente"
+        items={[
+          { title: 'Paso 1: <span class="font-medium">Arrastra tu Excel</span>', description: 'Cualquier formato sirve.', icon: 'tabler:file-upload' },
+          { title: 'Paso 2: <span class="font-medium">La IA Mapea</span>', description: 'Organizamos tus columnas solos.', icon: 'tabler:wand' },
+          { title: 'Paso 3: <span class="font-medium">Vende</span>', description: 'Tu catálogo listo en segundos.', icon: 'tabler:refresh' },
+        ]}
+        image={{ src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Import' }}
+      />
+    </div>
+
+    <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40">
+      <PricingSection
+        title="Precios claros"
+        prices={[
+          {
+            title: 'Community', price: '0', period: '/mes',
+            items: [{ description: 'Hasta 100 productos' }, { description: 'TPV Básico' }],
+            callToAction: { target: '_self', text: 'Gratis', href: '/register' },
+          },
+          {
+            title: 'Profesional', price: 29, period: '/mes', hasRibbon: true, ribbonTitle: 'Top',
+            items: [{ description: 'Ilimitado' }, { description: 'IA Fiscal' }, { description: 'Soporte' }],
+            callToAction: { target: '_self', text: 'Prueba 14 días', href: '/register?plan=pro' },
+          },
+          {
+            title: 'Enterprise', price: '99', period: '/mes',
+            items: [{ description: 'Servidor Dedicado' }, { description: 'API Rest' }],
+            callToAction: { target: '_self', text: 'Contactar', href: '/contact' },
+          },
+        ]}
+      />
+    </div>
+
+    <div id="faq" class="scroll-mt-20">
+      <FAQs
+        title="Preguntas Frecuentes"
+        items={[
+          { title: '¿Qué necesito?', description: 'Un PC moderno para la IA local. Si no, usa la nube.' },
+          { title: '¿Mac y Windows?', description: 'Sí, somos multiplataforma.' },
+          { title: '¿Factura Electrónica?', description: 'Sí, estamos adaptados para 2026.' },
+        ]}
+      />
+    </div>
+
+    <Brands
+      title="Tecnología"
+      icons={[]}
+      images={[
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png', alt: 'PostgreSQL' },
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png', alt: 'Stripe' },
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png', alt: 'React Native' },
+      ]}
+    />
+
+    <CallToAction
+      actions={[{ variant: 'primary', text: 'Empezar ahora', href: '/register', icon: 'tabler:download' }]}
+    >
+      <fragment slot="title">Control total hoy mismo</fragment>
+    </CallToAction>
+
+  </div>
+</div>
+
+<style is:global>
   html {
       scroll-behavior: smooth;
   }
 </style>
 
 <script>
-  // Esperamos a que el DOM esté listo
   document.addEventListener('DOMContentLoaded', () => {
       
       const observerOptions = {
         root: null,
-        rootMargin: '-45% 0px -45% 0px', // Centro exacto
+        // Detectamos el centro exacto de la pantalla
+        rootMargin: '-45% 0px -45% 0px', 
         threshold: 0
       };
 
@@ -234,22 +223,19 @@ const metadata = { title: 'TuStock - ERP Híbrido con IA' };
               const indicator = link.querySelector('.indicator');
               const linkTarget = link.getAttribute('data-target');
 
+              // 🔥 AQUÍ ESTÁ LA MAGIA DE LA BARRA
               if (linkTarget === id) {
-                // --> ACTIVO (Barra vertical brillante)
+                // ACTIVO: Quitamos clase de punto pequeño, ponemos barra grande (h-8)
                 link.classList.add('active');
                 if (indicator) {
-                  // Quitamos estilos de "punto"
                   indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-                  // Ponemos estilos de "barra"
                   indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
                 }
               } else {
-                // --> INACTIVO (Punto gris pequeño)
+                // INACTIVO: Quitamos barra, ponemos punto pequeño
                 link.classList.remove('active');
                 if (indicator) {
-                  // Quitamos estilos de "barra"
                   indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-                  // Ponemos estilos de "punto"
                   indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
                 }
               }
@@ -258,7 +244,6 @@ const metadata = { title: 'TuStock - ERP Híbrido con IA' };
         });
       }, observerOptions);
 
-      // Observamos
       ['hero', 'features', 'ai-core', 'fiscalidad', 'steps', 'pricing', 'faq'].forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
