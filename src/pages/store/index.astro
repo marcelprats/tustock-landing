@@ -1,18 +1,15 @@
 ---
-import Layout from '~/layouts/Layout.astro'; // Usamos el Layout MAESTRO (el mismo de la landing)
+import Layout from '~/layouts/Layout.astro';
 import Hero from '~/components/widgets/Hero.astro';
 import Features2 from '~/components/widgets/Features2.astro';
-import Content from '~/components/widgets/Content.astro'; // Componente visual potente
+import Content from '~/components/widgets/Content.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
-import ItemGrid from '~/components/ui/ItemGrid.astro'; // Para el grid de productos
 
 // 1. DATOS REALES (Middleware)
 const { currentShop } = Astro.locals;
 
-// Protección
-if (currentShop?.web_plan === 'FREE') {
-  return Astro.redirect('/store/placeholder');
-}
+// NOTA: No necesitamos comprobar si es FREE aquí, el middleware ya lo ha hecho.
+// Si llegamos aquí, es porque es PRO o el middleware falló (y en ese caso, mejor mostrar algo que un error).
 
 const shopName = currentShop?.name || "Tienda";
 const metadata = { title: `${shopName} - Catálogo`, ignoreTitleTemplate: true };
@@ -28,7 +25,7 @@ const products = [
 
 <Layout metadata={metadata}>
   
-  {/* 1. HERO IDÉNTICO A LA LANDING (Mismos estilos) */}
+  {/* 1. HERO */}
   <Hero
     tagline="Comercio Oficial"
     actions={[
@@ -47,7 +44,7 @@ const products = [
     </fragment>
   </Hero>
 
-  {/* 2. CATÁLOGO USANDO LOS MISMOS ESTILOS DE "FEATURES" */}
+  {/* 2. CATÁLOGO */}
   <div id="catalogo" class="bg-blue-50 dark:bg-slate-900">
       <Features2
         title="Nuestros Productos Destacados"
@@ -58,7 +55,7 @@ const products = [
       />
   </div>
 
-  {/* 3. SECCIÓN VISUAL (Como la de 'Fiscalidad' de la Landing) */}
+  {/* 3. SECCIÓN VISUAL */}
   <Content
     isReversed
     tagline="Garantía"
@@ -79,7 +76,7 @@ const products = [
     }}
   />
 
-  {/* 4. CALL TO ACTION (Igual que el de 'Digitalizar mi negocio') */}
+  {/* 4. CALL TO ACTION */}
   <CallToAction
     actions={[
       {

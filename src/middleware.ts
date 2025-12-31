@@ -25,15 +25,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // ------------------------------------------------------------------------
     // 2. LISTA BLANCA GLOBAL (CRÍTICO: SALVAR LOGOUT Y ASSETS)
     // ------------------------------------------------------------------------
-    // Esta sección DEBE ir antes de conectar a la base de datos o verificar tiendas.
-    // Si la URL es un recurso estático o una ruta de sistema (API/Login/Logout),
-    // dejamos pasar la petición inmediatamente.
     if (
         url.pathname.match(/\.(css|js|jpg|jpeg|png|svg|ico|json|woff2|woff|ttf)$/) || 
         url.pathname.startsWith('/_astro') ||
         url.pathname.startsWith('/_image') ||
         url.pathname.startsWith('/favicon') ||
-        // 🔥 IMPORTANTE: Dejar pasar logout ANTES de comprobar tienda
         ['/api', '/login', '/logout', '/register'].some(p => url.pathname.startsWith(p))
     ) {
         return next();
@@ -49,12 +45,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
         let shopData: any = null; 
         
-        // Conexión a Base de Datos (Turso / LibSQL)
         if (env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
             try {
                 const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
                 
-                // Buscamos la tienda por su URL
                 const result = await turso.execute({
                     sql: "SELECT company_name, owner_email, plan_type, web_plan FROM licenses WHERE website_url LIKE ? LIMIT 1",
                     args: [`%${subdomain}%`]
@@ -65,9 +59,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
                     const rawWebPlan = (shop.web_plan as string) || 'FREE';
                     const webPlanNormalized = rawWebPlan.toUpperCase().trim(); 
 
-                    // 🛑 DEBUG: Útil para ver en los logs de Cloudflare si detecta bien el plan
-                    // console.log(`[Middleware] ${subdomain} -> Plan: ${webPlanNormalized}`);
-
                     shopData = {
                         name: (shop.company_name as string) || 'Tienda',
                         plan: (shop.plan_type as string) || 'FREE',
@@ -76,7 +67,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
                         isStore: true
                     };
                     
-                    // Guardamos los datos en locals para usarlos en los componentes (.astro)
                     context.locals.currentShop = shopData;
                 }
             } catch (e) { 
@@ -84,7 +74,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        // Si la tienda no existe en la BD, devolvemos 404
         if (!shopData) return new Response(`Tienda '${subdomain}' no encontrada`, { status: 404 });
 
         // --- ENRUTAMIENTO (REWRITES) ---
@@ -100,15 +89,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
         }
 
         // C) PLAN PRO -> Tienda Real
-        // 🔥 FIX: Forzamos /index para asegurar que Astro carga el archivo correcto
-        // si la petición es a la raíz.
-        const targetPath = (url.pathname === '/' || url.pathname === '') 
-            ? '/store/index' 
-            : `/store${url.pathname}`;
-            
-        return context.rewrite(targetPath);
+        // 🔥 FIX: Reescribir a la CARPETA '/store' en lugar de '/store/index'
+        // Esto permite que Astro resuelva el index.astro correctamente.
+        if (url.pathname === '/' || url.pathname === '') {
+            return context.rewrite('/store'); 
+        }
+
+        return context.rewrite(`/store${url.pathname}`);
     }
 
-    // Si no es tienda ni sistema, cargamos la Landing Page normal
     return next();
 });
