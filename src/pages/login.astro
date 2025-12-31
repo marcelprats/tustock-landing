@@ -1,99 +1,154 @@
 ---
-import Layout from '~/layouts/Layout.astro';
-import Headline from '~/components/ui/Headline.astro';
+import Layout from '~/layouts/PageLayout.astro';
 import { Icon } from 'astro-icon/components';
 
-const metadata = { title: 'Acceder' };
+const metadata = { title: 'Acceder - TuStock' };
 const returnTo = Astro.url.searchParams.get('redirect') || '';
 ---
 
 <Layout metadata={metadata}>
-  <section class="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-900">
-    <div class="w-full max-w-md p-8 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700">
+  <section class="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0b1120] overflow-hidden p-4">
+    
+    <div class="absolute inset-0 pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="relative w-full max-w-md z-10">
       
-      <div class="text-center mb-8">
-        <Headline
-          title="Bienvenido"
-          subtitle="Entra para gestionar tu negocio."
-          tagline="Acceso Seguro"
-        />
+      <div class="flex flex-col items-center mb-10">
+        <div class="w-16 h-16 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/30 flex items-center justify-center mb-4 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+           <Icon name="tabler:layout-dashboard" class="w-10 h-10 text-white" />
+        </div>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">TuStock</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium italic">Acceso centralizado</p>
       </div>
 
-      <form id="loginForm" class="space-y-6">
+      <div class="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-white dark:border-slate-800">
         
-        <input type="hidden" id="return_to" value={returnTo} />
-
-        <div id="errorMessage" class="hidden p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center"></div>
-
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Icon name="tabler:mail" class="w-5 h-5 text-gray-400" />
-            </div>
-            <input type="email" id="email" required class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-gray-600 dark:text-white" placeholder="tu@email.com" />
-          </div>
+        <div class="text-left mb-8">
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Bienvenido</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Introduce tus credenciales para continuar.</p>
         </div>
 
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Icon name="tabler:lock" class="w-5 h-5 text-gray-400" />
-            </div>
-            <input type="password" id="password" required class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-gray-600 dark:text-white" placeholder="••••••••" />
+        <form id="loginForm" class="space-y-6">
+          <input type="hidden" id="return_to" value={returnTo} />
+
+          <div id="errorMessage" class="hidden animate-shake p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold border border-red-100 dark:border-red-900/30 text-center">
           </div>
+
+          <div class="space-y-2">
+            <label for="email" class="block text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Correo Electrónico</label>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
+                <Icon name="tabler:mail" class="w-5 h-5" />
+              </div>
+              <input 
+                type="email" 
+                id="email" 
+                required 
+                class="block w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all dark:text-white placeholder:text-slate-400" 
+                placeholder="ejemplo@correo.com" 
+              />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center ml-1">
+              <label for="password" class="block text-sm font-bold text-slate-700 dark:text-slate-300">Contraseña</label>
+              <a href="/forgot" class="text-[10px] uppercase font-black text-blue-600 dark:text-blue-400 hover:underline">¿La olvidaste?</a>
+            </div>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
+                <Icon name="tabler:lock" class="w-5 h-5" />
+              </div>
+              <input 
+                type="password" 
+                id="password" 
+                required 
+                class="block w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all dark:text-white placeholder:text-slate-400" 
+                placeholder="••••••••" 
+              />
+            </div>
+          </div>
+
+          <button 
+            id="submitBtn" 
+            type="submit" 
+            class="w-full flex justify-center items-center gap-3 py-4 px-6 border border-transparent rounded-2xl shadow-xl shadow-blue-500/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+          >
+            <span id="btnText">Acceder al Sistema</span>
+            <Icon name="tabler:arrow-right" class="w-5 h-5" id="btnIcon" />
+          </button>
+        </form>
+
+        <div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-sm text-slate-500">¿Aún no tienes cuenta?</p>
+            <a href="/register" class="inline-block mt-2 font-bold text-blue-600 dark:text-blue-400 hover:underline">Crea una ahora gratis</a>
         </div>
 
-        <button id="submitBtn" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300">
-          Acceder
-        </button>
-      </form>
-
+      </div>
     </div>
   </section>
 </Layout>
 
-<script>
-  const form = document.getElementById('loginForm');
-  const errorDiv = document.getElementById('errorMessage');
-  const btn = document.getElementById('submitBtn') as HTMLButtonElement;
+<style>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .animate-shake { animation: shake 0.3s ease-in-out; }
+</style>
 
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault(); // 🛑 DETIENE LA RECARGA DE PÁGINA
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const form = document.getElementById('loginForm');
+    const errorDiv = document.getElementById('errorMessage');
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
 
-    // Limpiar errores y poner botón cargando
-    if (errorDiv) errorDiv.classList.add('hidden');
-    if (btn) { btn.disabled = true; btn.innerText = "Verificando..."; }
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
-    const returnTo = (document.getElementById('return_to') as HTMLInputElement).value;
-
-    try {
-      // ENVIAMOS LA PETICIÓN MANUALMENTE
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, return_to: returnTo })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        // ✅ ÉXITO: Redirigimos manualmente
-        window.location.href = result.redirect;
-      } else {
-        // ❌ ERROR: Mostramos el mensaje
-        throw new Error(result.error || 'Error desconocido');
+      if (errorDiv) errorDiv.classList.add('hidden');
+      if (btn) { 
+        btn.disabled = true; 
+        btnText.innerText = "Verificando..."; 
+        btnIcon.style.display = "none";
       }
 
-    } catch (err: any) {
-      if (errorDiv) {
-        errorDiv.innerText = err.message;
-        errorDiv.classList.remove('hidden');
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const returnTo = document.getElementById('return_to').value;
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, return_to: returnTo })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          window.location.href = result.redirect;
+        } else {
+          throw new Error(result.error || 'Credenciales inválidas');
+        }
+
+      } catch (err) {
+        if (errorDiv) {
+          errorDiv.innerText = err.message;
+          errorDiv.classList.remove('hidden');
+        }
+        if (btn) { 
+          btn.disabled = false; 
+          btnText.innerText = "Acceder al Sistema"; 
+          btnIcon.style.display = "block";
+        }
       }
-      if (btn) { btn.disabled = false; btn.innerText = "Acceder"; }
-    }
+    });
   });
 </script>
