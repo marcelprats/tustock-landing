@@ -1,11 +1,14 @@
 ---
-// PARTE SUPERIOR DEL HUB.ASTRO
 import Layout from '~/layouts/PageLayout.astro';
 import { Icon } from 'astro-icon/components';
 
+// 1. SEGURIDAD: SI NO HAY COOKIE, AL LOGIN
 const session = Astro.cookies.get('session');
-if (!session || !session.value) return Astro.redirect('/login');
+if (!session || !session.value) {
+  return Astro.redirect('/login');
+}
 
+// 2. OBTENER DATOS REALES
 const userId = session.value;
 const db = Astro.locals.runtime?.env?.DB;
 
@@ -25,18 +28,18 @@ if (userId && db) {
     `).bind(userId).all();
     
     if (storesRes.results) {
-      // Usamos un bucle for...of para evitar líos de sintaxis en el map con async
       const processedStores = [];
+      
       for (const s of storesRes.results) {
         let currentStatus = s.status;
 
+        // AUTO-ACTIVACIÓN: Si está PENDING, probamos si ya responde
         if (currentStatus === 'PENDING') {
           try {
             const checkUrl = import.meta.env.PROD 
               ? `https://${s.slug}.tustock.app` 
               : `http://localhost:4321/?tenant=${s.slug}`;
 
-            // Petición rápida al servidor
             const check = await fetch(checkUrl, { method: 'HEAD' });
 
             if (check.ok || check.status === 404 || check.status === 200) {
@@ -44,7 +47,7 @@ if (userId && db) {
               currentStatus = 'ACTIVE';
             }
           } catch (e) {
-            // Sigue sin responder, no pasa nada
+            // Sigue sin responder
           }
         }
 
@@ -63,7 +66,6 @@ if (userId && db) {
     console.error("Error cargando Hub:", e);
   }
 }
----
 
 const metadata = { title: 'Mis Tiendas - TuStock' };
 ---
@@ -107,10 +109,6 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
             <a 
                 href={store.url} 
                 target={store.isPending ? "_self" : "_blank"}
-                /* 🔥 ATRIBUTOS CRÍTICOS PARA EL SCRIPT 🔥 */
-                data-status={store.status} 
-                data-slug={store.slug} 
-                data-id={store.id} 
                 class={`group relative flex flex-col justify-between min-h-[260px] p-8 rounded-3xl transition-all duration-500
                     ${store.isPending 
                         ? 'bg-slate-100 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-700 cursor-wait' 
@@ -122,7 +120,6 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                         ${store.isPending 
                             ? 'bg-slate-200 dark:bg-slate-700 text-slate-400' 
                             : 'bg-slate-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-6'}`}>
-                        {/* Si está pendiente, animamos el icono de carga */}
                         <Icon name={store.isPending ? "tabler:loader-quarter" : "tabler:building-store"} class={`w-7 h-7 ${store.isPending ? 'animate-spin' : ''}`} />
                     </div>
 
@@ -159,9 +156,8 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                                 </span>
                                 Configurando entorno...
                             </span>
-                            {/* Barra de progreso visual sutil */}
-                            <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-amber-500 animate-[loading_2s_ease-in-out_infinite]"></div>
+                            <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden text-transparent">.
+                                <div class="h-full bg-amber-500 animate-pulse w-1/2"></div>
                             </div>
                         </div>
                     ) : (
@@ -190,64 +186,14 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
 </Layout>
 
 <style>
-    /* Efecto de entrada suave para las tarjetas */
     .grid > a {
         animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     }
-
     @keyframes slideUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes loading {
-    0% { width: 0%; transform: translateX(-100%); }
-    50% { width: 100%; transform: translateX(0); }
-    100% { width: 0%; transform: translateX(100%); }
-    }
-
-    /* Retraso escalonado para las tarjetas */
     .grid > a:nth-child(1) { animation-delay: 0.1s; }
     .grid > a:nth-child(2) { animation-delay: 0.2s; }
     .grid > a:nth-child(3) { animation-delay: 0.3s; }
 </style>
-
-<script is:inline>
-  async function checkPendingStores() {
-    // 1. Buscamos todas las tarjetas que están en estado "PENDING"
-    const pendingCards = document.querySelectorAll('[data-status="PENDING"]');
-    
-    if (pendingCards.length === 0) return;
-
-    for (const card of pendingCards) {
-      const slug = card.getAttribute('data-slug');
-      const storeId = card.getAttribute('data-id');
-
-      try {
-        // 2. Hacemos un "ping" a la tienda
-        // En local usamos /?tenant=slug, en prod la URL real
-        const checkUrl = window.location.hostname.includes('localhost') 
-          ? `/?tenant=${slug}` 
-          : `https://${slug}.tustock.app`;
-
-        const res = await fetch(checkUrl, { method: 'HEAD', mode: 'no-cors' });
-
-        // 3. Si responde (aunque sea opaque por no-cors), consideramos que está viva
-        // Enviamos señal a nuestra API para activar en D1
-        await fetch('/api/activate-store', {
-          method: 'POST',
-          body: JSON.stringify({ storeId })
-        });
-
-        // 4. Recargamos la página para que el usuario vea el botón de ENTRAR
-        window.location.reload();
-        
-      } catch (e) {
-        console.log(`Tienda ${slug} aún no responde...`);
-      }
-    }
-  }
-
-  // Ejecutar cada 3 segundos si hay pendientes
-  setInterval(checkPendingStores, 3000);
-</script>
