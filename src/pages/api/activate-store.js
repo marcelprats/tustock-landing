@@ -1,6 +1,6 @@
-import type { APIRoute } from 'astro';
+// src/pages/api/activate-store.js
 
-export const POST: APIRoute = async ({ request, locals, cookies }) => {
+export const POST = async ({ request, locals, cookies }) => {
   try {
     const env = locals.runtime?.env;
     const db = env?.DB;
@@ -18,14 +18,11 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     }
 
     // 2. ACTUALIZAR ESTADO A ACTIVE
-    // Opcional: Podrías verificar que el storeId pertenece al usuario de la sesión
-    // pero para agilizar el ping, con el ID es suficiente.
     const result = await db.prepare(
       "UPDATE tenants SET status = 'ACTIVE' WHERE id = ?"
     ).bind(storeId).run();
 
     if (result.success) {
-      console.log(`✅ Tienda ${storeId} activada correctamente en D1`);
       return new Response(JSON.stringify({ 
         success: true, 
         message: "Tienda activada" 
@@ -34,7 +31,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
       return new Response(JSON.stringify({ error: "No se pudo actualizar" }), { status: 500 });
     }
 
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error en activate-store:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
