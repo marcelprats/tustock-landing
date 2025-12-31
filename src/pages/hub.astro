@@ -2,13 +2,9 @@
 import Layout from '~/layouts/PageLayout.astro';
 import { Icon } from 'astro-icon/components';
 
-// 1. SEGURIDAD: SI NO HAY COOKIE, AL LOGIN
 const session = Astro.cookies.get('session');
-if (!session || !session.value) {
-  return Astro.redirect('/login');
-}
+if (!session || !session.value) return Astro.redirect('/login');
 
-// 2. OBTENER DATOS REALES
 const userId = session.value;
 const db = Astro.locals.runtime?.env?.DB;
 
@@ -21,28 +17,56 @@ if (userId && db) {
     if (userRes) userName = userRes.full_name;
 
     const storesRes = await db.prepare(`
-      SELECT t.name, t.slug, t.status, t.web_plan, m.role 
+      SELECT t.id, t.name, t.slug, t.status, t.web_plan, m.role 
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ?
     `).bind(userId).all();
     
     if (storesRes.results) {
-      userStores = storesRes.results.map(s => {
-        const isPending = s.status === 'PENDING';
+      // PROCESAMIENTO CON AUTO-ACTIVACIÓN
+      userStores = await Promise.all(storesRes.results.map(async (s) => {
+        let currentStatus = s.status;
+
+        // Si está PENDING, intentamos validarla ahora mismo en el servidor
+        if (currentStatus === 'PENDING') {
+          try {
+            const checkUrl = import.meta.env.PROD 
+              ? `https://${s.slug}.tustock.app` 
+              : `http://localhost:4321/?tenant=${s.slug}`;
+
+            // Timeout corto de 800ms para no retrasar la carga del Hub
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 800);
+
+            const check = await fetch(checkUrl, { method: 'HEAD', signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (check.ok || check.status === 404 || check.status === 200) {
+              // Si responde algo, la activamos en la DB silenciosamente
+              await db.prepare("UPDATE tenants SET status = 'ACTIVE' WHERE id = ?").bind(s.id).run();
+              currentStatus = 'ACTIVE';
+            }
+          } catch (e) {
+            // Sigue caída, mantenemos PENDING
+          }
+        }
+
         return {
-          ...s, 
-          url: isPending 
-               ? '#' 
-               : (import.meta.env.PROD ? `https://${s.slug}.tustock.app` : `/?tenant=${s.slug}`),
-          isPending
+          ...s,
+          status: currentStatus,
+          isPending: currentStatus === 'PENDING',
+          url: currentStatus === 'ACTIVE' 
+               ? (import.meta.env.PROD ? `https://${s.slug}.tustock.app` : `/?tenant=${s.slug}`)
+               : '#'
         };
-      });
+      }));
     }
   } catch (e) {
     console.error("Error cargando Hub:", e);
   }
 }
+---
 
 const metadata = { title: 'Mis Tiendas - TuStock' };
 ---
