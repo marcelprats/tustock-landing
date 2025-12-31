@@ -2,7 +2,7 @@
 import Layout from '~/layouts/PageLayout.astro';
 import MainHome from '~/components/landing/MainHome.astro';
 
-// 1. Estadísticas dinámicas desde D1 (Solo para la landing principal)
+// 1. Estadísticas dinámicas desde D1
 let shopCount = "10+";
 let userCount = "50+";
 
@@ -21,7 +21,8 @@ if (db) {
 }
 
 const metadata = { 
-  title: 'TuStock - Gestión de Inventario Híbrida con IA' 
+  title: 'TuStock - Gestión de Inventario Híbrida con IA',
+  ignoreTitleTemplate: true 
 };
 ---
 

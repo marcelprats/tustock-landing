@@ -9,7 +9,7 @@ import PricingSection from '~/components/widgets/PricingSection.astro';
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 
-const { shopCount = "10+", userCount = "50+" } = Astro.props;
+const { shopCount, userCount } = Astro.props;
 
 const navItems = [
   { text: 'Inicio', target: 'hero' },
@@ -22,10 +22,10 @@ const navItems = [
 ];
 ---
 
-<div class="relative overflow-hidden">
+<div class="relative w-full overflow-x-hidden">
   
-  <aside class="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-6">
-    <nav class="flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60">
+  <aside class="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-6 pointer-events-none">
+    <nav class="pointer-events-auto flex flex-col gap-5 p-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md rounded-full border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-slate-900/60">
       
       {navItems.map(({ text, target }) => (
         <a 
@@ -38,7 +38,7 @@ const navItems = [
             {text}
           </span>
           
-          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-300 ease-out group-hover:bg-blue-400 group-hover:scale-110"></div>
+          <div class="indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-500 ease-out group-hover:bg-blue-400 group-hover:scale-110"></div>
         </a>
       ))}
 
@@ -47,33 +47,21 @@ const navItems = [
 
   <div class="flex-1 w-full">
     
-    <div id="hero" class="scroll-mt-20 section-scroll">
+    <div id="hero" class="scroll-section">
       <Hero
         actions={[
-          {
-            variant: 'primary',
-            text: 'Descargar App Escritorio',
-            href: '/download',
-            icon: 'tabler:download',
-            class: 'shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300'
-          },
+          { variant: 'primary', text: 'Descargar App Escritorio', href: '/download', icon: 'tabler:download' },
           { text: 'Usar versión Web', href: '/register' },
         ]}
-        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Desktop App Interface' }}
+        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Interface' }}
       >
         <fragment slot="title">
-            <span class="block animate-fade-in duration-300 ease-out">
-                ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
-                <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
-            </span>
+          ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
+          <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
         </fragment>
-
         <fragment slot="subtitle">
-          <span class="font-light text-lg block animate-fade-in duration-500 delay-100">
-            La gestión de stock que combina una <b>App de Escritorio de alto rendimiento</b> con sincronización Cloud.
-            <br/>
-            Ejecuta la <b>Inteligencia Artificial en tu propio PC</b> para máxima privacidad y velocidad.
-          </span>
+          Gestión de stock con <b>App de Escritorio</b> y sincronización Cloud.
+          <br/> Ejecuta la <b>IA en tu PC</b> para máxima privacidad.
         </fragment>
       </Hero>
     </div>
@@ -81,74 +69,74 @@ const navItems = [
     <div class="border-y border-gray-100 dark:border-slate-800 bg-blue-50/30 dark:bg-slate-900/30 backdrop-blur-sm">
       <Stats
         stats={[
-          { title: 'Tiendas Conectadas', amount: `${shopCount}` },
-          { title: 'Usuarios Activos', amount: `${userCount}` },
-          { title: 'IA On-Device', amount: 'Disponible' },
-          { title: 'Ley Crea y Crece', amount: 'Ready' },
+          { title: 'Tiendas', amount: shopCount },
+          { title: 'Usuarios', amount: userCount },
+          { title: 'IA Local', amount: 'Sí' },
+          { title: 'Fiscalidad', amount: '2026' },
         ]}
       />
     </div>
 
-    <div id="features" class="scroll-mt-20 section-scroll">
+    <div id="features" class="scroll-section">
       <Features3
-        title="Más que una web. Un Sistema Operativo."
-        subtitle="Diseñado para trabajar offline y sincronizar cuando vuelvas."
-        tagline="Tecnología Híbrida"
+        title="Sistema Operativo Retail"
+        subtitle="Trabaja offline. Sincroniza online."
+        tagline="Híbrido"
         columns={3}
         isBeforeContent={true}
         items={[
-          { title: 'Base de Datos Local', description: 'Tus datos viven en tu PC. Búsqueda instantánea (0 latencia).', icon: 'tabler:database' },
-          { title: 'Sincronización Cloud', description: 'Todo se sube a la nube automáticamente cuando hay conexión.', icon: 'tabler:cloud-upload' },
-          { title: 'Consultas Stock IA', description: 'Pregunta a tu inventario en lenguaje natural.', icon: 'tabler:message-chatbot' },
-          { title: 'TPV Rápido', description: 'Optimizado para teclado y lector de códigos.', icon: 'tabler:device-desktop-analytics' },
-          { title: 'Factura Electrónica', description: 'XML estructurado y firma digital normativa 2026.', icon: 'tabler:certificate' },
-          { title: 'Privacidad Real', description: 'Cifrado local de extremo a extremo.', icon: 'tabler:shield-lock' },
+          { title: 'Base de Datos Local', description: '0 latencia. Funciona sin internet.', icon: 'tabler:database' },
+          { title: 'Sync Cloud', description: 'Respaldo automático en la nube.', icon: 'tabler:cloud-upload' },
+          { title: 'Consultas IA', description: 'Habla con tu inventario.', icon: 'tabler:message-chatbot' },
+          { title: 'TPV Rápido', description: 'Optimizado para velocidad.', icon: 'tabler:device-desktop-analytics' },
+          { title: 'Factura Electrónica', description: 'XML legal y firma digital.', icon: 'tabler:certificate' },
+          { title: 'Cifrado Local', description: 'Tus datos son tuyos.', icon: 'tabler:shield-lock' },
         ]}
       />
     </div>
 
-    <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20 section-scroll">
+    <div id="ai-core" class="py-10 bg-slate-50 dark:bg-slate-800/20 scroll-section">
       <Content
         isReversed
-        tagline="Inteligencia Artificial On-Device"
-        title="Tu PC es más potente de lo que crees."
+        tagline="Edge AI"
+        title="Potencia en tu Hardware"
         items={[
-          { title: 'Procesamiento Local', description: 'TuStock corre los modelos de IA directamente en tu hardware.' },
-          { title: 'Asistente de Importación', description: 'La IA mapea tus Excels antiguos automáticamente.' },
-          { title: 'Predicción de Demanda', description: 'Analizamos tu histórico para sugerir compras.' },
+          { title: 'Procesamiento Local', description: 'Usa tu GPU/CPU para correr la IA sin coste por token.' },
+          { title: 'Importación Inteligente', description: 'Mapeo automático de Excel y CSV.' },
+          { title: 'Predicción', description: 'Cálculo de roturas de stock.' },
         ]}
         image={{ src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1965&q=80', alt: 'AI' }}
       />
     </div>
 
-    <div id="fiscalidad" class="scroll-mt-20 section-scroll">
+    <div id="fiscalidad" class="scroll-section">
       <Content
-        tagline="Cumplimiento Normativo"
-        title="Fiscalidad Automatizada 2026"
+        tagline="Legal 2026"
+        title="Hacienda Ready"
         items={[
-          { title: 'VeriFactu Ready', description: 'Envío inmediato a Hacienda (cuando sea obligatorio).' },
-          { title: 'Formatos Estructurados', description: 'Generamos Facturae y formatos europeos B2B.' },
-          { title: 'Detección de Errores', description: 'Validación fiscal previa al envío.' },
+          { title: 'VeriFactu', description: 'Envío inmediato a la AEAT.' },
+          { title: 'Facturae B2B', description: 'Formatos estructurados obligatorios.' },
+          { title: 'Validación', description: 'Detección de errores fiscales.' },
         ]}
         image={{ src: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Legal' }}
       />
     </div>
 
-    <div id="steps" class="scroll-mt-20 section-scroll">
+    <div id="steps" class="scroll-section">
       <Steps
-        title="Migración inteligente"
+        title="Migración en minutos"
         items={[
-          { title: 'Paso 1: <span class="font-medium">Arrastra tu Excel</span>', description: 'Cualquier formato sirve.', icon: 'tabler:file-upload' },
-          { title: 'Paso 2: <span class="font-medium">La IA Mapea</span>', description: 'Organizamos tus columnas solos.', icon: 'tabler:wand' },
-          { title: 'Paso 3: <span class="font-medium">Vende</span>', description: 'Tu catálogo listo en segundos.', icon: 'tabler:refresh' },
+          { title: '1. Arrastra Excel', description: 'Cualquier formato.', icon: 'tabler:file-upload' },
+          { title: '2. IA Mapea', description: 'Entendemos tus columnas.', icon: 'tabler:wand' },
+          { title: '3. Vende', description: 'Stock listo al instante.', icon: 'tabler:refresh' },
         ]}
         image={{ src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Import' }}
       />
     </div>
 
-    <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40 section-scroll">
+    <div id="pricing" class="bg-blue-50 dark:bg-slate-900/40 scroll-section">
       <PricingSection
-        title="Precios claros"
+        title="Precios"
         prices={[
           {
             title: 'Community', price: '0', period: '/mes',
@@ -156,32 +144,32 @@ const navItems = [
             callToAction: { target: '_self', text: 'Gratis', href: '/register' },
           },
           {
-            title: 'Profesional', price: 29, period: '/mes', hasRibbon: true, ribbonTitle: 'Top',
+            title: 'Pro', price: 29, period: '/mes', hasRibbon: true, ribbonTitle: 'Recomendado',
             items: [{ description: 'Ilimitado' }, { description: 'IA Fiscal' }, { description: 'Soporte' }],
             callToAction: { target: '_self', text: 'Prueba 14 días', href: '/register?plan=pro' },
           },
           {
             title: 'Enterprise', price: '99', period: '/mes',
-            items: [{ description: 'Servidor Dedicado' }, { description: 'API Rest' }],
+            items: [{ description: 'Servidor Dedicado' }, { description: 'API' }],
             callToAction: { target: '_self', text: 'Contactar', href: '/contact' },
           },
         ]}
       />
     </div>
 
-    <div id="faq" class="scroll-mt-20 section-scroll">
+    <div id="faq" class="scroll-section">
       <FAQs
-        title="Preguntas Frecuentes"
+        title="Dudas Comunes"
         items={[
-          { title: '¿Qué necesito?', description: 'Un PC moderno para la IA local. Si no, usa la nube.' },
-          { title: '¿Mac y Windows?', description: 'Sí, somos multiplataforma.' },
-          { title: '¿Factura Electrónica?', description: 'Sí, estamos adaptados para 2026.' },
+          { title: '¿Requisitos?', description: 'PC moderno para IA local, o usa la nube.' },
+          { title: '¿Mac/Windows?', description: 'Sí, compatible con ambos.' },
+          { title: '¿Ley Crea y Crece?', description: 'Sí, 100% adaptado.' },
         ]}
       />
     </div>
 
     <Brands
-      title="Tecnología"
+      title="Tech Stack"
       icons={[]}
       images={[
         { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png', alt: 'PostgreSQL' },
@@ -191,9 +179,9 @@ const navItems = [
     />
 
     <CallToAction
-      actions={[{ variant: 'primary', text: 'Empezar ahora', href: '/register', icon: 'tabler:download' }]}
+      actions={[{ variant: 'primary', text: 'Empezar Gratis', href: '/register', icon: 'tabler:download' }]}
     >
-      <fragment slot="title">Control total hoy mismo</fragment>
+      <fragment slot="title">Toma el control hoy</fragment>
     </CallToAction>
 
   </div>
@@ -201,52 +189,53 @@ const navItems = [
 
 <style is:global>
   html {
-      scroll-behavior: smooth;
+    scroll-behavior: smooth;
   }
 </style>
 
 <script is:inline>
-  // Esta función se ejecutará cada vez que muevas la rueda
-  function onScroll() {
-    const sections = document.querySelectorAll('.section-scroll');
-    const navLinks = document.querySelectorAll('.nav-link');
-
-    let currentSectionId = '';
-
-    // Calculamos qué sección está ocupando más pantalla
-    sections.forEach((section) => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.clientHeight;
-      
-      // Si el scroll ha bajado más allá del inicio de la sección (menos un margen de 200px para anticipar)
-      if (window.scrollY >= (sectionTop - 300)) {
-        currentSectionId = section.getAttribute('id');
-      }
-    });
-
-    // Actualizamos el menú
-    navLinks.forEach((link) => {
-      const indicator = link.querySelector('.indicator');
-      // Limpiamos estilos (RESET)
-      if (indicator) {
-        indicator.classList.remove('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
-        indicator.classList.add('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-      }
-
-      // Si coincide con la sección actual
-      if (link.getAttribute('data-target') === currentSectionId) {
-        if (indicator) {
-          // APLICAMOS ESTILO BARRA (ACTIVADO)
-          indicator.classList.remove('w-1.5', 'h-1.5', 'bg-slate-400/40', 'dark:bg-slate-500/40');
-          indicator.classList.add('w-2', 'h-8', 'bg-blue-600', 'shadow-[0_0_15px_rgba(37,99,235,0.6)]');
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Configuramos el observador
+    // rootMargin: '-50% 0px -50% 0px' -> Esto crea una línea horizontal invisible en el CENTRO de la pantalla.
+    // Solo se activa cuando un elemento cruza esa línea exacta.
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          activateMenuLink(id);
         }
-      }
-    });
-  }
+      });
+    }, { rootMargin: '-50% 0px -50% 0px' });
 
-  // Escuchamos el evento de scroll globalmente
-  window.addEventListener('scroll', onScroll);
-  
-  // Ejecutamos una vez al inicio para iluminar la portada
-  onScroll();
+    // 2. Función para pintar el menú
+    function activateMenuLink(id) {
+      document.querySelectorAll('.nav-link').forEach(link => {
+        const indicator = link.querySelector('.indicator');
+        const target = link.getAttribute('data-target');
+
+        if (target === id) {
+          // ACTIVO: Barra Vertical Azul Brillante
+          link.classList.add('active');
+          if (indicator) {
+            indicator.className = "indicator w-2 h-8 rounded-full bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.8)] transition-all duration-300";
+          }
+        } else {
+          // INACTIVO: Punto Gris Pequeño
+          link.classList.remove('active');
+          if (indicator) {
+            indicator.className = "indicator w-1.5 h-1.5 rounded-full bg-slate-400/40 dark:bg-slate-500/40 transition-all duration-300 group-hover:bg-blue-400 group-hover:scale-110";
+          }
+        }
+      });
+    }
+
+    
+
+    // 3. Empezar a observar
+    document.querySelectorAll('.scroll-section').forEach(section => {
+      observer.observe(section);
+    });
+
+  });
 </script>
