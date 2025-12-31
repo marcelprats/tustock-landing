@@ -195,10 +195,13 @@ const navItems = [
 </style>
 
 <script is:inline>
-  function initScrollSpy() {
+  // Esta función contiene toda la lógica de detección
+  function setupScrollSpy() {
     const sections = document.querySelectorAll('.scroll-target');
     const navLinks = document.querySelectorAll('.nav-link');
     
+    if (sections.length === 0) return; // Si no hay secciones, no hacemos nada
+
     let lastActiveId = "";
     let labelTimeout = null;
 
@@ -220,7 +223,6 @@ const navItems = [
       if (closestId !== lastActiveId) {
         lastActiveId = closestId;
         
-        // Limpiar cualquier timeout anterior (si el usuario hace scroll rápido)
         if (labelTimeout) clearTimeout(labelTimeout);
 
         navLinks.forEach(link => {
@@ -229,37 +231,42 @@ const navItems = [
           const target = link.getAttribute('data-target');
 
           if (target === closestId) {
-            // INDICADOR ACTIVO
-            indicator.className = "indicator w-2.5 h-8 rounded-full bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.7)]";
-            
-            // EFECTO LABEL: Encender
-            label.style.opacity = "1";
-            label.style.transform = "translateX(0)";
-
-            // Apagar después de 2 segundos (con fade de 0.5s definido en CSS)
-            labelTimeout = setTimeout(() => {
+            if (indicator) indicator.className = "indicator w-2.5 h-8 rounded-full bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.7)]";
+            if (label) {
+              label.style.opacity = "1";
+              label.style.transform = "translateX(0)";
+              labelTimeout = setTimeout(() => {
+                label.style.opacity = "0";
+                label.style.transform = "translateX(-10px)";
+              }, 2000);
+            }
+          } else {
+            if (indicator) indicator.className = "indicator w-1.5 h-1.5 rounded-full bg-slate-400/30 dark:bg-slate-500/30";
+            if (label) {
               label.style.opacity = "0";
               label.style.transform = "translateX(-10px)";
-            }, 2000);
-
-          } else {
-            // INACTIVO
-            indicator.className = "indicator w-1.5 h-1.5 rounded-full bg-slate-400/30 dark:bg-slate-500/30";
-            // Apagar inmediatamente si no es el activo
-            label.style.opacity = "0";
-            label.style.transform = "translateX(-10px)";
+            }
           }
         });
       }
     }
 
+    // Escuchamos el scroll de forma eficiente
     window.addEventListener('scroll', () => {
         window.requestAnimationFrame(update);
     }, { passive: true });
     
+    // Ejecución inmediata
     update();
   }
 
-  document.addEventListener('DOMContentLoaded', initScrollSpy);
-  setTimeout(initScrollSpy, 400);
+  // 🔥 LA CLAVE: Escuchar el evento de navegación de Astro
+  document.addEventListener('astro:page-load', setupScrollSpy);
+
+  // Por si acaso no usas ViewTransitions, también lo lanzamos en DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupScrollSpy);
+  } else {
+    setupScrollSpy();
+  }
 </script>
