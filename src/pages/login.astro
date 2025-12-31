@@ -1,92 +1,64 @@
 ---
-import Layout from '~/layouts/Layout.astro';
-import HeroText from '~/components/widgets/HeroText.astro';
-import Contact from '~/components/widgets/Contact.astro'; // Usamos el widget de formulario para que se vea bonito
+import Layout from '~/layouts/PageLayout.astro';
 
-const { currentShop } = Astro.locals;
-const title = currentShop ? `Acceder a ${currentShop.name}` : 'Iniciar Sesión';
-const subtitle = currentShop 
-  ? 'Introduce tus credenciales de propietario para gestionar la tienda.' 
-  : 'Accede a tu cuenta de TuStock para gestionar tus negocios.';
+const metadata = { title: 'Login' };
 
-const metadata = { title: title };
+// Capturar errores si vuelven de la API (ej: contraseña mal)
+const error = Astro.url.searchParams.get('error');
 ---
 
 <Layout metadata={metadata}>
+  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
+    <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8">
+      
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bienvenido de nuevo</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Introduce tus credenciales para acceder</p>
+      </div>
 
-  <div class="flex min-h-screen items-center justify-center bg-blue-50 dark:bg-slate-900 p-4">
-    
-    <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+      {error === 'invalid_credentials' && (
+        <div class="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4 text-center border border-red-100">
+          Email o contraseña incorrectos.
+        </div>
+      )}
+
+      <form action="/api/login" method="POST" class="space-y-5">
         
-        {/* Cabecera Visual */}
-        <div class="bg-blue-600 p-8 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 text-white text-3xl mb-4 backdrop-blur-sm">
-                {currentShop ? '🏪' : '🚀'}
-            </div>
-            <h1 class="text-2xl font-bold text-white mb-2">{title}</h1>
-            <p class="text-blue-100 text-sm">{subtitle}</p>
+        <div>
+          <label class="block text-sm font-medium mb-1 dark:text-gray-300">Email</label>
+          <input 
+            type="email" 
+            name="email" 
+            required 
+            class="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            placeholder="nombre@empresa.com"
+          />
         </div>
 
-        {/* Formulario */}
-        <div class="p-8">
-            <form action="/api/login" method="POST" class="space-y-6">
-                
-                {/* Email */}
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo Electrónico</label>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
-                        required 
-                        class="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="tu@email.com"
-                    />
-                </div>
-
-                {/* Password */}
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
-                    <input 
-                        type="password" 
-                        name="password" 
-                        id="password" 
-                        required 
-                        class="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="••••••••"
-                    />
-                </div>
-
-                {/* Input oculto para redirigir tras login */}
-                <input type="hidden" name="redirect" value={Astro.url.searchParams.get('redirect') || '/hub'} />
-
-                {/* Botón */}
-                <button type="submit" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition transform hover:scale-[1.02]">
-                    Entrar
-                </button>
-
-            </form>
-
-            {/* Links inferiores */}
-            <div class="mt-6 text-center text-sm text-gray-500">
-                <p>
-                    ¿No tienes cuenta? 
-                    <a href="/register" class="text-blue-600 hover:underline font-bold">Regístrate gratis</a>
-                </p>
-                <p class="mt-2">
-                    <a href="/recover" class="text-gray-400 hover:text-gray-600 text-xs">¿Olvidaste tu contraseña?</a>
-                </p>
-            </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-sm font-medium dark:text-gray-300">Contraseña</label>
+            <a href="#" class="text-xs text-blue-600 hover:underline">¿Olvidaste la contraseña?</a>
+          </div>
+          <input 
+            type="password" 
+            name="password" 
+            required 
+            class="w-full px-4 py-2 border rounded-lg dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            placeholder="••••••••"
+          />
         </div>
 
-        {/* Footer */}
-        {!currentShop && (
-            <div class="bg-gray-50 dark:bg-slate-900/50 p-4 text-center border-t border-gray-100 dark:border-gray-700">
-                <p class="text-xs text-gray-400 uppercase tracking-wider">TuStock Secure Login</p>
-            </div>
-        )}
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-lg shadow-blue-500/30">
+          Entrar
+        </button>
 
+      </form>
+
+      <div class="mt-6 text-center pt-6 border-t border-gray-100 dark:border-slate-700">
+        <span class="text-sm text-gray-500">¿No tienes cuenta?</span>
+        <a href="/register" class="text-sm font-bold text-blue-600 hover:underline ml-1">Regístrate gratis</a>
+      </div>
     </div>
   </div>
-
 </Layout>
