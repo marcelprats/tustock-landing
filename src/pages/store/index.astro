@@ -1,113 +1,102 @@
 ---
-import StoreLayout from '~/layouts/StoreLayout.astro';
+import Layout from '~/layouts/Layout.astro'; // Usamos el Layout MAESTRO (el mismo de la landing)
 import Hero from '~/components/widgets/Hero.astro';
 import Features2 from '~/components/widgets/Features2.astro';
+import Content from '~/components/widgets/Content.astro'; // Componente visual potente
 import CallToAction from '~/components/widgets/CallToAction.astro';
+import ItemGrid from '~/components/ui/ItemGrid.astro'; // Para el grid de productos
 
-// 1. OBTENER DATOS DE LA TIENDA
+// 1. DATOS REALES (Middleware)
 const { currentShop } = Astro.locals;
 
-// --- PROTECCIÓN EXTRA ---
-// Si el plan es FREE, redirigimos al placeholder (por seguridad)
+// Protección
 if (currentShop?.web_plan === 'FREE') {
   return Astro.redirect('/store/placeholder');
 }
-// ------------------------
 
-const shopName = currentShop?.name || "Nuestra Tienda";
-const shopEmail = currentShop?.email || "contacto@tustock.app";
+const shopName = currentShop?.name || "Tienda";
+const metadata = { title: `${shopName} - Catálogo`, ignoreTitleTemplate: true };
 
-const metadata = { 
-  title: `${shopName} - Catálogo Online`,
-  ignoreTitleTemplate: true 
-};
-
-// 2. MOCKUP DE PRODUCTOS
-const featuredProducts = [
-  { id: 1, name: 'Producto Destacado 1', price: 29.99, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80', category: 'Novedad' },
-  { id: 2, name: 'Pack Especial', price: 49.50, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80', category: 'Oferta' },
-  { id: 3, name: 'Edición Limitada', price: 15.00, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=500&q=80', category: 'Exclusivo' },
-  { id: 4, name: 'Accesorio Premium', price: 12.99, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80', category: 'Básico' }
+// 2. MOCKUP PRODUCTOS (Lo conectaremos a BD después)
+const products = [
+  { title: 'Producto Premium', description: '29.99€', icon: 'tabler:package' },
+  { title: 'Pack Ahorro', description: '49.99€', icon: 'tabler:box' },
+  { title: 'Accesorio', description: '15.50€', icon: 'tabler:tag' },
+  { title: 'Novedad', description: 'Consultar', icon: 'tabler:star' },
 ];
 ---
 
-<StoreLayout metadata={metadata}>
+<Layout metadata={metadata}>
   
-  {/* --- 1. HERO: PORTADA --- */}
+  {/* 1. HERO IDÉNTICO A LA LANDING (Mismos estilos) */}
   <Hero
-    tagline="Tienda Oficial"
-    title={`Bienvenido a <span class="text-blue-600 dark:text-blue-400">${shopName}</span>`}
-    subtitle="Descubre nuestros productos seleccionados con la mejor calidad y servicio local."
-    image={{ 
-        src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', 
-        alt: `Portada de ${shopName}` 
-    }}
+    tagline="Comercio Oficial"
     actions={[
-      { text: 'Ver Productos', href: '#catalogo', variant: 'primary', icon: 'tabler:shopping-bag' },
-      { text: 'Contactar', href: '#contacto' }
+      { text: 'Ver Catálogo', href: '#catalogo', variant: 'primary', icon: 'tabler:shopping-cart' },
+      { text: 'WhatsApp', href: '#contacto', icon: 'tabler:brand-whatsapp' }
     ]}
-  />
+    image={{ src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Tienda Cover' }}
+  >
+    <fragment slot="title">
+      Bienvenido a <span class="text-accent dark:text-white highlight">{shopName}</span>
+    </fragment>
 
-  {/* --- 2. CATÁLOGO (GRID) --- */}
-  <div id="catalogo" class="py-16 bg-gray-50 dark:bg-slate-800/50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold font-heading mb-4">Nuestros Productos</h2>
-            <p class="text-xl text-gray-600 dark:text-slate-400 max-w-2xl mx-auto">Explora nuestra selección.</p>
-          </div>
+    <fragment slot="subtitle">
+      Descubre la mejor selección de productos con la garantía y confianza de siempre. 
+      Compra online o reserva y recoge en tienda.
+    </fragment>
+  </Hero>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 dark:border-slate-800 flex flex-col">
-                <div class="relative h-64 overflow-hidden bg-gray-100">
-                  <span class="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">{product.category}</span>
-                  <img src={product.image} alt={product.name} class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
-                </div>
-                <div class="p-5 flex-1 flex flex-col">
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition">{product.name}</h3>
-                  <div class="mt-auto flex items-center justify-between pt-4">
-                    <span class="text-xl font-bold text-gray-900 dark:text-white">{product.price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition shadow-lg shadow-blue-500/30">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 17h-11v-14h-2" /><path d="M6 5l14 1l-1 7h-13" /></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-      </div>
+  {/* 2. CATÁLOGO USANDO LOS MISMOS ESTILOS DE "FEATURES" */}
+  <div id="catalogo" class="bg-blue-50 dark:bg-slate-900">
+      <Features2
+        title="Nuestros Productos Destacados"
+        subtitle="Calidad seleccionada para ti."
+        tagline="Catálogo"
+        items={products} 
+        columns={4}
+      />
   </div>
 
-  {/* --- 3. CONFIANZA --- */}
-  <Features2
-    title="¿Por qué confiar en nosotros?"
-    subtitle={`En ${shopName} nos preocupamos por ofrecerte lo mejor.`}
-    columns={3}
+  {/* 3. SECCIÓN VISUAL (Como la de 'Fiscalidad' de la Landing) */}
+  <Content
+    isReversed
+    tagline="Garantía"
+    title="¿Por qué comprar aquí?"
     items={[
-      { title: 'Calidad Garantizada', description: 'Revisamos cada producto personalmente.', icon: 'tabler:award' },
-      { title: 'Atención Personal', description: 'Somos un comercio local.', icon: 'tabler:users' },
-      { title: 'Pago Seguro', description: 'Transacciones protegidas.', icon: 'tabler:lock' },
+      {
+        title: 'Atención Personalizada',
+        description: 'Somos un comercio real, con personas reales detrás.',
+      },
+      {
+        title: 'Pago Seguro',
+        description: 'Tecnología cifrada para proteger tus datos.',
+      },
     ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      alt: 'Confianza',
+    }}
   />
 
-  {/* --- 4. CONTACTO --- */}
-  <div id="contacto" class="scroll-mt-16">
-    <Features2
-      title="Estamos cerca de ti"
-      tagline="Contacto"
-      columns={3}
-      items={[
-          { title: 'Horario', description: 'Lun - Vie: 09:00 - 20:00', icon: 'tabler:clock' },
-          { title: 'Email', description: shopEmail, icon: 'tabler:mail' },
-          { title: 'Ubicación', description: 'Calle Comercio, 123', icon: 'tabler:map-pin' },
-      ]}
-    />
-  </div>
-
+  {/* 4. CALL TO ACTION (Igual que el de 'Digitalizar mi negocio') */}
   <CallToAction
-    title="¿Tienes alguna duda?"
-    subtitle="Escríbenos por WhatsApp."
-    actions={[{ variant: 'primary', text: 'Chatear', href: '#', icon: 'tabler:brand-whatsapp' }]}
-  />
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Contactar ahora',
+        href: '#',
+        icon: 'tabler:message-circle',
+      },
+    ]}
+  >
+    <fragment slot="title">
+      ¿No encuentras lo que buscas?
+    </fragment>
 
-</StoreLayout>
+    <fragment slot="subtitle">
+      Escríbenos y te ayudaremos a encontrar el producto perfecto.
+    </fragment>
+  </CallToAction>
+
+</Layout>

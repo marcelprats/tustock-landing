@@ -1,5 +1,7 @@
 ---
-import ServerStatus from '~/components/app/dashboard/ServerStatus.astro'; 
+import Stats from '~/components/widgets/Stats.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
 import { decryptLicense } from '~/utils/crypto'; 
 
 const { tenantId } = Astro.props; 
@@ -8,11 +10,11 @@ const userId = session?.value;
 const env = Astro.locals.runtime?.env; 
 const db = env?.DB;
 
-let tenantData = null;
-let error = null;
+let tenantData = { salesToday: 0, licenseKey: '---', lastHeartbeat: 0, dataUpdatedAt: null };
 let isOnline = false;
-let lastUpdateText = "---";
+let error = null;
 
+// --- 1. LÓGICA DE DATOS (IGUAL QUE ANTES) ---
 if (userId && db && tenantId) {
   try {
     const membership = await db.prepare(`
@@ -32,102 +34,111 @@ if (userId && db && tenantId) {
       } catch (err) { console.error(err); }
 
       tenantData = {
-        name: membership.name,
-        slug: tenantId,
-        licenseKey: realKey,        
         salesToday: membership.sales_today || 0,
-        dataUpdatedAt: membership.data_updated_at,
-        lastHeartbeat: membership.last_heartbeat
+        licenseKey: realKey,
+        lastHeartbeat: membership.last_heartbeat,
+        dataUpdatedAt: membership.data_updated_at
       };
 
       isOnline = tenantData.lastHeartbeat && (Date.now() - tenantData.lastHeartbeat) < 120000;
-      
-      lastUpdateText = tenantData.dataUpdatedAt 
-        ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})
-        : '---';
-    } else {
-      error = "No hemos podido cargar los datos de esta tienda.";
     }
   } catch (e) {
-    error = "Error de conexión con la base de datos.";
+    error = "Error de conexión";
   }
 }
+
+// --- 2. PREPARACIÓN DE DATOS PARA WIDGETS ---
+
+const salesFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday);
+const lastUpdate = tenantData.dataUpdatedAt 
+    ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'}) 
+    : '---';
+
+const statsData = [
+    { title: 'Ventas Hoy', amount: salesFormatted, icon: 'tabler:currency-euro' },
+    { title: 'Estado', amount: isOnline ? 'Online' : 'Offline', icon: isOnline ? 'tabler:wifi' : 'tabler:wifi-off' },
+    { title: 'Última sincro', amount: lastUpdate, icon: 'tabler:clock' },
+    { title: 'Licencia', amount: 'Activa', icon: 'tabler:license' },
+];
+
+const menuItems = [
+    {
+        title: 'Inventario',
+        description: 'Gestiona productos y stock.',
+        icon: 'tabler:package',
+    },
+    {
+        title: 'Pedidos',
+        description: 'Revisa el historial de ventas.',
+        icon: 'tabler:list',
+    },
+    {
+        title: 'Configuración',
+        description: 'Ajustes de la tienda.',
+        icon: 'tabler:settings',
+    },
+];
 ---
 
 {error ? (
-  <div class="p-6 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900 text-red-600 dark:text-red-400">
-      <strong>Error:</strong> {error}
+  <div class="max-w-4xl mx-auto p-4 bg-red-50 text-red-600 rounded-lg text-center font-bold">
+    {error}
   </div>
 ) : (
-  <div class="grid gap-6">
+  <div class="space-y-8 pb-12">
       
-      {/* ALERTA OFFLINE (Estilo Toast) */}
+      {/* 1. WIDGET DE ESTADÍSTICAS (KPIs) */}
+      <Stats
+        title="Rendimiento Diario"
+        subtitle="Métricas clave actualizadas en tiempo real."
+        stats={statsData}
+      />
+
+      {/* 2. ALERTA OFFLINE (Usando CallToAction estilizado) */}
       {!isOnline && (
-          <div class="flex items-center p-4 rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 animate-fade-in-up">
-              <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              <div>
-                  <span class="font-bold">Modo Desconectado:</span> Estás viendo los datos guardados a las {lastUpdateText}.
-              </div>
+          <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-yellow-100 dark:bg-yellow-800 rounded-full text-yellow-700 dark:text-yellow-100">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-yellow-800 dark:text-yellow-100">Modo Desconectado</h3>
+                        <p class="text-yellow-700 dark:text-yellow-200 text-sm">Mostrando datos cacheados ({lastUpdate}). Revisa tu conexión.</p>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-yellow-600 text-white rounded font-bold hover:bg-yellow-700 transition">
+                    Reconectar
+                </button>
+            </div>
           </div>
       )}
 
-      {/* GRID SUPERIOR */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* TARJETA DE VENTAS (Estilo KPI Premium) */}
-          <div class="relative p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
-              <div>
-                  <h3 class="text-xs font-bold text-muted uppercase tracking-widest mb-1">Ventas Hoy</h3>
-                  <div class="text-4xl font-bold font-heading text-heading">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday)}
-                  </div>
-              </div>
-              <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center text-xs">
-                  <span class="text-muted">Actualizado: {lastUpdateText}</span>
-                  {/* Badge de estado mini */}
-                  <span class={`flex items-center gap-1 font-bold ${isOnline ? 'text-green-600' : 'text-gray-400'}`}>
-                      <span class={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
-                      {isOnline ? 'LIVE' : 'OFF'}
-                  </span>
-              </div>
-          </div>
+      {/* 3. MENÚ DE GESTIÓN (Usando Features2 para el grid bonito) */}
+      <Features2
+        title="Gestión Rápida"
+        subtitle="Accede a las herramientas principales."
+        items={menuItems}
+        columns={3}
+      >
+        <fragment slot="bg">
+            <div class="absolute inset-0 bg-blue-50 dark:bg-slate-900 pointer-events-none" aria-hidden="true"></div>
+        </fragment>
+      </Features2>
 
-          {/* ESTADO SERVIDOR (Ocupa 2 columnas en desktop) */}
-          <div class="md:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-lg border border-gray-200 dark:border-gray-700">
-             <div class="mb-4">
-                 <h3 class="text-xs font-bold text-muted uppercase tracking-widest">Conexión con Tienda Física</h3>
-             </div>
-             {/* El componente ServerStatus ya tiene estilos propios, se adapta bien */}
-             <ServerStatus licenseKey={tenantData.licenseKey} isOnline={isOnline} />
-          </div>
-      </div>
-
-      {/* ACCIONES RÁPIDAS (Botones estilo 'Cards') */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <a href="#" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition bg-white dark:bg-slate-900">
-              <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-              </div>
-              <h4 class="font-bold text-heading">Inventario</h4>
-              <p class="text-sm text-muted mt-1">Gestionar productos y stock.</p>
-          </a>
-
-          <a href="#" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition bg-white dark:bg-slate-900">
-              <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-              </div>
-              <h4 class="font-bold text-heading">Informes</h4>
-              <p class="text-sm text-muted mt-1">Ver rendimiento detallado.</p>
-          </a>
-
-          <a href="#" class="group p-5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition bg-white dark:bg-slate-900">
-              <div class="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </div>
-              <h4 class="font-bold text-heading">Ajustes</h4>
-              <p class="text-sm text-muted mt-1">Configuración general.</p>
-          </a>
-      </div>
+      {/* 4. SERVER KEY (Call to action simple) */}
+      <CallToAction
+        title="Vinculación de Servidor"
+        subtitle={`Tu clave de licencia segura es: ${tenantData.licenseKey.substring(0,8)}...`}
+        actions={[
+          {
+            variant: 'secondary',
+            text: 'Copiar Clave Completa',
+            href: '#',
+            icon: 'tabler:copy',
+          },
+        ]}
+      />
 
   </div>
 )}

@@ -1,70 +1,102 @@
 ---
-import Layout from '~/layouts/Layout.astro';
+import Layout from '~/layouts/Layout.astro'; // Usamos el Layout MAESTRO (el mismo de la landing)
+import Hero from '~/components/widgets/Hero.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import Content from '~/components/widgets/Content.astro'; // Componente visual potente
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import ItemGrid from '~/components/ui/ItemGrid.astro'; // Para el grid de productos
 
+// 1. DATOS REALES (Middleware)
 const { currentShop } = Astro.locals;
+
+// Protección
+if (currentShop?.web_plan === 'FREE') {
+  return Astro.redirect('/store/placeholder');
+}
+
 const shopName = currentShop?.name || "Tienda";
+const metadata = { title: `${shopName} - Catálogo`, ignoreTitleTemplate: true };
+
+// 2. MOCKUP PRODUCTOS (Lo conectaremos a BD después)
+const products = [
+  { title: 'Producto Premium', description: '29.99€', icon: 'tabler:package' },
+  { title: 'Pack Ahorro', description: '49.99€', icon: 'tabler:box' },
+  { title: 'Accesorio', description: '15.50€', icon: 'tabler:tag' },
+  { title: 'Novedad', description: 'Consultar', icon: 'tabler:star' },
+];
 ---
 
-<Layout metadata={{ title: `${shopName} - Perfil` }}>
+<Layout metadata={metadata}>
   
-  <div class="relative min-h-screen flex items-center justify-center bg-page overflow-hidden">
-    
-    {/* Fondo Ambiental (Usa colores primarios del tema con opacidad) */}
-    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-    </div>
+  {/* 1. HERO IDÉNTICO A LA LANDING (Mismos estilos) */}
+  <Hero
+    tagline="Comercio Oficial"
+    actions={[
+      { text: 'Ver Catálogo', href: '#catalogo', variant: 'primary', icon: 'tabler:shopping-cart' },
+      { text: 'WhatsApp', href: '#contacto', icon: 'tabler:brand-whatsapp' }
+    ]}
+    image={{ src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Tienda Cover' }}
+  >
+    <fragment slot="title">
+      Bienvenido a <span class="text-accent dark:text-white highlight">{shopName}</span>
+    </fragment>
 
-    {/* Tarjeta Central "Glassmorphism" sutil */}
-    <div class="relative z-10 w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 mx-4">
-        
-        {/* Cabecera Degradada */}
-        <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-xl relative">
-            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
-                <div class="w-20 h-20 bg-page rounded-full p-1 shadow-lg ring-4 ring-page">
-                    <div class="w-full h-full bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-3xl">
-                        🏪
-                    </div>
-                </div>
-            </div>
-        </div>
+    <fragment slot="subtitle">
+      Descubre la mejor selección de productos con la garantía y confianza de siempre. 
+      Compra online o reserva y recoge en tienda.
+    </fragment>
+  </Hero>
 
-        {/* Cuerpo de la tarjeta */}
-        <div class="pt-12 pb-8 px-8 text-center">
-            
-            <h1 class="text-2xl font-bold font-heading text-heading mb-1">
-                {shopName}
-            </h1>
-            
-            <div class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-bold mb-6">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                Verificado por TuStock
-            </div>
-
-            <p class="text-muted text-sm mb-8 leading-relaxed">
-                Este comercio gestiona su inventario con nuestra tecnología, pero aún no ha abierto sus puertas digitales al público.
-            </p>
-
-            <div class="space-y-3">
-                <a href="/admin" class="btn-primary w-full py-3 rounded-lg shadow-md flex justify-center items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Soy el Propietario
-                </a>
-                
-                <a href="https://tustock.app" target="_blank" class="btn-secondary w-full py-3 rounded-lg flex justify-center items-center gap-2">
-                    <span>Crear mi tienda gratis</span>
-                </a>
-            </div>
-
-        </div>
-
-        {/* Footer Tarjeta */}
-        <div class="py-4 text-center border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-slate-800/50 rounded-b-xl">
-            <p class="text-[10px] uppercase tracking-widest font-bold text-muted">
-                Powered by <span class="text-primary">TuStock.App</span>
-            </p>
-        </div>
-
-    </div>
+  {/* 2. CATÁLOGO USANDO LOS MISMOS ESTILOS DE "FEATURES" */}
+  <div id="catalogo" class="bg-blue-50 dark:bg-slate-900">
+      <Features2
+        title="Nuestros Productos Destacados"
+        subtitle="Calidad seleccionada para ti."
+        tagline="Catálogo"
+        items={products} 
+        columns={4}
+      />
   </div>
+
+  {/* 3. SECCIÓN VISUAL (Como la de 'Fiscalidad' de la Landing) */}
+  <Content
+    isReversed
+    tagline="Garantía"
+    title="¿Por qué comprar aquí?"
+    items={[
+      {
+        title: 'Atención Personalizada',
+        description: 'Somos un comercio real, con personas reales detrás.',
+      },
+      {
+        title: 'Pago Seguro',
+        description: 'Tecnología cifrada para proteger tus datos.',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      alt: 'Confianza',
+    }}
+  />
+
+  {/* 4. CALL TO ACTION (Igual que el de 'Digitalizar mi negocio') */}
+  <CallToAction
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Contactar ahora',
+        href: '#',
+        icon: 'tabler:message-circle',
+      },
+    ]}
+  >
+    <fragment slot="title">
+      ¿No encuentras lo que buscas?
+    </fragment>
+
+    <fragment slot="subtitle">
+      Escríbenos y te ayudaremos a encontrar el producto perfecto.
+    </fragment>
+  </CallToAction>
+
 </Layout>
