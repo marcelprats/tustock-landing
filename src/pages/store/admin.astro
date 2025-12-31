@@ -1,60 +1,57 @@
 ---
 import Layout from '~/layouts/Layout.astro';
-import { createClient } from "@libsql/client/web";
 import { Icon } from 'astro-icon/components';
 
-// 1. OBTENER SESIÓN Y TIENDA ACTUAL
+// 1. OBTENER SESIÓN
 const session = Astro.cookies.get('session');
 const { currentShop } = Astro.locals;
-
-// 🔥 MEJORA: Intentamos pillar las variables de entorno de todas las formas posibles
-const env = Astro.locals.runtime?.env || import.meta.env;
+const env = Astro.locals.runtime?.env;
 
 // Si no hay sesión, al login
-if (!session) {
-  return Astro.redirect(`/login?redirect=/admin`);
-}
+if (!session) return Astro.redirect(`/login?redirect=/admin`);
 
 const userId = session.value;
 let isAuthorized = false;
+let userRole = "";
 let errorMsg = "";
-let debugInfo = ""; // Para ver detalles técnicos si falla
 
-// 2. SEGURIDAD: ¿ES EL DUEÑO?
-if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
-  try {
-    const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
+// 2. VERIFICACIÓN DE PERMISOS (SOLO D1)
+try {
+    const db = env?.DB; // Tu base de datos D1 local
 
-    // Consulta de verificación
-    const result = await turso.execute({
-        sql: `
-            SELECT id FROM licenses 
-            WHERE website_url LIKE ? 
-            AND owner_email = (SELECT email FROM users WHERE id = ?)
-            LIMIT 1
-        `,
-        args: [`%${currentShop.slug}%`, userId]
-    });
+    if (!db) throw new Error("No se encuentra la base de datos D1");
 
-    if (result.rows.length > 0) {
-        isAuthorized = true;
-    } else {
-        // Si no devuelve filas, es que el email del usuario NO coincide con el owner_email de la licencia
-        errorMsg = "No eres el propietario de esta licencia.";
-        debugInfo = `Usuario ID: ${userId} vs Tienda: ${currentShop.slug}`;
+    // PASO A: Buscar el rol del usuario para ESTA tienda específica
+    // Hacemos un JOIN entre memberships y tenants para asegurarnos
+    // (O si 'tenant_id' en memberships es directamente el slug, más fácil aún).
+    
+    // Asumo que en memberships:
+    // user_id = userId
+    // tenant_id = ID de la tienda (o el slug si lo guardaste así)
+    
+    // Primero buscamos el ID del tenant actual usando el slug (frutpaco)
+    const tenant = await db.prepare("SELECT id, name FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+
+    if (!tenant) {
+        throw new Error(`La tienda '${currentShop.slug}' no existe en la tabla tenants de D1.`);
     }
 
-  } catch (e) {
-    console.error("Error Admin Check:", e);
-    // 🔥 AQUÍ ESTÁ EL CAMBIO: Mostramos el error real
-    errorMsg = `Error Técnico: ${e.message}`;
-  }
-} else {
-    errorMsg = "Error de Configuración: Faltan variables de entorno (DB_URL o TOKEN)";
-}
+    // Ahora buscamos si el usuario tiene membresía en ese tenant
+    const membership = await db.prepare("SELECT role FROM memberships WHERE user_id = ? AND tenant_id = ?")
+        .bind(userId, tenant.id)
+        .first();
 
-// Si no está autorizado y no hay error técnico, expulsamos (Opcional, ahora lo dejo para ver el error)
-// if (!isAuthorized && !errorMsg) return Astro.redirect('https://tustock.app/hub');
+    if (membership) {
+        isAuthorized = true;
+        userRole = membership.role; // Ej: 'OWNER'
+    } else {
+        errorMsg = "No tienes permisos (Membresía no encontrada)";
+    }
+
+} catch (e) {
+    console.error("Error Admin Check D1:", e);
+    errorMsg = `Error: ${e.message}`;
+}
 
 const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
@@ -73,41 +70,36 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
         <p class="text-xl text-gray-500 dark:text-gray-400">
             Gestionando: <span class="font-bold text-blue-600">{currentShop?.name}</span>
         </p>
+        
+        {isAuthorized && (
+            <div class="mt-4 inline-block px-4 py-1 rounded-full bg-green-100 text-green-800 border border-green-200 text-sm font-bold tracking-wide">
+                ROL: {userRole}
+            </div>
+        )}
     </div>
 
-    {/* ZONA DE ERRORES / DEBUG */}
     {errorMsg ? (
-        <div class="p-8 bg-red-50 border border-red-200 text-red-800 rounded-xl max-w-2xl text-center shadow-lg">
-            <Icon name="tabler:bug" class="w-12 h-12 mx-auto mb-4 text-red-500" />
+        <div class="p-8 bg-red-50 border border-red-200 text-red-800 rounded-xl max-w-2xl text-center shadow-lg animate-fade-in-up">
+            <Icon name="tabler:lock-access" class="w-12 h-12 mx-auto mb-4 text-red-500" />
             <h3 class="text-xl font-bold mb-2">Acceso Denegado</h3>
-            
             <p class="text-lg font-medium">{errorMsg}</p>
+            <p class="text-sm mt-2 opacity-75">ID Usuario: {userId} | Tienda: {currentShop?.slug}</p>
             
-            {debugInfo && (
-                <p class="mt-2 text-sm font-mono bg-red-100 p-2 rounded">{debugInfo}</p>
-            )}
-
             <div class="mt-6 flex justify-center gap-4">
-                <a href="https://tustock.app/hub" class="px-6 py-2 bg-white border border-red-300 rounded-lg hover:bg-red-100 transition-colors">
-                    Volver al Hub
-                </a>
+                <a href="https://tustock.app/hub" class="px-6 py-2 bg-white border border-red-300 rounded-lg hover:bg-red-100 transition-colors">Volver al Hub</a>
                 <form action="/api/logout" method="POST">
-                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        Cerrar Sesión
-                    </button>
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Cerrar Sesión</button>
                 </form>
             </div>
         </div>
     ) : (
-        /* DASHBOARD REAL (Solo se ve si no hay error) */
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl animate-fade-in-up">
-            
             <a href="https://tustock.app/hub" class="group relative p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center">
                 <div class="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition-transform">
                     <Icon name="tabler:building-store" class="w-8 h-8" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mis Tiendas</h3>
-                <p class="text-gray-500 text-sm">Volver al selector de empresas.</p>
+                <p class="text-gray-500 text-sm">Volver al Hub Central.</p>
             </a>
 
             <div class="p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm opacity-60 flex flex-col items-center text-center">
@@ -115,7 +107,7 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
                     <Icon name="tabler:settings" class="w-8 h-8" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Configuración</h3>
-                <p class="text-gray-500 text-sm">Próximamente.</p>
+                <p class="text-gray-500 text-sm">Disponible próximamente.</p>
             </div>
 
             <div class="col-span-1 md:col-span-2 mt-8 flex justify-center">
@@ -126,7 +118,6 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
                     </button>
                 </form>
             </div>
-
         </div>
     )}
 
