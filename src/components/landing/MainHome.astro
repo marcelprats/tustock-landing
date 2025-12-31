@@ -5,35 +5,43 @@ import Features2 from '~/components/widgets/Features2.astro';
 import Features3 from '~/components/widgets/Features3.astro';
 import Steps from '~/components/widgets/Steps.astro';
 import Content from '~/components/widgets/Content.astro';
-import Testimonials from '~/components/widgets/Testimonials.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import PricingSection from '~/components/widgets/PricingSection.astro'; 
 import Stats from '~/components/widgets/Stats.astro';
 import Brands from '~/components/widgets/Brands.astro';
 
-// Importamos la config del menú lateral para que coincidan los IDs
-import { landingSections } from '~/navigation';
-
-// Recibimos los datos reales desde index.astro
+// Recibimos los datos reales
 const { shopCount = "10+", userCount = "50+" } = Astro.props;
+
+// Definimos las secciones aquí para asegurar que los IDs coinciden con el HTML
+const navItems = [
+  { text: 'Inicio', target: 'hero' },
+  { text: 'Tecnología', target: 'features' },
+  { text: 'IA Local', target: 'ai-core' },
+  { text: 'Fiscalidad', target: 'fiscalidad' },
+  { text: 'Migración', target: 'steps' },
+  { text: 'Precios', target: 'pricing' },
+  { text: 'FAQ', target: 'faq' },
+];
 ---
 
-<div class="relative overflow-hidden">
+<div class="relative overflow-hidden scroll-smooth">
   
-  <aside class="hidden xl:block fixed left-6 top-1/2 -translate-y-1/2 z-40">
-    <nav class="flex flex-col gap-3 p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-full shadow-2xl border border-white/20 dark:border-slate-700/30 transition-all duration-300" id="landing-menu">
-      {landingSections.map(({ text, target }) => (
+  <aside class="hidden xl:block fixed left-6 top-1/2 -translate-y-1/2 z-50">
+    <nav class="flex flex-col gap-4 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 transition-all duration-300" id="landing-menu">
+      {navItems.map(({ text, target }) => (
         <a 
           href={`#${target}`} 
-          class="group flex items-center gap-3 p-2 transition-all nav-link rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50"
+          class="group flex items-center gap-3 relative nav-link py-1"
           data-target={target}
           aria-label={text}
         >
-          <div class="w-2.5 h-2.5 rounded-full bg-slate-400/50 group-hover:bg-blue-600 group-[.active]:bg-blue-500 group-[.active]:shadow-[0_0_10px_rgba(59,130,246,0.6)] transition-all"></div>
-          <span class="absolute left-14 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-50 shadow-xl">
+          <span class="absolute left-10 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap shadow-xl z-50">
             {text}
           </span>
+          
+          <div class="indicator w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-all duration-500 ease-out group-hover:bg-blue-400"></div>
         </a>
       ))}
     </nav>
@@ -41,30 +49,30 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
 
   <div class="flex-1 w-full">
     
-    <div id="hero">
+    <div id="hero" class="scroll-mt-20">
       <Hero
         actions={[
           {
             variant: 'primary',
-            text: 'Prueba Gratis (14 días)',
-            href: '/register',
-            icon: 'tabler:rocket',
+            text: 'Descargar App Escritorio',
+            href: '/download',
+            icon: 'tabler:download',
             class: 'shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300'
           },
-          { text: 'Ver Demo Fiscal', href: '#fiscalidad' },
+          { text: 'Usar versión Web', href: '/register' },
         ]}
-        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Dashboard' }}
+        image={{ src: '~/assets/images/hero-image.png', alt: 'TuStock Desktop App Interface' }}
       >
         <fragment slot="title">
-          Gestión de Stock con IA y <br class="hidden md:inline" />
-          <span class="text-accent dark:text-white highlight">Cumplimiento Fiscal 2026</span>
+          ERP Híbrido: Potencia Local, <br class="hidden md:inline" />
+          <span class="text-accent dark:text-white highlight">Libertad en la Nube</span>
         </fragment>
 
         <fragment slot="subtitle">
           <span class="font-light text-lg">
-            La única plataforma que combina <b>Inteligencia Artificial predictiva</b> para tu inventario con la generación automática de <b>Factura Electrónica (Ley Crea y Crece)</b>.
+            La gestión de stock que combina una <b>App de Escritorio de alto rendimiento</b> con sincronización Cloud.
             <br/>
-            Ingeniería de datos para tu tienda. Seguridad legal para tu negocio.
+            Ejecuta la <b>Inteligencia Artificial en tu propio PC</b> para máxima privacidad y velocidad, o úsala en la nube si estás en movimiento.
           </span>
         </fragment>
       </Hero>
@@ -73,171 +81,173 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
     <div class="border-y border-gray-100 dark:border-slate-800 bg-blue-50/30 dark:bg-slate-900/30 backdrop-blur-sm">
       <Stats
         stats={[
-          { title: 'Tiendas Activas', amount: `${shopCount}` },
-          { title: 'Usuarios', amount: `${userCount}` },
-          { title: 'VeriFactu', amount: 'Ready' },
-          { title: 'Privacidad', amount: '100%' },
+          { title: 'Tiendas Conectadas', amount: `${shopCount}` },
+          { title: 'Usuarios Activos', amount: `${userCount}` },
+          { title: 'IA On-Device', amount: 'Disponible' },
+          { title: 'Ley Crea y Crece', amount: 'Ready' },
         ]}
       />
     </div>
 
     <div id="features" class="scroll-mt-20">
       <Features3
-        title="Todo tu negocio. Un solo sistema operativo."
-        subtitle="Sustituye a tu Gestoría (parcialmente), a tu ERP antiguo y a tus Excels."
-        tagline="Funcionalidades Core"
+        title="Más que una web. Un Sistema Operativo."
+        subtitle="Diseñado para trabajar offline y sincronizar cuando vuelvas. Tu negocio no se detiene si se cae internet."
+        tagline="Tecnología Híbrida"
         columns={3}
         isBeforeContent={true}
         items={[
           {
-            title: 'Inventario IA',
-            description: 'Predice roturas de stock antes de que pasen. "¿Cuánto pedir de X?" La IA te responde.',
-            icon: 'tabler:brain',
+            title: 'Base de Datos Local',
+            description: 'Tus datos viven en tu PC. La búsqueda de productos es instantánea (0 latencia) y sigues vendiendo sin WiFi.',
+            icon: 'tabler:database',
+          },
+          {
+            title: 'Sincronización Cloud',
+            description: 'En cuanto hay conexión, todo se sube a la nube. Consulta tus ventas desde el móvil o desde casa.',
+            icon: 'tabler:cloud-upload',
+          },
+          {
+            title: 'Consultas Stock con IA (Gratis)',
+            description: 'Pregunta a tu inventario: "¿Qué productos de la categoría Bebidas tienen stock bajo?". Tu asistente responde.',
+            icon: 'tabler:message-chatbot',
+          },
+          {
+            title: 'TPV de Alta Velocidad',
+            description: 'Optimizado para códigos de barras y teclado. Sin tiempos de carga de navegador.',
+            icon: 'tabler:device-desktop-analytics',
           },
           {
             title: 'Factura Electrónica',
-            description: 'Generación automática de XML firmados para Hacienda. Cumple la Ley Crea y Crece sin tocar nada.',
-            icon: 'tabler:gavel',
+            description: 'Generación de XML estructurado y firma digital. Cumplimiento total con la normativa española 2026.',
+            icon: 'tabler:certificate',
           },
           {
-            title: 'Escáner de Albaranes',
-            description: 'Sube una foto del albarán de tu proveedor. La IA extrae los productos y actualiza el stock sola.',
-            icon: 'tabler:scan',
-          },
-          {
-            title: 'TPV Cloud & Local',
-            description: 'Vende desde el iPad o el PC. Si se cae internet, sigue funcionando gracias a nuestra base de datos local.',
-            icon: 'tabler:device-desktop',
-          },
-          {
-            title: 'CRM Clientes',
-            description: 'Analiza quién compra qué. Segmenta a tus mejores clientes y ofréceles descuentos automáticos.',
-            icon: 'tabler:users-group',
-          },
-          {
-            title: 'Privacidad On-Device',
-            description: 'Tus datos sensibles nunca salen de tu ordenador si usas la App de Escritorio. Cifrado militar.',
-            icon: 'tabler:lock-square',
+            title: 'Privacidad Real',
+            description: 'Al procesar datos en local, reducimos la exposición de tu información sensible. Cifrado de extremo a extremo.',
+            icon: 'tabler:shield-lock',
           },
         ]}
       />
     </div>
 
-    <div id="fiscalidad" class="scroll-mt-20 bg-slate-50 dark:bg-slate-800/20 py-10">
+    <div id="ai-core" class="scroll-mt-20 py-10 bg-slate-50 dark:bg-slate-800/20">
       <Content
         isReversed
-        tagline="Ley Crea y Crece & VeriFactu"
-        title="No dejes que Hacienda te quite el sueño"
+        tagline="Inteligencia Artificial On-Device"
+        title="Tu PC es más potente de lo que crees. Úsalo."
         items={[
           {
-            title: 'Preparado para 2026',
-            description: 'España obligará a todas las empresas B2B a emitir factura electrónica. TuStock ya genera el formato estructurado legal.',
+            title: 'Procesamiento Local (Edge AI)',
+            description: 'Si tu equipo tiene potencia suficiente, TuStock corre los modelos de IA directamente en tu tarjeta gráfica o procesador. Máxima privacidad, cero coste de tokens.',
           },
           {
-            title: 'Trazabilidad Total',
-            description: 'Cada movimiento de stock queda registrado. Si tienes una inspección, generas el reporte de trazabilidad en un clic.',
+            title: 'Asistente de Importación',
+            description: '¿Odias configurar Excels? Nuestra IA analiza tu archivo, detecta las columnas (Precio, SKU, Nombre) y hace el mapeo por ti.',
           },
           {
-            title: 'Cierre de Caja Automático',
-            description: 'Olvídate de contar monedas hasta las 10 de la noche. El arqueo de caja se hace solo y se envía a tu gestor.',
+            title: 'Predicción de Demanda',
+            description: 'Analizamos tu histórico localmente para sugerirte pedidos de compra antes de romper stock.',
+          },
+        ]}
+        image={{
+          src: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1965&q=80',
+          alt: 'AI Processing Local',
+        }}
+      >
+        <fragment slot="content">
+          <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">
+            No compartas tus datos si no quieres
+          </h3>
+        </fragment>
+      </Content>
+    </div>
+
+    <div id="fiscalidad" class="scroll-mt-20">
+      <Content
+        tagline="Cumplimiento Normativo"
+        title="Fiscalidad Automatizada 2026"
+        items={[
+          {
+            title: 'VeriFactu Ready',
+            description: 'Sistema preparado para el envío inmediato de facturas a Hacienda (cuando sea obligatorio). Generación de huella digital y QR.',
+          },
+          {
+            title: 'Formatos Estructurados',
+            description: 'Olvídate del PDF. Generamos Facturae y formatos europeos obligatorios para B2B.',
+          },
+          {
+            title: 'Detección de Errores',
+            description: 'La IA revisa tus facturas entrantes para avisarte si falta algún dato fiscal obligatorio antes de contabilizarla.',
           },
         ]}
         image={{
           src: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
           alt: 'Legal Compliance',
         }}
-      >
-        <fragment slot="content">
-          <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Seguridad Jurídica</h3>
-        </fragment>
-      </Content>
-    </div>
-
-    <div id="ai-core" class="scroll-mt-20">
-      <Content
-        tagline="Automatización"
-        title="Tu empleado digital que no duerme"
-        items={[
-          {
-            title: 'Lectura de Documentos',
-            description: 'Arrastra un PDF o foto de una factura de compra. Nuestra IA (OCR avanzado) lee las líneas y mete el stock.',
-          },
-          {
-            title: 'Chat con tus Datos',
-            description: 'Pregunta en lenguaje natural: "¿Qué productos tienen margen negativo?" o "¿Qué día de la semana vendo más?".',
-          },
-        ]}
-        image={{
-          src: 'https://images.unsplash.com/photo-1633419461186-7d40a2e50594?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80',
-          alt: 'AI Analysis',
-        }}
-      >
-        <fragment slot="content">
-          <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">IA Generativa Real</h3>
-        </fragment>
-      </Content>
+      />
     </div>
 
     <div id="steps" class="scroll-mt-20">
       <Steps
-        title="Migra tu negocio en una tarde"
+        title="Migración inteligente en 3 pasos"
         items={[
           {
-            title: 'Paso 1: <span class="font-medium">Importación</span>',
-            description: 'Sube tu Excel de productos actual o conecta tu WooCommerce/Shopify.',
-            icon: 'tabler:file-spreadsheet',
+            title: 'Paso 1: <span class="font-medium">Arrastra tu Excel</span>',
+            description: 'No importa el formato que tenga tu proveedor o tu antiguo programa.',
+            icon: 'tabler:file-upload',
           },
           {
-            title: 'Paso 2: <span class="font-medium">Configuración Fiscal</span>',
-            description: 'Mete tus datos de empresa. Nosotros configuramos los impuestos automáticamente según tu región.',
-            icon: 'tabler:settings',
+            title: 'Paso 2: <span class="font-medium">La IA Mapea las Columnas</span>',
+            description: 'Nuestro algoritmo compara tus cabeceras con nuestra base de datos y organiza la información automáticamente.',
+            icon: 'tabler:wand',
           },
           {
-            title: 'Paso 3: <span class="font-medium">Vende y Olvida</span>',
-            description: 'Empieza a usar el TPV. El stock y la contabilidad se actualizan solos en tiempo real.',
-            icon: 'tabler:device-ipad',
+            title: 'Paso 3: <span class="font-medium">Sincronización</span>',
+            description: 'Tu catálogo se descarga en la App de Escritorio y ya estás listo para vender offline y online.',
+            icon: 'tabler:refresh',
           },
         ]}
         image={{
           src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-          alt: 'Steps image',
+          alt: 'Import process',
         }}
       />
     </div>
 
-    <div id="pricing" class="scroll-mt-20">
+    <div id="pricing" class="scroll-mt-20 bg-blue-50 dark:bg-slate-900/40">
       <PricingSection
-        title="Inversión transparente"
-        subtitle="Más barato que una multa de Hacienda. Más barato que tu tiempo perdido."
+        title="Precios claros"
+        subtitle="Empieza gratis. Paga solo si necesitas potencia extra."
         prices={[
           {
-            title: 'Starter',
-            subtitle: 'Para empezar a digitalizar',
+            title: 'Community',
+            subtitle: 'Pequeños comercios',
             price: '0',
             period: '/mes',
             items: [
               { description: 'Hasta 100 productos' },
-              { description: 'TPV Web Básico' },
-              { description: 'Facturas Simplificadas' },
-              { description: 'Sin IA Avanzada' },
+              { description: 'TPV Web y Local Básico' },
+              { description: 'IA Consultiva (Stock)' },
+              { description: 'Factura Simplificada' },
             ],
             callToAction: {
               target: '_self',
-              text: 'Crear Gratis',
+              text: 'Descargar Gratis',
               href: '/register',
             },
           },
           {
-            title: 'Pro',
+            title: 'Profesional',
             subtitle: 'El estándar del Retail',
             price: 29,
             period: '/mes',
             items: [
               { description: 'Productos Ilimitados' },
-              { description: 'Factura Electrónica (B2B)' },
-              { description: 'IA Predictiva de Stock' },
-              { description: 'Escáner de Albaranes' },
-              { description: 'Soporte Prioritario' },
+              { description: 'IA Fiscal y de Importación' },
+              { description: 'Factura Electrónica B2B' },
+              { description: 'Sincronización Multi-dispositivo' },
+              { description: 'Soporte Técnico' },
             ],
             callToAction: {
               target: '_self',
@@ -245,19 +255,18 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
               href: '/register?plan=pro',
             },
             hasRibbon: true,
-            ribbonTitle: 'Recomendado',
+            ribbonTitle: 'Más Popular',
           },
           {
             title: 'Enterprise',
-            subtitle: 'Franquicias y Cadenas',
+            subtitle: 'Cadenas y Franquicias',
             price: '99',
             period: '/mes',
             items: [
-              { description: 'Multi-tienda unificada' },
-              { description: 'API Rest Completa' },
               { description: 'Servidor Dedicado' },
-              { description: 'Gestor de Cuenta' },
-              { description: 'Auditoría Fiscal' },
+              { description: 'IA Personalizada (Fine-tuning)' },
+              { description: 'API Rest Completa' },
+              { description: 'Auditoría de Datos' },
             ],
             callToAction: {
               target: '_self',
@@ -272,36 +281,31 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
     <div id="faq" class="scroll-mt-20">
       <FAQs
         title="Preguntas Frecuentes"
-        subtitle="Respondemos a lo que de verdad importa."
         items={[
           {
-            title: '¿Cumple con la Ley Antifraude 11/2021?',
-            description: 'Sí. El software garantiza la integridad, conservación, accesibilidad, legibilidad, trazabilidad e inalterabilidad de los registros.',
+            title: '¿Qué necesito para correr la IA en local?',
+            description: 'Para funciones básicas, cualquier PC moderno sirve. Para análisis predictivos avanzados en local, recomendamos un equipo con 8GB de RAM mínimo. Si no, usamos la nube automáticamente.',
           },
           {
-            title: '¿Necesito instalar algo en mi ordenador?',
-            description: 'No. TuStock funciona en la nube. Sin embargo, ofrecemos una App de Escritorio opcional si quieres que la IA funcione más rápido y sin internet.',
+            title: '¿Funciona en Mac y Windows?',
+            description: 'Sí. Nuestra App de Escritorio es multiplataforma. También puedes acceder vía web desde Linux o tablets.',
           },
           {
-            title: '¿Mis datos son míos?',
-            description: 'Absolutamente. Puedes exportar todo tu catálogo, clientes y facturas a Excel/CSV o JSON en cualquier momento con un clic.',
-          },
-          {
-            title: '¿Puedo conectar mi tienda online?',
-            description: 'Sí, tenemos integraciones nativas con WooCommerce, Shopify y PrestaShop para unificar el stock físico y online.',
+            title: '¿Es obligatorio la Factura Electrónica?',
+            description: 'Será obligatorio para todas las operaciones B2B en España a partir de 2026 (según facturación). TuStock ya está adaptado a la norma técnica.',
           },
         ]}
       />
     </div>
 
     <Brands
-      title="Tecnología de base"
-      subtitle="Construido sobre infraestructura de clase mundial."
+      title="Potenciado por"
+      subtitle="Infraestructura sólida y tecnologías modernas."
       icons={[]}
       images={[
-        { src: 'https://cdn.pixabay.com/photo/2013/02/12/09/07/microsoft-80658_1280.png', alt: 'Azure Cloud' },
-        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png', alt: 'Stripe Payments' },
-        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/800px-Google_Chrome_icon_%28February_2022%29.svg.png', alt: 'PWA Ready' },
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png', alt: 'PostgreSQL' },
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png', alt: 'Stripe' },
+        { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png', alt: 'React Native' },
       ]}
     />
 
@@ -309,20 +313,17 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
       actions={[
         {
           variant: 'primary',
-          text: 'Digitalizar mi negocio ahora',
+          text: 'Crear cuenta y Descargar',
           href: '/register',
-          target: '_self',
-          icon: 'tabler:check',
+          icon: 'tabler:download',
         },
       ]}
     >
       <fragment slot="title">
-        ¿Listo para tomar el control?
+        El control total de tu stock empieza hoy
       </fragment>
-
       <fragment slot="subtitle">
-        Deja de trabajar para tu tienda y haz que tu tienda trabaje para ti.<br/>
-        Sin permanencia. Sin tarjeta para empezar.
+        Únete a las tiendas que ya duermen tranquilas.
       </fragment>
     </CallToAction>
 
@@ -330,9 +331,10 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
 </div>
 
 <script>
+  // Configuración del Observer
   const observerOptions = {
     root: null,
-    // 🔥 AJUSTE CLAVE: Detecta el centro de la pantalla mejor
+    // Detectamos cuando el elemento está en el centro de la pantalla
     rootMargin: '-40% 0px -40% 0px', 
     threshold: 0
   };
@@ -342,34 +344,39 @@ const { shopCount = "10+", userCount = "50+" } = Astro.props;
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute('id');
         
-        // 1. RESETEAR TODOS (Gris y pequeños)
-        document.querySelectorAll('.nav-link').forEach(link => {
-          link.classList.remove('active'); 
-          const dot = link.querySelector('div');
-          // Si encontramos el puntito, lo ponemos gris
-          if (dot) {
-             dot.classList.remove('bg-blue-600', 'scale-125');
-             dot.classList.add('bg-slate-400/50');
+        // Seleccionamos todos los links y sus indicadores
+        const allLinks = document.querySelectorAll('.nav-link');
+        
+        allLinks.forEach(link => {
+          const indicator = link.querySelector('.indicator');
+          
+          // Comprobamos si este es el link activo
+          if (link.getAttribute('data-target') === id) {
+            // ESTADO ACTIVO
+            link.classList.add('active');
+            if (indicator) {
+              indicator.classList.remove('bg-slate-300', 'dark:bg-slate-600', 'w-2', 'h-2');
+              indicator.classList.add('bg-blue-600', 'w-3', 'h-3', 'shadow-[0_0_10px_rgba(37,99,235,0.5)]');
+            }
+          } else {
+            // ESTADO INACTIVO
+            link.classList.remove('active');
+            if (indicator) {
+              indicator.classList.remove('bg-blue-600', 'w-3', 'h-3', 'shadow-[0_0_10px_rgba(37,99,235,0.5)]');
+              indicator.classList.add('bg-slate-300', 'dark:bg-slate-600', 'w-2', 'h-2');
+            }
           }
         });
-        
-        // 2. ACTIVAR EL ACTUAL (Azul y grande)
-        const activeLink = document.querySelector(`.nav-link[data-target="${id}"]`);
-        if (activeLink) {
-          activeLink.classList.add('active');
-          const dot = activeLink.querySelector('div');
-          // Si encontramos el puntito, lo ponemos azul
-          if (dot) {
-             dot.classList.remove('bg-slate-400/50');
-             dot.classList.add('bg-blue-600', 'scale-125');
-          }
-        }
       }
     });
   }, observerOptions);
 
-  // Observamos todas las secciones
-  document.querySelectorAll('#hero, #features, #fiscalidad, #ai-core, #steps, #pricing, #faq').forEach((section) => {
-    observer.observe(section);
+  // Observamos todas las secciones que tengan ID en el menú
+  // Aseguramos que los IDs coincidan con el array 'navItems'
+  const sectionsToObserve = ['hero', 'features', 'ai-core', 'fiscalidad', 'steps', 'pricing', 'faq'];
+  
+  sectionsToObserve.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) observer.observe(element);
   });
 </script>
