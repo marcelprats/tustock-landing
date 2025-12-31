@@ -14,17 +14,22 @@ export const onRequest = defineMiddleware(async (context, next) => {
         subdomain = url.searchParams.get('tenant') || ''; 
     } else {
         const parts = host.split('.');
+        // Si hay 3 partes (ej: paco.tustock.app), el subdominio es la primera
         if (parts.length >= 3) {
             subdomain = parts[0];
         }
     }
 
+    // Lista de subdominios reservados que NO son tiendas
     const systemSubdomains = ['www', 'app', 'api', 'admin'];
     const isStoreContext = subdomain !== '' && !systemSubdomains.includes(subdomain);
 
     if (isStoreContext) {
-        // 🛑 Evitar bucles internos
-        if (url.pathname.startsWith('/store')) return next();
+        // 🛑 EVITAR BUCLES Y ARCHIVOS ESTÁTICOS
+        // Si ya estamos en /store o es un asset (imagen, css), dejamos pasar.
+        if (url.pathname.startsWith('/store') || url.pathname.match(/\.(css|js|jpg|png|svg|ico|json)$/)) {
+            return next();
+        }
 
         // 2. RUTAS DE SISTEMA (Login/API/Settings) pasan siempre
         const systemPaths = ['/api', '/login', '/settings']; 
@@ -32,16 +37,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
             return next();
         }
 
-        // 3. RECUPERAR DATOS Y PLAN
-        // Inicializamos como 'any' para evitar que TS se queje si empieza en null
+        // 3. RECUPERAR DATOS Y PLAN DE LA TIENDA
         let shopData: any = null; 
 
         if (env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
             try {
                 const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
-                const fullUrl = `https://${subdomain}.tustock.app`;
                 
-                // Leemos web_plan
+                // Buscamos la tienda por su URL completa o parcial
                 const result = await turso.execute({
                     sql: "SELECT company_name, owner_email, plan_type, web_plan FROM licenses WHERE website_url LIKE ? LIMIT 1",
                     args: [`%${subdomain}%`]
@@ -53,8 +56,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
                         name: (shop.company_name as string) || '',
                         email: (shop.owner_email as string) || '',
                         plan: (shop.plan_type as string) || 'FREE',
-                        web_plan: (shop.web_plan as string) || 'FREE', // Default FREE
-                        url: fullUrl,
+                        // Si web_plan es null en la BD, lo tratamos como 'FREE' por defecto
+                        web_plan: (shop.web_plan as string) || 'FREE', 
                         slug: subdomain,
                         isStore: true
                     };
@@ -66,25 +69,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
-        // Si no se encontró la tienda en BD, 404
+        // Si no se encontró la tienda en BD, devolvemos 404
         if (!shopData) {
-             return new Response(`La tienda '${subdomain}' no existe.`, { status: 404 });
+             return new Response(`La tienda '${subdomain}' no existe en TuStock.`, { status: 404 });
         }
 
-        // 4. LÓGICA DE REWRITE (REDIRECCIONES INTERNAS)
+        // 4. LÓGICA DE REWRITE (LA MAGIA) 🪄
         
-        // A) ¿Quiere entrar al ADMIN? -> Lo mandamos al Dashboard real (/store/admin)
+        // A) ¿Quiere entrar al ADMIN? -> Lo mandamos al panel de gestión (/store/admin)
+        // Esto funciona SIEMPRE, tenga plan Free o Pro.
         if (url.pathname.startsWith('/admin')) {
             return context.rewrite('/store/admin');
         }
 
-        // B) ¿Es plan FREE? -> Solo mostramos el Placeholder
+        // B) ¿Es plan FREE? -> Bloqueamos la tienda y mostramos el Placeholder
         if (shopData.web_plan === 'FREE') {
-            // El usuario ve 'paco.tustock.app' pero servimos 'store/placeholder'
             return context.rewrite('/store/placeholder');
         }
 
         // C) ¿Es plan PREMIUM/PRO? -> Mostramos la tienda real
+        // "/" -> "/store/index"
+        // "/contacto" -> "/store/contacto"
         const targetPath = url.pathname === '/' ? '/store' : `/store${url.pathname}`;
         return context.rewrite(targetPath);
     }

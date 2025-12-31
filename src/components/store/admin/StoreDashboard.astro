@@ -2,7 +2,6 @@
 import ServerStatus from '~/components/app/dashboard/ServerStatus.astro'; 
 import { decryptLicense } from '~/utils/crypto'; 
 
-// Recibimos el tenantId (slug) de la tienda actual
 const { tenantId } = Astro.props; 
 
 const session = Astro.cookies.get('session');
@@ -13,10 +12,8 @@ const db = env?.DB;
 let tenantData = null;
 let error = null;
 let isOnline = false;
-let statusBadge = "";
 let lastUpdateText = "---";
 
-// Consultamos SOLO los datos de esta tienda
 if (userId && db && tenantId) {
   try {
     const membership = await db.prepare(`
@@ -46,11 +43,7 @@ if (userId && db && tenantId) {
 
       const now = Date.now();
       isOnline = tenantData.lastHeartbeat && (now - tenantData.lastHeartbeat) < 120000;
-
-      statusBadge = isOnline
-        ? '<span class="text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs font-bold animate-pulse">● ONLINE</span>'
-        : '<span class="text-gray-500 bg-gray-100 px-2 py-0.5 rounded text-xs font-bold">OFFLINE</span>';
-
+      
       lastUpdateText = tenantData.dataUpdatedAt 
         ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})
         : '---';
@@ -58,52 +51,53 @@ if (userId && db && tenantId) {
       error = "Datos no disponibles.";
     }
   } catch (e) {
-    error = "Error de conexión.";
+    error = "Error conexión.";
   }
 }
 ---
 
-{/* VISTA LIMPIA - SIN SIDEBARS NI HEADERS EXTRAÑOS */}
-
 {error ? (
-  <div class="p-4 bg-red-50 text-red-600 rounded border border-red-200">{error}</div>
+  <div class="p-6 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>
 ) : (
-  <div class="grid gap-6">
+  <div class="flex flex-col gap-6">
       
-      {/* 1. Tarjetas Superiores */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 1. CARTEL OFFLINE (Si aplica) */}
+      {!isOnline && (
+          <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r">
+              <p class="text-sm text-amber-800 font-bold">⚠️ Tienda desconectada</p>
+              <p class="text-xs text-amber-700">Mostrando datos de: {lastUpdateText}</p>
+          </div>
+      )}
+
+      {/* 2. TARJETAS DE DATOS */}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Ventas */}
           <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
               <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ventas Hoy</h3>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white">
+              <p class="text-4xl font-bold text-gray-900 dark:text-white">
                   {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday)}
               </p>
-              <div class="mt-4 flex justify-between items-center">
-                  <span class="text-xs text-gray-400">Act: {lastUpdateText}</span>
-                  <div set:html={statusBadge} />
-              </div>
           </div>
 
-          {/* Estado Servidor (Conexión Local) */}
-          <div class="md:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+          {/* Estado Servidor Local */}
+          <div class="lg:col-span-2">
              <ServerStatus licenseKey={tenantData.licenseKey} isOnline={isOnline} />
           </div>
       </div>
 
-      {/* 2. Área de Gestión Rápida */}
-      <div class="bg-blue-50 dark:bg-slate-800 p-8 rounded-xl border border-blue-100 dark:border-slate-700 text-center">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Gestión de Inventario</h3>
-          <p class="text-gray-500 mb-4 text-sm">Sincroniza tus productos o gestiona pedidos manualmente.</p>
-          <div class="flex justify-center gap-3">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">
-                Ver Productos
-            </button>
-            <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition">
-                Configurar Caja
-            </button>
+      {/* 3. ACCIONES RÁPIDAS */}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-100 dark:border-slate-700">
+              <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Inventario</h3>
+              <p class="text-sm text-gray-500 mb-4">Gestiona tus productos y precios.</p>
+              <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">Ver Productos</button>
+          </div>
+          <div class="p-6 bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700">
+              <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Configuración</h3>
+              <p class="text-sm text-gray-500 mb-4">Ajustes de la tienda y usuarios.</p>
+              <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 transition">Ir a Ajustes</button>
           </div>
       </div>
-
   </div>
 )}

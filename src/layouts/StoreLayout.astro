@@ -1,69 +1,190 @@
 ---
-import CustomStyles from "~/components/CustomStyles.astro"; // Compartimos estilos base (Tailwind)
+import CustomStyles from "~/components/CustomStyles.astro";
 import Favicons from "~/components/Favicons.astro";
 import Metadata from "~/components/common/Metadata.astro";
 import ApplyColorMode from "~/components/common/ApplyColorMode.astro";
 import BasicScripts from "~/components/common/BasicScripts.astro";
 
 const { metadata = {} } = Astro.props;
-const { currentShop } = Astro.locals; // Datos automáticos del middleware
+const { currentShop } = Astro.locals;
 
 const shopName = currentShop?.name || "Mi Tienda";
+const shopEmail = currentShop?.email || "contacto@tustock.app";
 ---
 
 <!doctype html>
 <html lang="es" class="motion-safe:scroll-smooth" dir="ltr">
   <head>
     <Metadata {...metadata} />
-    <CustomStyles /> {/* <-- ESTO MANTIENE LA COHERENCIA VISUAL */}
+    <CustomStyles />
     <Favicons />
     <ApplyColorMode />
   </head>
 
-  <body class="antialiased text-default bg-white dark:bg-slate-900 tracking-tight">
+  <body class="antialiased text-gray-900 bg-white dark:bg-slate-950 tracking-tight flex flex-col min-h-screen">
     
-    {/* CABECERA DE LA TIENDA (No de TuStock) */}
-    <header class="sticky top-0 z-40 flex-none mx-auto w-full border-b border-gray-50/0 transition-[opacity] ease-in-out">
-        <div class="relative md:px-6">
-            <div class="flex justify-between items-center py-4 px-4 mx-auto max-w-7xl">
+    {/* --- 1. TOP BAR (ANUNCIO) --- */}
+    <div class="bg-gray-900 dark:bg-black text-white text-xs font-bold py-2 px-4 text-center tracking-wide">
+      <span>🚀 ENVÍO GRATIS EN PEDIDOS SUPERIORES A 50€ — <span class="text-yellow-400">VER OFERTAS</span></span>
+    </div>
+
+    {/* --- 2. HEADER E-COMMERCE --- */}
+    <header class="sticky top-0 z-40 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 transition-all duration-300" id="store-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
                 
-                {/* Logo / Nombre de la Tienda */}
-                <a href="/" class="flex items-center gap-2 font-bold text-2xl text-gray-900 dark:text-white">
-                    <span class="text-3xl">🏪</span> {shopName}
-                </a>
-
-                {/* Menú de la Tienda (Simple) */}
-                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                    <a href="#catalogo" class="hover:text-blue-600 transition">Catálogo</a>
-                    <a href="#contacto" class="hover:text-blue-600 transition">Contacto</a>
-                </nav>
-
-                {/* Acciones (Carrito / Admin) */}
+                {/* IZQUIERDA: MENÚ MÓVIL + LOGO */}
                 <div class="flex items-center gap-4">
-                    <a href="/admin" class="text-xs font-bold text-gray-500 hover:text-blue-600 flex items-center gap-1 border border-gray-200 dark:border-slate-700 px-3 py-1.5 rounded-full transition">
-                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> Dueño
+                    {/* Botón Menú Móvil */}
+                    <button id="mobile-menu-btn" class="lg:hidden p-2 text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+
+                    {/* Logo / Nombre */}
+                    <a href="/" class="flex items-center gap-2 group">
+                        <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform duration-300">
+                            <span class="text-xl">🏪</span>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                            {shopName}
+                        </span>
                     </a>
                 </div>
 
+                {/* CENTRO: NAVEGACIÓN DESKTOP */}
+                <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-600 dark:text-gray-300">
+                    <a href="/" class="hover:text-blue-600 dark:hover:text-white transition">Inicio</a>
+                    <a href="#catalogo" class="hover:text-blue-600 dark:hover:text-white transition">Colección</a>
+                    <a href="#novedades" class="hover:text-blue-600 dark:hover:text-white transition">Novedades</a>
+                    <a href="#contacto" class="hover:text-blue-600 dark:hover:text-white transition">Contacto</a>
+                </nav>
+
+                {/* DERECHA: ICONOS (BUSCAR, ADMIN, CARRITO) */}
+                <div class="flex items-center gap-2 sm:gap-4">
+                    
+                    {/* Buscador (Visual) */}
+                    <button class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </button>
+
+                    {/* Carrito (Con badge) */}
+                    <button class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white transition relative">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <span class="absolute top-1 right-0 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                    </button>
+
+                    {/* Botón Admin (Discreto) */}
+                    <a href="/admin" class="hidden sm:flex items-center gap-1 text-xs font-bold text-gray-500 bg-gray-100 dark:bg-slate-800 dark:text-gray-300 px-3 py-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition ml-2">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Admin
+                    </a>
+
+                </div>
             </div>
+        </div>
+
+        {/* MENÚ MÓVIL DESPLEGABLE */}
+        <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 absolute w-full left-0 top-full shadow-xl">
+            <nav class="flex flex-col p-4 space-y-4 text-center">
+                <a href="/" class="text-sm font-bold text-gray-800 dark:text-white py-2">Inicio</a>
+                <a href="#catalogo" class="text-sm font-medium text-gray-600 dark:text-gray-400 py-2">Colección</a>
+                <a href="#contacto" class="text-sm font-medium text-gray-600 dark:text-gray-400 py-2">Contacto</a>
+                <hr class="border-gray-100 dark:border-slate-800"/>
+                <a href="/admin" class="text-sm font-bold text-blue-600 py-2">Acceso Propietario</a>
+            </nav>
         </div>
     </header>
 
-    {/* CONTENIDO DE LA PLANTILLA */}
-    <main>
+    {/* --- 3. CONTENIDO PRINCIPAL --- */}
+    <main class="flex-grow">
       <slot />
     </main>
 
-    {/* FOOTER DE LA TIENDA */}
-    <footer class="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-sm text-gray-500">© {new Date().getFullYear()} <b>{shopName}</b>.</p>
-            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">
-                Tecnología proporcionada por <a href="https://tustock.app" target="_blank" class="hover:underline">TuStock</a>
-            </p>
+    {/* --- 4. FOOTER PREMIUM --- */}
+    <footer class="bg-gray-50 dark:bg-slate-950 border-t border-gray-200 dark:border-slate-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                
+                {/* Columna 1: Marca */}
+                <div class="col-span-1 md:col-span-1">
+                    <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-4">{shopName}</h3>
+                    <p class="text-sm text-gray-500 mb-6">
+                        Seleccionamos los mejores productos para ti. Calidad garantizada y envío rápido.
+                    </p>
+                    <div class="flex gap-4">
+                        {/* Redes Sociales Mockup */}
+                        <a href="#" class="text-gray-400 hover:text-blue-600 transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-pink-600 transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    </div>
+                </div>
+
+                {/* Columna 2: Enlaces */}
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Comprar</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-blue-600 transition">Novedades</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Más Vendidos</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Ofertas</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Tarjetas Regalo</a></li>
+                    </ul>
+                </div>
+
+                {/* Columna 3: Ayuda */}
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Ayuda</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-blue-600 transition">Envíos y Devoluciones</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Preguntas Frecuentes</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Contacto</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+
+                {/* Columna 4: Newsletter */}
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Únete al club</h4>
+                    <p class="text-sm text-gray-500 mb-4">Recibe ofertas exclusivas y novedades.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Tu email" class="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded px-3 py-2 text-sm w-full focus:outline-none focus:border-blue-500" />
+                        <button class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded text-sm font-bold hover:opacity-80 transition">OK</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="border-gray-200 dark:border-slate-800 mb-8" />
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-gray-400">© {new Date().getFullYear()} <b>{shopName}</b>. Todos los derechos reservados.</p>
+                
+                {/* Métodos de Pago (Iconos CSS puros o SVGs) */}
+                <div class="flex gap-3 opacity-50 grayscale hover:grayscale-0 transition">
+                    <div class="h-6 w-10 bg-gray-200 rounded flex items-center justify-center text-[10px] font-bold text-gray-500">VISA</div>
+                    <div class="h-6 w-10 bg-gray-200 rounded flex items-center justify-center text-[10px] font-bold text-gray-500">MC</div>
+                    <div class="h-6 w-10 bg-gray-200 rounded flex items-center justify-center text-[10px] font-bold text-gray-500">PAY</div>
+                </div>
+
+                <p class="text-[10px] text-gray-300 uppercase tracking-widest">
+                    Tecnología <a href="https://tustock.app" class="font-bold hover:text-blue-500">TuStock</a>
+                </p>
+            </div>
         </div>
     </footer>
 
     <BasicScripts />
+
+    {/* SCRIPT SIMPLE PARA EL MENÚ MÓVIL (Sin dependencias externas) */}
+    <script>
+      const btn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+
+      if (btn && menu) {
+        btn.addEventListener('click', () => {
+          menu.classList.toggle('hidden');
+        });
+      }
+    </script>
+
   </body>
 </html>

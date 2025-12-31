@@ -1,43 +1,68 @@
 ---
-import Layout from '~/layouts/Layout.astro'; // Usamos Layout base (sin menús corporativos)
+import Layout from '~/layouts/Layout.astro'; // Usamos el layout base limpio
 
 const { currentShop } = Astro.locals;
+const shopName = currentShop?.name || "Tienda";
 ---
 
-<Layout metadata={{ title: currentShop?.name }}>
+<Layout metadata={{ title: `${shopName} - Perfil Verificado` }}>
   
-  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
+  <div class="relative min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
     
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md p-8 rounded-2xl shadow-xl text-center border border-gray-100 dark:border-slate-700">
-        
-        {/* Icono Tienda */}
-        <div class="mx-auto w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6">
-            <span class="text-3xl">🏪</span>
-        </div>
-
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {currentShop?.name}
-        </h1>
-        
-        <div class="h-1 w-20 bg-blue-500 mx-auto rounded-full mb-6"></div>
-
-        <p class="text-gray-500 dark:text-slate-400 mb-8 leading-relaxed">
-            Esta tienda utiliza la tecnología de <b>TuStock</b> para su gestión, pero actualmente no tiene habilitada la venta online pública.
-        </p>
-
-        {/* Caja solo para el dueño */}
-        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl border border-gray-100 dark:border-slate-600">
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Administración</p>
-            <a href="/admin" class="block w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition text-sm">
-                Acceder al Panel de Control
-            </a>
-        </div>
-
-        <p class="text-[10px] text-gray-300 mt-6 uppercase tracking-widest">
-            Powered by TuStock System
-        </p>
+    {/* Fondo Decorativo (Blobs) */}
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 rounded-full blur-3xl opacity-50 mix-blend-multiply dark:mix-blend-screen"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-400/20 rounded-full blur-3xl opacity-50 mix-blend-multiply dark:mix-blend-screen"></div>
     </div>
 
-  </div>
+    {/* Tarjeta Central */}
+    <div class="relative z-10 w-full max-w-md bg-white dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden m-4">
+        
+        {/* Cabecera de la Tarjeta */}
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 h-32 relative">
+            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
+                <div class="w-24 h-24 bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex items-center justify-center border-4 border-white dark:border-slate-800">
+                    <span class="text-4xl">🏪</span>
+                </div>
+            </div>
+        </div>
 
+        {/* Contenido */}
+        <div class="pt-14 pb-8 px-8 text-center">
+            
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                {shopName}
+            </h1>
+            
+            <div class="flex items-center justify-center gap-1.5 mb-6">
+                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Comercio Verificado</span>
+            </div>
+
+            <p class="text-gray-600 dark:text-slate-300 text-sm mb-8 leading-relaxed">
+                Este negocio utiliza la tecnología de <b>TuStock</b> para su gestión interna. Actualmente la tienda online pública no está habilitada.
+            </p>
+
+            <div class="space-y-3">
+                <a href="/admin" class="flex items-center justify-center w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-lg">
+                    <span>Soy el Propietario</span>
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                </a>
+                
+                <a href="https://tustock.app" target="_blank" class="flex items-center justify-center w-full py-3.5 bg-gray-50 dark:bg-slate-700/50 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                    Crear mi propia tienda
+                </a>
+            </div>
+
+        </div>
+
+        {/* Footer Tarjeta */}
+        <div class="bg-gray-50 dark:bg-slate-900/50 py-4 px-8 text-center border-t border-gray-100 dark:border-slate-700">
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                Powered by <span class="text-blue-600">TuStock.App</span>
+            </p>
+        </div>
+
+    </div>
+  </div>
 </Layout>

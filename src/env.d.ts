@@ -12,7 +12,7 @@ declare namespace App {
       url: string;
       slug: string;
       isStore: boolean;
-      web_plan: string; // <--- ¡AQUÍ ESTÁ LA CLAVE!
+      web_plan: string;
     } | null;
     
     runtime: {
