@@ -1,10 +1,10 @@
 export const POST = async ({ cookies, redirect, request }) => {
-  // 1. INTENTO DE BORRADO MULTIPLE (Para matar cookies zombies)
+  // 1. INTENTO DE BORRADO MASIVO (Matamos todas las versiones posibles)
   
-  // A) Borrar cookie global (producción)
+  // Opción A: Borrar cookie global (Producción)
   cookies.delete("session", { path: "/", domain: ".tustock.app" });
   
-  // B) Borrar cookie local/host-only (por si acaso)
+  // Opción B: Borrar cookie local (Localhost o antiguas)
   cookies.delete("session", { path: "/" });
 
   // 2. REDIRECCIÓN INTELIGENTE
@@ -14,12 +14,14 @@ export const POST = async ({ cookies, redirect, request }) => {
   if (referer) {
     try {
       const url = new URL(referer);
-      // Si venía de una tienda, le mandamos al login de esa tienda
+      // Si venía de una tienda, le devolvemos al login de esa tienda
       if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
-         // Añadimos timestamp para romper caché del navegador
+         // Añadimos timestamp para romper la caché visual del navegador
          targetUrl = `/login?redirect=/admin&t=${Date.now()}`;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return redirect(targetUrl, 302);
