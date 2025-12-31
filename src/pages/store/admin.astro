@@ -6,9 +6,11 @@ import { Icon } from 'astro-icon/components';
 // 1. OBTENER SESIÓN Y TIENDA ACTUAL
 const session = Astro.cookies.get('session');
 const { currentShop } = Astro.locals;
-const env = Astro.locals.runtime?.env;
 
-// Si no hay sesión, al login recordando volver aquí
+// 🔥 MEJORA: Intentamos pillar las variables de entorno de todas las formas posibles
+const env = Astro.locals.runtime?.env || import.meta.env;
+
+// Si no hay sesión, al login
 if (!session) {
   return Astro.redirect(`/login?redirect=/admin`);
 }
@@ -16,13 +18,14 @@ if (!session) {
 const userId = session.value;
 let isAuthorized = false;
 let errorMsg = "";
+let debugInfo = ""; // Para ver detalles técnicos si falla
 
 // 2. SEGURIDAD: ¿ES EL DUEÑO?
-// Conectamos a BD para ver si el usuario logueado coincide con el dueño de la tienda
 if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
   try {
     const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
 
+    // Consulta de verificación
     const result = await turso.execute({
         sql: `
             SELECT id FROM licenses 
@@ -36,19 +39,22 @@ if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
     if (result.rows.length > 0) {
         isAuthorized = true;
     } else {
-        errorMsg = "No tienes permisos para administrar esta tienda.";
+        // Si no devuelve filas, es que el email del usuario NO coincide con el owner_email de la licencia
+        errorMsg = "No eres el propietario de esta licencia.";
+        debugInfo = `Usuario ID: ${userId} vs Tienda: ${currentShop.slug}`;
     }
 
   } catch (e) {
     console.error("Error Admin Check:", e);
-    errorMsg = "Error de conexión verificando permisos.";
+    // 🔥 AQUÍ ESTÁ EL CAMBIO: Mostramos el error real
+    errorMsg = `Error Técnico: ${e.message}`;
   }
+} else {
+    errorMsg = "Error de Configuración: Faltan variables de entorno (DB_URL o TOKEN)";
 }
 
-// Si no está autorizado (y no es error técnico), lo mandamos al Hub central
-if (!isAuthorized && !errorMsg) {
-    return Astro.redirect('https://tustock.app/hub');
-}
+// Si no está autorizado y no hay error técnico, expulsamos (Opcional, ahora lo dejo para ver el error)
+// if (!isAuthorized && !errorMsg) return Astro.redirect('https://tustock.app/hub');
 
 const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
@@ -65,49 +71,58 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
             Panel de Control
         </h1>
         <p class="text-xl text-gray-500 dark:text-gray-400">
-            Gestionando: <span class="font-bold text-blue-600">{currentShop?.name}</span> ({currentShop?.slug})
+            Gestionando: <span class="font-bold text-blue-600">{currentShop?.name}</span>
         </p>
     </div>
 
-    {/* Si hay error de permisos mostramos alerta */}
+    {/* ZONA DE ERRORES / DEBUG */}
     {errorMsg ? (
-        <div class="p-6 bg-red-100 border border-red-300 text-red-800 rounded-lg max-w-lg text-center">
-            <Icon name="tabler:alert-triangle" class="w-12 h-12 mx-auto mb-2" />
-            <h3 class="text-lg font-bold">Acceso Denegado</h3>
-            <p>{errorMsg}</p>
-            <a href="https://tustock.app/hub" class="mt-4 inline-block px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Volver al Hub</a>
+        <div class="p-8 bg-red-50 border border-red-200 text-red-800 rounded-xl max-w-2xl text-center shadow-lg">
+            <Icon name="tabler:bug" class="w-12 h-12 mx-auto mb-4 text-red-500" />
+            <h3 class="text-xl font-bold mb-2">Acceso Denegado</h3>
+            
+            <p class="text-lg font-medium">{errorMsg}</p>
+            
+            {debugInfo && (
+                <p class="mt-2 text-sm font-mono bg-red-100 p-2 rounded">{debugInfo}</p>
+            )}
+
+            <div class="mt-6 flex justify-center gap-4">
+                <a href="https://tustock.app/hub" class="px-6 py-2 bg-white border border-red-300 rounded-lg hover:bg-red-100 transition-colors">
+                    Volver al Hub
+                </a>
+                <form action="/api/logout" method="POST">
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </div>
         </div>
     ) : (
-        /* DASHBOARD REAL */
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+        /* DASHBOARD REAL (Solo se ve si no hay error) */
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl animate-fade-in-up">
             
-            {/* Tarjeta 1: Ir al HUB Central */}
             <a href="https://tustock.app/hub" class="group relative p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center">
-                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Icon name="tabler:external-link" class="w-5 h-5 text-gray-400" />
-                </div>
                 <div class="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition-transform">
-                    <Icon name="tabler:apps" class="w-8 h-8" />
+                    <Icon name="tabler:building-store" class="w-8 h-8" />
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mis Tiendas (Hub)</h3>
-                <p class="text-gray-500 text-sm">Vuelve al panel central para ver todas tus licencias.</p>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mis Tiendas</h3>
+                <p class="text-gray-500 text-sm">Volver al selector de empresas.</p>
             </a>
 
-            {/* Tarjeta 2: Configuración (Placeholder) */}
             <div class="p-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm opacity-60 flex flex-col items-center text-center">
-                <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-4">
                     <Icon name="tabler:settings" class="w-8 h-8" />
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Configuración</h3>
-                <p class="text-gray-500 text-sm">Próximamente podrás editar productos aquí.</p>
+                <p class="text-gray-500 text-sm">Próximamente.</p>
             </div>
 
-            {/* BOTÓN LOGOUT GRANDE */}
             <div class="col-span-1 md:col-span-2 mt-8 flex justify-center">
                 <form action="/api/logout" method="POST">
-                    <button type="submit" class="flex items-center gap-2 px-8 py-3 rounded-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-red-500/30">
+                    <button type="submit" class="flex items-center gap-2 px-8 py-3 rounded-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-300 font-semibold">
                         <Icon name="tabler:logout" class="w-5 h-5" />
-                        Cerrar Sesión en {currentShop?.name}
+                        Salir de {currentShop?.name}
                     </button>
                 </form>
             </div>
