@@ -1,37 +1,36 @@
 export const POST = async ({ cookies, redirect, request }) => {
+  console.log("--> EJECUTANDO LOGOUT NUCLEAR...");
+
+  // 1. Borrado MULTI-DOMINIO (Dispara a todo lo que se mueva)
   
-  // 🔥 Usamos la misma lógica de dominio que en el Login
-  const isProd = import.meta.env.PROD;
-  const cookieDomain = isProd ? ".tustock.app" : undefined;
+  // Opción A: Dominio global con punto (El estándar de Prod)
+  cookies.delete("session", { path: "/", domain: ".tustock.app" });
+  
+  // Opción B: Dominio global SIN punto (A veces los navegadores son raros)
+  cookies.delete("session", { path: "/", domain: "tustock.app" });
 
-  // 1. Borrar la cookie GLOBAL (La correcta)
-  cookies.delete("session", { path: "/", domain: cookieDomain });
-
-  // 2. Limpieza de seguridad (Borrar posibles cookies zombies antiguas sin dominio)
+  // Opción C: Dominio Local / Host actual (Para cookies zombies locales)
   cookies.delete("session", { path: "/" });
 
-  // 3. Redirección Inteligente
+  // 2. Redirección
   const referer = request.headers.get('referer');
   let targetUrl = '/login';
 
-  // Si el usuario sale desde una tienda específica (ej: paco.tustock.app),
-  // le mandamos de vuelta al login de esa tienda para que vea su logo.
+  // Si vienes de una tienda, te manda al login de esa tienda con un parámetro de tiempo
+  // para obligar al navegador a refrescar la caché.
   if (referer) {
-      try {
-        const url = new URL(referer);
-        if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
-            // Añadimos timestamp para evitar que el navegador use la caché visual
-            targetUrl = `/login?redirect=/admin&ts=${Date.now()}`;
-        }
-      } catch (e) {
-          console.error(e);
+    try {
+      const url = new URL(referer);
+      if (url.host.split('.').length >= 3 && !url.host.startsWith('www')) {
+          targetUrl = `/login?redirect=/admin&cache_buster=${Date.now()}`;
       }
+    } catch (e) { console.error(e); }
   }
 
   return redirect(targetUrl, 302);
 };
 
-// Permitir GET para que funcionen los enlaces simples <a href="/api/logout">
+// Permite que funcione con enlaces simples <a> también
 export const GET = async (ctx) => {
     return POST(ctx);
 }
