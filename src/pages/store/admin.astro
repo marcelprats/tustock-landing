@@ -6,21 +6,54 @@ import StoreDashboard from '~/components/store/admin/StoreDashboard.astro';
 const { currentShop } = Astro.locals;
 const session = Astro.cookies.get('session');
 
-if (!session) return Astro.redirect('/login');
+// 1. ¿NO HAY SESIÓN? -> AL LOGIN
+if (!session) {
+  // Guardamos a dónde quería ir para volver después
+  return Astro.redirect(`/login?redirect=/admin`);
+}
+
+// 2. ¿ES EL DUEÑO? (SEGURIDAD CRÍTICA)
+const userId = session.value;
+const env = Astro.locals.runtime?.env; 
+const db = env?.DB;
+
+let isOwner = false;
+
+if (db && userId && currentShop) {
+  try {
+    // Buscamos si existe una relación entre este usuario y esta tienda
+    const membership = await db.prepare(`
+      SELECT role FROM memberships m
+      JOIN tenants t ON m.tenant_id = t.id
+      WHERE m.user_id = ? AND t.slug = ?
+    `).bind(userId, currentShop.slug).first();
+
+    if (membership) {
+        isOwner = true;
+    }
+  } catch (e) {
+    console.error("Error comprobando permisos:", e);
+  }
+}
+
+// 3. SI NO ES DUEÑO -> FUERA (AL HUB GLOBAL)
+if (!isOwner) {
+    return Astro.redirect('https://tustock.app/hub');
+}
 
 const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
 
 <Layout tenant={currentShop.slug} metadata={metadata}>
   
-  {/* 1. CABECERA ESTILO LANDING */}
+  {/* SI LLEGAMOS AQUÍ, ES SEGURO MOSTRAR DATOS */}
+  
   <HeroText
     tagline="Panel de Control"
     title={currentShop.name}
-    subtitle="Visión general de tu negocio en tiempo real."
+    subtitle="Gestión segura de tu negocio."
   />
 
-  {/* 2. CONTENIDO DEL DASHBOARD */}
   <StoreDashboard tenantId={currentShop.slug} />
 
 </Layout>
