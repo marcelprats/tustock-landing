@@ -30,7 +30,9 @@ const navItems = [
       {navItems.map(({ text, target }) => (
         <a href={`#${target}`} class="nav-link group relative flex items-center justify-center w-4 h-full" data-target={target}>
           
-          <span class="nav-label absolute left-12 opacity-0 -translate-x-4 transition-all duration-500 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
+          <span class="nav-label absolute left-12 opacity-0 -translate-x-4 transition-all duration-500 
+            bg-slate-900 text-slate-50 dark:bg-slate-50 dark:text-slate-900 
+            text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-xl pointer-events-none whitespace-nowrap z-50">
             {text}
           </span>
           
