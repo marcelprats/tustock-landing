@@ -23,7 +23,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const isStoreContext = subdomain !== '' && !systemSubdomains.includes(subdomain);
 
     // ------------------------------------------------------------------------
-    // 2. LISTA BLANCA GLOBAL (CRÍTICO: SALVAR LOGOUT Y ASSETS)
+    // 2. LISTA BLANCA GLOBAL
     // ------------------------------------------------------------------------
     if (
         url.pathname.match(/\.(css|js|jpg|jpeg|png|svg|ico|json|woff2|woff|ttf)$/) || 
@@ -36,37 +36,61 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     // ------------------------------------------------------------------------
-    // 3. LÓGICA DE TIENDA (Solo si es un subdominio válido)
+    // 3. LÓGICA DE TIENDA (Buscando en tabla 'tenants')
     // ------------------------------------------------------------------------
     if (isStoreContext) {
         
-        // Evitar bucles: Si ya estamos en una ruta interna reescrita, pasamos.
         if (url.pathname.startsWith('/store')) return next();
 
         let shopData: any = null; 
         
-        if (env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
+        // OPCIÓN A: D1 (Cloudflare Database) - PRIORIDAD
+        // -------------------------------------------------------
+        if (env.DB) {
+            try {
+                // 🔥 CAMBIO: Buscamos en 'tenants' usando 'slug'
+                const shop = await env.DB.prepare(
+                    "SELECT name, web_plan, slug FROM tenants WHERE slug = ? LIMIT 1"
+                ).bind(subdomain).first();
+
+                if (shop) {
+                    const rawWebPlan = (shop.web_plan as string) || 'FREE';
+                    
+                    shopData = {
+                        name: (shop.name as string) || 'Tienda',
+                        web_plan: rawWebPlan.toUpperCase().trim(), 
+                        slug: (shop.slug as string),
+                        isStore: true
+                    };
+                    context.locals.currentShop = shopData;
+                }
+            } catch (e) {
+                console.error("Error Middleware D1:", e);
+            }
+        }
+
+        // OPCIÓN B: TURSO (Fallback por si D1 falla o no está)
+        // -------------------------------------------------------
+        if (!shopData && env.TURSO_DB_URL && env.TURSO_AUTH_TOKEN) {
             try {
                 const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
                 
+                // 🔥 CAMBIO: Misma consulta corregida para Turso
                 const result = await turso.execute({
-                    sql: "SELECT company_name, owner_email, plan_type, web_plan FROM licenses WHERE website_url LIKE ? LIMIT 1",
-                    args: [`%${subdomain}%`]
+                    sql: "SELECT name, web_plan, slug FROM tenants WHERE slug = ? LIMIT 1",
+                    args: [subdomain]
                 });
 
                 if (result.rows.length > 0) {
                     const shop = result.rows[0];
                     const rawWebPlan = (shop.web_plan as string) || 'FREE';
-                    const webPlanNormalized = rawWebPlan.toUpperCase().trim(); 
-
+                    
                     shopData = {
-                        name: (shop.company_name as string) || 'Tienda',
-                        plan: (shop.plan_type as string) || 'FREE',
-                        web_plan: webPlanNormalized, 
-                        slug: subdomain,
+                        name: (shop.name as string) || 'Tienda',
+                        web_plan: rawWebPlan.toUpperCase().trim(), 
+                        slug: (shop.slug as string),
                         isStore: true
                     };
-                    
                     context.locals.currentShop = shopData;
                 }
             } catch (e) { 
@@ -74,23 +98,22 @@ export const onRequest = defineMiddleware(async (context, next) => {
             }
         }
 
+        // Si no se encuentra -> 404
         if (!shopData) return new Response(`Tienda '${subdomain}' no encontrada`, { status: 404 });
 
-        // --- ENRUTAMIENTO (REWRITES) ---
+        // --- ENRUTAMIENTO ---
         
-        // A) ADMIN -> Panel de Control
+        // A) ADMIN
         if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
             return context.rewrite('/store/admin');
         }
 
-        // B) PLAN FREE -> Placeholder (Bloqueo de tienda)
+        // B) PLAN FREE -> Placeholder
         if (shopData.web_plan === 'FREE') {
             return context.rewrite('/store/placeholder');
         }
 
         // C) PLAN PRO -> Tienda Real
-        // 🔥 FIX: Reescribir a la CARPETA '/store' en lugar de '/store/index'
-        // Esto permite que Astro resuelva el index.astro correctamente.
         if (url.pathname === '/' || url.pathname === '') {
             return context.rewrite('/store'); 
         }
