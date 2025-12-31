@@ -1,25 +1,24 @@
 import bcrypt from "bcryptjs"; 
 
-export const POST = async ({ request, cookies, redirect, locals }) => {
-  console.log("--> INTENTO DE LOGIN RECIBIDO (POST)"); // Debug en logs
-
+export const POST = async ({ request, cookies, locals }) => {
   try {
-    const formData = await request.formData();
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const returnUrl = formData.get("return_to");
-
+    // Leemos el cuerpo como JSON (ya no como FormData tradicional)
+    const data = await request.json(); 
+    const email = data.email;
+    const password = data.password;
+    
+    // Conexión DB
     const db = locals.runtime?.env?.DB; 
-    if (!db) return new Response("Error Base de Datos", { status: 500 });
+    if (!db) return new Response(JSON.stringify({ error: "Error de conexión a BD" }), { status: 500 });
 
     // 1. Validar Usuario
     const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
 
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-        return redirect("/login?error=invalid_credentials");
+        return new Response(JSON.stringify({ error: "Credenciales incorrectas" }), { status: 401 });
     }
 
-    // 2. Crear Cookie Global
+    // 2. Crear Cookie
     const isProd = import.meta.env.PROD;
     cookies.set("session", user.id, {
         path: "/",
@@ -30,30 +29,24 @@ export const POST = async ({ request, cookies, redirect, locals }) => {
         domain: isProd ? ".tustock.app" : undefined
     });
 
-    // 3. Redirección Inteligente
-    if (returnUrl && returnUrl.startsWith('/')) {
-        return redirect(returnUrl);
-    }
-
+    // 3. Decidir destino (pero no redirigir, solo informar)
+    // El frontend se encargará de mover al usuario.
     const url = new URL(request.url);
     const host = url.host;
+    let destination = "/hub"; // Por defecto
 
-    // Si es una tienda (subdominio), vamos al Admin
-    if (host.split('.').length >= 3 && !host.startsWith('www')) {
-        return redirect("/admin");
-    } 
-    
-    // Si es la web principal, al Hub
-    return redirect("/hub");
+    // Si return_to existe
+    if (data.return_to && data.return_to.startsWith('/')) {
+        destination = data.return_to;
+    } else if (host.split('.').length >= 3 && !host.startsWith('www')) {
+        // Si estamos en una tienda -> Admin
+        destination = "/admin";
+    }
+
+    return new Response(JSON.stringify({ success: true, redirect: destination }), { status: 200 });
 
   } catch (error) {
     console.error("Login Error:", error);
-    return new Response(`Error Interno: ${error.message}`, { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 };
-
-// 🔥 ELIMINAMOS EL GET PARA NO CONFUNDIRNOS
-// Si entras por GET, te mandamos al formulario de login de nuevo
-export const GET = async ({ redirect }) => {
-    return redirect("/login");
-}

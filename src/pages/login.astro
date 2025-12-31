@@ -4,8 +4,6 @@ import Headline from '~/components/ui/Headline.astro';
 import { Icon } from 'astro-icon/components';
 
 const metadata = { title: 'Acceder' };
-
-// Detectar si nos piden volver a algún sitio concreto (ej: /admin)
 const returnTo = Astro.url.searchParams.get('redirect') || '';
 ---
 
@@ -21,9 +19,11 @@ const returnTo = Astro.url.searchParams.get('redirect') || '';
         />
       </div>
 
-      <form action="/api/login" method="POST" class="space-y-6">
+      <form id="loginForm" class="space-y-6">
         
-        <input type="hidden" name="return_to" value={returnTo} />
+        <input type="hidden" id="return_to" value={returnTo} />
+
+        <div id="errorMessage" class="hidden p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center"></div>
 
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
@@ -31,14 +31,7 @@ const returnTo = Astro.url.searchParams.get('redirect') || '';
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Icon name="tabler:mail" class="w-5 h-5 text-gray-400" />
             </div>
-            <input 
-              type="email" 
-              name="email" 
-              id="email" 
-              required
-              class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="tu@email.com"
-            />
+            <input type="email" id="email" required class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-gray-600 dark:text-white" placeholder="tu@email.com" />
           </div>
         </div>
 
@@ -48,28 +41,59 @@ const returnTo = Astro.url.searchParams.get('redirect') || '';
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Icon name="tabler:lock" class="w-5 h-5 text-gray-400" />
             </div>
-            <input 
-              type="password" 
-              name="password" 
-              id="password" 
-              required
-              class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="••••••••"
-            />
+            <input type="password" id="password" required class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-gray-600 dark:text-white" placeholder="••••••••" />
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
-        >
+        <button id="submitBtn" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300">
           Acceder
         </button>
-
-        <p class="text-center text-sm text-gray-500 mt-4">
-          ¿No tienes cuenta? <a href="/register" class="text-blue-600 hover:underline font-semibold">Crea tu tienda</a>
-        </p>
       </form>
+
     </div>
   </section>
 </Layout>
+
+<script>
+  const form = document.getElementById('loginForm');
+  const errorDiv = document.getElementById('errorMessage');
+  const btn = document.getElementById('submitBtn') as HTMLButtonElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault(); // 🛑 DETIENE LA RECARGA DE PÁGINA
+
+    // Limpiar errores y poner botón cargando
+    if (errorDiv) errorDiv.classList.add('hidden');
+    if (btn) { btn.disabled = true; btn.innerText = "Verificando..."; }
+
+    const email = (document.getElementById('email') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const returnTo = (document.getElementById('return_to') as HTMLInputElement).value;
+
+    try {
+      // ENVIAMOS LA PETICIÓN MANUALMENTE
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, return_to: returnTo })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // ✅ ÉXITO: Redirigimos manualmente
+        window.location.href = result.redirect;
+      } else {
+        // ❌ ERROR: Mostramos el mensaje
+        throw new Error(result.error || 'Error desconocido');
+      }
+
+    } catch (err: any) {
+      if (errorDiv) {
+        errorDiv.innerText = err.message;
+        errorDiv.classList.remove('hidden');
+      }
+      if (btn) { btn.disabled = false; btn.innerText = "Acceder"; }
+    }
+  });
+</script>
