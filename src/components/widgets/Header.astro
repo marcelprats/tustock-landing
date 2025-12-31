@@ -1,3 +1,4 @@
+---
 import { Icon } from 'astro-icon/components';
 import Logo from '~/components/Logo.astro';
 import ToggleTheme from '~/components/common/ToggleTheme.astro';
@@ -8,176 +9,177 @@ import { getHomePermalink } from '~/utils/permalinks';
 import { trimSlash, getAsset } from '~/utils/permalinks';
 
 interface Link {
-  text?: string;
-  href?: string;
-  ariaLabel?: string;
-  icon?: string;
+  text?: string;
+  href?: string;
+  ariaLabel?: string;
+  icon?: string;
 }
 
 interface ActionLink extends Link {
-  type?: string;
+  type?: string;
 }
 
 interface MenuLink extends Link {
-  links?: Array<MenuLink>;
+  links?: Array<MenuLink>;
 }
 
 export interface Props {
-  id?: string;
-  links?: Array<MenuLink>;
-  actions?: Array<ActionLink>;
-  isSticky?: boolean;
-  isDark?: boolean;
-  isFullWidth?: boolean;
-  showToggleTheme?: boolean;
-  showRssFeed?: boolean;
-  position?: string;
+  id?: string;
+  links?: Array<MenuLink>;
+  actions?: Array<ActionLink>;
+  isSticky?: boolean;
+  isDark?: boolean;
+  isFullWidth?: boolean;
+  showToggleTheme?: boolean;
+  showRssFeed?: boolean;
+  position?: string;
 }
 
 const {
-  id = 'header',
-  links = [],
-  actions = [],
-  isSticky = false,
-  isDark = false,
-  isFullWidth = false,
-  showToggleTheme = false,
-  showRssFeed = false,
-  position = 'center',
+  id = 'header',
+  links = [],
+  actions = [],
+  isSticky = false,
+  isDark = false,
+  isFullWidth = false,
+  showToggleTheme = false,
+  showRssFeed = false,
+  position = 'center',
 } = Astro.props;
 
+// 🔥 CORRECCIÓN: Aseguramos que esto sea una cadena de texto normal
 const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
 
-// --- 🔥 LÓGICA DE SESIÓN ---
+// --- LÓGICA DE SESIÓN ---
 const session = Astro.cookies.get('session');
 const isLoggedIn = !!session?.value;
-const userName = "Mi Cuenta"; 
+const userName = "Mi Cuenta"; 
 ---
 
 <header
-  class:list={[
-    { sticky: isSticky, relative: !isSticky, dark: isDark },
-    'top-0 z-40 flex-none mx-auto w-full transition-all ease-in-out',
-  ]}
-  {...id ? { id } : {}}
+  class:list={[
+    { sticky: isSticky, relative: !isSticky, dark: isDark },
+    'top-0 z-40 flex-none mx-auto w-full transition-all ease-in-out',
+  ]}
+  {...id ? { id } : {}}
 >
-  <div class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800"></div>
-  
-  <div
-    class:list={[
-      'relative text-default py-3 px-3 md:px-6 mx-auto w-full md:flex md:justify-between',
-      {
-        'max-w-7xl': !isFullWidth,
-      },
-    ]}
-  >
-    <div class:list={[{ 'mr-auto rtl:ml-auto': position === 'right' }, 'flex justify-between']}>
-      <a class="flex items-center" href={getHomePermalink()}>
-        <Logo />
-      </a>
-      <div class="flex items-center md:hidden">
-        <ToggleTheme />
-        <ToggleMenu />
-      </div>
-    </div>
+  <div class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800"></div>
+  
+  <div
+    class:list={[
+      'relative text-default py-3 px-3 md:px-6 mx-auto w-full md:flex md:justify-between',
+      {
+        'max-w-7xl': !isFullWidth,
+      },
+    ]}
+  >
+    <div class:list={[{ 'mr-auto rtl:ml-auto': position === 'right' }, 'flex justify-between']}>
+      <a class="flex items-center" href={getHomePermalink()}>
+        <Logo />
+      </a>
+      <div class="flex items-center md:hidden">
+        <ToggleTheme />
+        <ToggleMenu />
+      </div>
+    </div>
 
-    <nav
-      class="items-center w-full md:w-auto hidden md:flex text-default overflow-y-auto overflow-x-hidden md:overflow-y-visible md:overflow-x-auto md:mx-5"
-      aria-label="Main navigation"
-    >
-      <ul class="flex flex-col md:flex-row md:self-center w-full md:w-auto text-xl md:text-[0.9375rem] tracking-[0.01rem] font-medium">
-        {
-          links.map(({ text, href, links }) => (
-            <li class={links?.length ? 'dropdown' : ''}>
-              {links?.length ? (
-                <>
-                  <button class="hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors">
-                    {text} <Icon name="tabler:chevron-down" class="w-3.5 h-3.5 ml-0.5 rtl:mr-0.5 hidden md:inline" />
-                  </button>
-                  <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl border border-gray-100 dark:border-gray-700">
-                    {links.map(({ text: text2, href: href2 }) => (
-                      <li>
-                        <a
-                          class:list={[
-                            'first:rounded-t last:rounded-b md:hover:bg-gray-50 hover:text-blue-600 dark:hover:text-blue-400 dark:hover:bg-gray-800 py-2 px-5 block whitespace-no-wrap',
-                            { 'text-blue-600 font-bold': href2 === currentPath },
-                          ]}
-                          href={href2}
-                        >
-                          {text2}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <a
-                  class:list={[
-                    'hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors',
-                    { 'text-blue-600 font-bold': href === currentPath },
-                  ]}
-                  href={href}
-                >
-                  {text}
-                </a>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <nav
+      class="items-center w-full md:w-auto hidden md:flex text-default overflow-y-auto overflow-x-hidden md:overflow-y-visible md:overflow-x-auto md:mx-5"
+      aria-label="Main navigation"
+    >
+      <ul class="flex flex-col md:flex-row md:self-center w-full md:w-auto text-xl md:text-[0.9375rem] tracking-[0.01rem] font-medium">
+        {
+          links.map(({ text, href, links }) => (
+            <li class={links?.length ? 'dropdown' : ''}>
+              {links?.length ? (
+                <>
+                  <button class="hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors">
+                    {text} <Icon name="tabler:chevron-down" class="w-3.5 h-3.5 ml-0.5 rtl:mr-0.5 hidden md:inline" />
+                  </button>
+                  <ul class="dropdown-menu md:backdrop-blur-md dark:md:bg-dark rounded md:absolute pl-4 md:pl-0 md:hidden font-medium md:bg-white/90 md:min-w-[200px] drop-shadow-xl border border-gray-100 dark:border-gray-700">
+                    {links.map(({ text: text2, href: href2 }) => (
+                      <li>
+                        <a
+                          class:list={[
+                            'first:rounded-t last:rounded-b md:hover:bg-gray-50 hover:text-blue-600 dark:hover:text-blue-400 dark:hover:bg-gray-800 py-2 px-5 block whitespace-no-wrap',
+                            { 'text-blue-600 font-bold': href2 === currentPath },
+                          ]}
+                          href={href2}
+                        >
+                          {text2}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <a
+                  class:list={[
+                    'hover:text-blue-600 dark:hover:text-blue-400 px-4 py-3 flex items-center transition-colors',
+                    { 'text-blue-600 font-bold': href === currentPath },
+                  ]}
+                  href={href}
+                >
+                  {text}
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
 
-    <div
-      class:list={[
-        { 'ml-auto rtl:mr-auto': position === 'left' },
-        'hidden md:self-center md:flex items-center md:mb-0 fixed w-full md:w-auto md:static left-0 rtl:right-0 bottom-0 p-3 md:p-0',
-      ]}
-    >
-      <div class="items-center flex justify-between w-full md:w-auto">
-        <div class="flex">
-          {showToggleTheme && <ToggleTheme iconClass="w-6 h-6 md:w-5 md:h-5 md:inline-block" />}
-        </div>
-        
-        {isLoggedIn ? (
-            <div class="relative group ml-4">
-                <button class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/50 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700 hover:shadow-lg transition-all duration-300 backdrop-blur-sm">
-                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
-                        {userName.charAt(0)}
-                    </div>
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">{userName}</span>
-                    <Icon name="tabler:chevron-down" class="w-4 h-4 text-gray-500 transition-transform group-hover:rotate-180" />
-                </button>
+    <div
+      class:list={[
+        { 'ml-auto rtl:mr-auto': position === 'left' },
+        'hidden md:self-center md:flex items-center md:mb-0 fixed w-full md:w-auto md:static left-0 rtl:right-0 bottom-0 p-3 md:p-0',
+      ]}
+    >
+      <div class="items-center flex justify-between w-full md:w-auto">
+        <div class="flex">
+          {showToggleTheme && <ToggleTheme iconClass="w-6 h-6 md:w-5 md:h-5 md:inline-block" />}
+        </div>
+        
+        {isLoggedIn ? (
+            <div class="relative group ml-4">
+                <button class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/50 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700 hover:shadow-lg transition-all duration-300 backdrop-blur-sm">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                        {userName.charAt(0)}
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">{userName}</span>
+                    <Icon name="tabler:chevron-down" class="w-4 h-4 text-gray-500 transition-transform group-hover:rotate-180" />
+                </button>
 
-                <div class="absolute right-0 top-full mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 pt-2">
-                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-2 overflow-hidden">
-                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Mi Cuenta</span>
-                        </div>
-                        <a href="/hub" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition-colors">
-                            <Icon name="tabler:building-store" class="w-5 h-5 text-blue-500" />
-                            Mis Tiendas
-                        </a>
-                        <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                            <Icon name="tabler:settings" class="w-5 h-5 text-gray-500" />
-                            Ajustes
-                        </a>
-                        <div class="my-1 border-t border-gray-100 dark:border-gray-800"></div>
-                        <form action="/api/logout" method="POST">
-                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                <Icon name="tabler:logout" class="w-5 h-5" />
-                                Cerrar Sesión
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        ) : (
-            <div class="flex items-center gap-3 ml-4">
-                <a href="/login" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors">Acceder</a>
-                <a href="/register" class="btn-primary px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">Crear Tienda</a>
-            </div>
-        )}
-      </div>
-    </div>
-  </div>
+                <div class="absolute right-0 top-full mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 pt-2">
+                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-2 overflow-hidden">
+                        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Mi Cuenta</span>
+                        </div>
+                        <a href="/hub" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition-colors">
+                            <Icon name="tabler:building-store" class="w-5 h-5 text-blue-500" />
+                            Mis Tiendas
+                        </a>
+                        <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <Icon name="tabler:settings" class="w-5 h-5 text-gray-500" />
+                            Ajustes
+                        </a>
+                        <div class="my-1 border-t border-gray-100 dark:border-gray-800"></div>
+                        <form action="/api/logout" method="POST">
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <Icon name="tabler:logout" class="w-5 h-5" />
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        ) : (
+            <div class="flex items-center gap-3 ml-4">
+                <a href="/login" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors">Acceder</a>
+                <a href="/register" class="btn-primary px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">Crear Tienda</a>
+            </div>
+        )}
+      </div>
+    </div>
+  </div>
 </header>
