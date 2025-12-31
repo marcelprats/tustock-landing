@@ -3,7 +3,6 @@ import ServerStatus from '~/components/app/dashboard/ServerStatus.astro';
 import { decryptLicense } from '~/utils/crypto'; 
 
 const { tenantId } = Astro.props; 
-
 const session = Astro.cookies.get('session');
 const userId = session?.value;
 const env = Astro.locals.runtime?.env; 
@@ -41,62 +40,39 @@ if (userId && db && tenantId) {
         lastHeartbeat: membership.last_heartbeat
       };
 
-      const now = Date.now();
-      isOnline = tenantData.lastHeartbeat && (now - tenantData.lastHeartbeat) < 120000;
+      isOnline = tenantData.lastHeartbeat && (Date.now() - tenantData.lastHeartbeat) < 120000;
       
       lastUpdateText = tenantData.dataUpdatedAt 
         ? new Date(tenantData.dataUpdatedAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})
         : '---';
     } else {
-      error = "Datos no disponibles.";
+      error = "Sin datos disponibles";
     }
   } catch (e) {
-    error = "Error conexión.";
+    error = "Error conexión";
   }
 }
 ---
 
 {error ? (
-  <div class="p-6 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>
+  <div class="p-4 bg-red-100 text-red-700 rounded border border-red-200 dark:bg-red-900/30 dark:text-red-300">{error}</div>
 ) : (
-  <div class="flex flex-col gap-6">
-      
-      {/* 1. CARTEL OFFLINE (Si aplica) */}
+  <div class="grid gap-6">
       {!isOnline && (
-          <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r">
-              <p class="text-sm text-amber-800 font-bold">⚠️ Tienda desconectada</p>
-              <p class="text-xs text-amber-700">Mostrando datos de: {lastUpdateText}</p>
+          <div class="p-4 rounded border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 text-sm">
+              <strong>Modo Desconectado:</strong> Visualizando datos del {lastUpdateText}.
           </div>
       )}
 
-      {/* 2. TARJETAS DE DATOS */}
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Ventas */}
-          <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-              <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ventas Hoy</h3>
-              <p class="text-4xl font-bold text-gray-900 dark:text-white">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700">
+              <h3 class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Ventas Hoy</h3>
+              <p class="text-4xl font-bold text-heading">
                   {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(tenantData.salesToday)}
               </p>
           </div>
-
-          {/* Estado Servidor Local */}
-          <div class="lg:col-span-2">
+          <div class="md:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700">
              <ServerStatus licenseKey={tenantData.licenseKey} isOnline={isOnline} />
-          </div>
-      </div>
-
-      {/* 3. ACCIONES RÁPIDAS */}
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="p-6 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-100 dark:border-slate-700">
-              <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Inventario</h3>
-              <p class="text-sm text-gray-500 mb-4">Gestiona tus productos y precios.</p>
-              <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition">Ver Productos</button>
-          </div>
-          <div class="p-6 bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700">
-              <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Configuración</h3>
-              <p class="text-sm text-gray-500 mb-4">Ajustes de la tienda y usuarios.</p>
-              <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 transition">Ir a Ajustes</button>
           </div>
       </div>
   </div>
