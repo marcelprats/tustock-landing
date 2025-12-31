@@ -6,42 +6,50 @@ export const POST = async ({ request, cookies, redirect, locals }) => {
     const email = formData.get("email");
     const password = formData.get("password");
     
+    // Acceso a la BD (Cloudflare D1)
     const db = locals.runtime?.env?.DB; 
     
     if (!db) {
-      console.error("❌ No DB found");
-      return new Response("Error interno", { status: 500 });
+      console.error("❌ Error: No se encontró la base de datos");
+      return new Response("Error interno de configuración", { status: 500 });
     }
 
-    // 1. BUSCAR USUARIO
+    // 1. Buscar usuario por email
     const user = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
 
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    if (!user) {
+        return redirect("/login?error=invalid_credentials"); 
+    }
+
+    // 2. Verificar contraseña
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!validPassword) {
         return redirect("/login?error=invalid_credentials");
     }
 
-    // 2. CREAR SESIÓN (FIX CRÍTICO)
-    // Usamos import.meta.env.PROD para saber si estamos en producción.
-    // En local (localhost) NO ponemos dominio. En producción ponemos .tustock.app
+    // 3. CREAR SESIÓN GLOBAL (La clave de todo)
+    // En Producción: domain = ".tustock.app" (con el punto inicial) -> Cookie compartida.
+    // En Localhost: domain = undefined -> Cookie local simple.
     const isProd = import.meta.env.PROD;
-    
+    const cookieDomain = isProd ? ".tustock.app" : undefined;
+
     cookies.set("session", user.id, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 días
-        domain: isProd ? ".tustock.app" : undefined // 🔥 ESTA LÍNEA ARREGLA TODO
+        path: "/",            // Disponible en toda la web
+        httpOnly: true,       // Inaccesible para JS del cliente (seguridad)
+        secure: isProd,       // Solo HTTPS en producción
+        sameSite: 'lax',      // Permite navegación entre subdominios
+        maxAge: 60 * 60 * 24 * 7, // Duración: 7 días
+        domain: cookieDomain  // <--- ¡ESTO UNIFICA TODO!
     });
 
-    // 3. REDIRIGIR
+    // 4. Redirigir
     const url = new URL(request.url);
     const returnTo = url.searchParams.get("return_to") || "/hub";
     
     return redirect(returnTo);
 
   } catch (error) {
-    console.error("🔥 Login Error:", error);
-    return new Response("Error", { status: 500 });
+    console.error("🔥 Error crítico en Login:", error);
+    return new Response("Error interno del servidor", { status: 500 });
   }
 };

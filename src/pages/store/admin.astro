@@ -2,42 +2,51 @@
 import Layout from '~/layouts/Layout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import StoreDashboard from '~/components/store/admin/StoreDashboard.astro'; 
+import { createClient } from "@libsql/client/web";
 
 const { currentShop } = Astro.locals;
 const session = Astro.cookies.get('session');
 
-// 1. ¿NO HAY SESIÓN? -> AL LOGIN
+// 1. SI NO HAY SESIÓN -> AL LOGIN
 if (!session) {
   // Guardamos a dónde quería ir para volver después
   return Astro.redirect(`/login?redirect=/admin`);
 }
 
-// 2. ¿ES EL DUEÑO? (SEGURIDAD CRÍTICA)
+// 2. SEGURIDAD: ¿ES EL DUEÑO O TIENE PERMISO?
 const userId = session.value;
 const env = Astro.locals.runtime?.env; 
-const db = env?.DB;
+let isAuthorized = false;
 
-let isOwner = false;
-
-if (db && userId && currentShop) {
+if (env?.TURSO_DB_URL && env?.TURSO_AUTH_TOKEN && currentShop) {
   try {
-    // Buscamos si existe una relación entre este usuario y esta tienda
-    const membership = await db.prepare(`
-      SELECT role FROM memberships m
-      JOIN tenants t ON m.tenant_id = t.id
-      WHERE m.user_id = ? AND t.slug = ?
-    `).bind(userId, currentShop.slug).first();
+    const turso = createClient({ url: env.TURSO_DB_URL, authToken: env.TURSO_AUTH_TOKEN });
 
-    if (membership) {
-        isOwner = true;
+    // CONSULTA DE SEGURIDAD
+    // Buscamos si el usuario actual es el propietario de esta licencia específica.
+    // Ajusta esta query si tienes un sistema de roles más complejo (tabla memberships).
+    const result = await turso.execute({
+        sql: `
+            SELECT id FROM licenses 
+            WHERE website_url LIKE ? 
+            AND owner_email = (SELECT email FROM users WHERE id = ?)
+            LIMIT 1
+        `,
+        args: [`%${currentShop.slug}%`, userId]
+    });
+
+    if (result.rows.length > 0) {
+        isAuthorized = true;
     }
+
   } catch (e) {
-    console.error("Error comprobando permisos:", e);
+    console.error("Error comprobando permisos en Admin:", e);
   }
 }
 
-// 3. SI NO ES DUEÑO -> FUERA (AL HUB GLOBAL)
-if (!isOwner) {
+// 3. SI NO ESTÁ AUTORIZADO -> EXPULSAR
+if (!isAuthorized) {
+    // Si está logueado pero no es su tienda, lo mandamos al Hub central
     return Astro.redirect('https://tustock.app/hub');
 }
 
@@ -45,8 +54,6 @@ const metadata = { title: `Admin - ${currentShop?.name}` };
 ---
 
 <Layout tenant={currentShop.slug} metadata={metadata}>
-  
-  {/* SI LLEGAMOS AQUÍ, ES SEGURO MOSTRAR DATOS */}
   
   <HeroText
     tagline="Panel de Control"
