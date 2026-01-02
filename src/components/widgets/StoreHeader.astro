@@ -47,7 +47,10 @@ const {
 } = Astro.props;
 
 const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
----
+
+// --- LÓGICA DE SESIÓN ---
+const session = Astro.cookies.get('session');
+const isLoggedIn = !!session?.value;
 
 <header
   class:list={[
@@ -139,13 +142,23 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
         </div>
 
         {/* RENDERIZADO DE ACCIONES (BOTONES) */}
-        {actions?.length ? (
-          <span class="ml-4 rtl:ml-0 rtl:mr-4 inline-flex items-center gap-2">
-            {actions.map((btnProps) => (
-              <Button {...btnProps} class="px-5 py-2.5 text-sm font-semibold shadow-none md:px-6" />
-            ))}
-          </span>
-        ) : null}
+        <div class="flex items-center gap-2 ml-4 rtl:ml-0 rtl:mr-4">
+
+          {/* BOTÓN ADMIN (Solo visible si logueado) */}
+          {isLoggedIn && (
+             <a href="/admin" class="btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-wider border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+               Panel Admin
+             </a>
+          )}
+
+          {actions?.length ? (
+            <span class="inline-flex items-center gap-2">
+              {actions.map((btnProps) => (
+                <Button {...btnProps} class="px-5 py-2.5 text-sm font-semibold shadow-none md:px-6" />
+              ))}
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   </div>

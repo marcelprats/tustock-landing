@@ -31,11 +31,14 @@ export const POST = async ({ request, locals, cookies }) => {
         }
 
         // 1. Recibir datos
-        const { name, email, password, subdomain } = await request.json();
+        const { full_name, name, email, password, subdomain } = await request.json();
 
         if (!name || !email || !password || !subdomain) {
             return new Response(JSON.stringify({ error: "Todos los campos son obligatorios" }), { status: 400 });
         }
+
+        // Si el usuario no mandó full_name (por usar API vieja), usamos el nombre del negocio como fallback
+        const realUserName = full_name || name;
 
         const fullWebsiteUrl = `https://${subdomain}.tustock.app`;
 
@@ -61,7 +64,7 @@ export const POST = async ({ request, locals, cookies }) => {
         // Guardamos todo en la base de datos de la Web primero
         await db.batch([
             db.prepare("INSERT INTO tenants (id, name, slug, plan_type, status, license_hash, license_encrypted) VALUES (?, ?, ?, 'FREE', 'ACTIVE', ?, ?)").bind(tenantId, name, subdomain, licenseHash, licenseEncrypted),
-            db.prepare("INSERT INTO users (id, email, password_hash, full_name) VALUES (?, ?, ?, ?)").bind(userId, email, hashedPassword, name),
+            db.prepare("INSERT INTO users (id, email, password_hash, full_name) VALUES (?, ?, ?, ?)").bind(userId, email, hashedPassword, realUserName),
             db.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, 'OWNER')").bind(membershipId, userId, tenantId)
         ]);
 
