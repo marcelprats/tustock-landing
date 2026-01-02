@@ -2,6 +2,7 @@
 import PageLayout from '~/layouts/PageLayout.astro';
 import StoreHeader from '~/components/widgets/StoreHeader.astro';
 import { Icon } from 'astro-icon/components';
+import { decryptLicense } from '~/utils/crypto'; // <--- Importamos utilidad
 
 // 1. SEGURIDAD DE SESIÓN (Copiar lógica de admin.astro para consistencia)
 const session = Astro.cookies.get('session');
@@ -13,16 +14,28 @@ if (!session) return Astro.redirect(`/login?redirect=/admin`);
 // (Simplificamos la auth aquí asumiendo que el middleware o admin previo ya filtró, pero por seguridad doble check)
 const userId = session.value;
 let isAuthorized = false;
+let decryptedLicense = "Solo disponible en producción";
+
 try {
     const db = env?.DB;
     if (db) {
-        const tenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+        // Obtenemos también la license_encrypted
+        const tenant = await db.prepare("SELECT id, license_encrypted FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
         if(tenant) {
              const membership = await db.prepare("SELECT role FROM memberships WHERE user_id = ? AND tenant_id = ?").bind(userId, tenant.id).first();
-             if(membership) isAuthorized = true;
+             if(membership) {
+                 isAuthorized = true;
+                 // Desencriptar licencia
+                 if (tenant.license_encrypted && env.MASTER_KEY) {
+                     decryptedLicense = decryptLicense(tenant.license_encrypted, env.MASTER_KEY);
+                 } else {
+                     decryptedLicense = "No disponible (Falta Master Key)";
+                 }
+             }
         }
     } else if (import.meta.env.DEV) {
         isAuthorized = true;
+        decryptedLicense = "DEV-LICENSE-KEY-12345";
     }
 } catch (e) { console.error(e); }
 
@@ -129,7 +142,31 @@ if (Astro.request.method === "POST") {
                 </div>
             </form>
 
-            {/* SECCIÓN 2: Contacto (Mockup) */}
+            {/* SECCIÓN 2: LICENCIA Y CONEXIÓN */}
+            <div class="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-xl border border-blue-100 dark:border-blue-800">
+                <h3 class="text-lg font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center gap-2">
+                    <Icon name="tabler:key" class="w-5 h-5" />
+                    Licencia de Escritorio
+                </h3>
+                <p class="text-sm text-blue-800 dark:text-blue-200 mb-4">
+                    Usa esta clave para conectar la App de Escritorio (Windows/Mac) con esta tienda.
+                    <br/><span class="font-bold">Nota:</span> Esta licencia es única para <u>{currentShop?.name}</u>.
+                </p>
+
+                <div class="relative">
+                    <label class="block text-xs font-bold text-blue-600 dark:text-blue-300 uppercase tracking-wider mb-1">Clave de Activación</label>
+                    <div class="flex gap-2">
+                        <code class="flex-1 p-3 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg font-mono text-center text-lg tracking-widest text-slate-700 dark:text-slate-300 select-all">
+                            {decryptedLicense}
+                        </code>
+                        <button onclick={`navigator.clipboard.writeText('${decryptedLicense}')`} class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-sm transition-colors" title="Copiar">
+                            <Icon name="tabler:copy" class="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* SECCIÓN 3: Contacto (Mockup) */}
             <div class="opacity-50 pointer-events-none relative">
                 <div class="absolute inset-0 z-10"></div> {/* Bloqueo visual */}
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700 flex justify-between">
