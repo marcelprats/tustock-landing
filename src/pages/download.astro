@@ -8,16 +8,16 @@ const metadata = { title: 'Descargar TuStock - Motor Local' };
 
 <Layout metadata={metadata}>
   <section class="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0b1120] overflow-hidden p-6">
-    
+
     <div class="absolute inset-0 pointer-events-none z-0">
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
     </div>
 
     <div class="relative w-full max-w-4xl z-10">
-      
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        
+
         <div class="text-center lg:text-left">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
             <Icon name="tabler:device-laptop" class="w-4 h-4" />
@@ -97,3 +97,13 @@ const metadata = { title: 'Descargar TuStock - Motor Local' };
     </div>
   </section>
 </Layout>
+
+<style is:global>
+  /* FORZAR VISIBILIDAD INMEDIATA */
+  [class*="intersect"] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+</style>

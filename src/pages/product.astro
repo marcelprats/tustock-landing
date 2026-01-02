@@ -82,3 +82,13 @@ const metadata = {
     actions={[{ text: 'Empezar Prueba Gratis', href: '/register', variant: 'primary' }]}
   />
 </Layout>
+
+<style is:global>
+  /* FORZAR VISIBILIDAD INMEDIATA (Quitar animaciones lentas en esta página) */
+  [class*="intersect"] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+</style>

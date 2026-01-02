@@ -1,5 +1,11 @@
 import { sendTelegramAlert, sendWelcomeEmail } from '../../utils/notifications';
-import { generateLicenseKey, hashLicense, encryptLicense } from '../../utils/crypto'; // <--- Importante
+import { generateLicenseKey, hashLicense, encryptLicense } from '../../utils/crypto';
+import { createClient } from '@libsql/client/web'; // 🔥 IMPORTANTE PARA TURSO
+
+// --- 📅 FORMATO FECHA ---
+const getSqlDate = () => {
+    return new Date().toISOString().slice(0, 19).replace('T', ' ');
+};
 
 export const POST = async ({ request, locals, cookies }) => {
   try {
@@ -27,12 +33,15 @@ export const POST = async ({ request, locals, cookies }) => {
     // 3. RECUPERAR DATOS USUARIO
     const currentUser = await db.prepare("SELECT email FROM users WHERE id = ?").bind(userId).first();
     const userEmail = currentUser?.email;
+    const fullWebsiteUrl = `https://${subdomain}.tustock.app`;
 
     const tenantId = crypto.randomUUID();
     const membershipId = crypto.randomUUID();
 
     // 4. 🔐 GENERAR LICENCIA SEGURA
-    if (!env.MASTER_KEY) throw new Error("Falta MASTER_KEY");
+    if (!env.MASTER_KEY || !env.TURSO_DB_URL || !env.TURSO_AUTH_TOKEN) {
+         throw new Error("Falta configuración (MASTER_KEY o TURSO)");
+    }
 
     const rawLicense = generateLicenseKey();
     const licenseHash = hashLicense(rawLicense);
@@ -49,8 +58,35 @@ export const POST = async ({ request, locals, cookies }) => {
       "INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, 'OWNER')"
     ).bind(membershipId, userId, tenantId).run();
 
-    // 6. NOTIFICACIONES
-    const msgTelegram = `🏭 <b>NUEVA TIENDA SECUNDARIA</b>\n\nTienda: ${name}\nSlug: <code>${subdomain}</code>`;
+    // 6. 🚀 SYNC CON TURSO (Licencias App Escritorio)
+    let tursoSyncError = null;
+    try {
+        const turso = createClient({
+            url: env.TURSO_DB_URL,
+            authToken: env.TURSO_AUTH_TOKEN
+        });
+
+        await turso.execute({
+            sql: `INSERT INTO licenses (
+                key, company_name, owner_email, website_url, plan_type,
+                created_at, is_active, token_balance, total_usage, hw_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            args: [
+                rawLicense, name, userEmail, fullWebsiteUrl, 'FREE',
+                getSqlDate(), 1, 100, 0, null
+            ]
+        });
+        console.log(`✅ Turso Sync OK (Secondary): ${rawLicense}`);
+
+    } catch (err) {
+        tursoSyncError = err.message;
+        console.error("❌ ERROR SYNC TURSO (Secondary):", err);
+        // No bloqueamos, pero avisamos
+    }
+
+    // 7. NOTIFICACIONES
+    const syncStatus = tursoSyncError ? `⚠️ Error Turso: ${tursoSyncError}` : `✅ Turso OK`;
+    const msgTelegram = `🏭 <b>NUEVA TIENDA SECUNDARIA</b>\n\nTienda: ${name}\nSlug: <code>${subdomain}</code>\nLicencia: <code>${rawLicense}</code>\nSync: ${syncStatus}`;
 
     if (locals.runtime?.ctx?.waitUntil) {
         locals.runtime.ctx.waitUntil(sendTelegramAlert(msgTelegram, env));
