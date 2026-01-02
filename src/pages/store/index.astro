@@ -1,99 +1,231 @@
 ---
-import Layout from '~/layouts/Layout.astro';
-import Hero from '~/components/widgets/Hero.astro';
+import PageLayout from '~/layouts/PageLayout.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
 import Features2 from '~/components/widgets/Features2.astro';
+import Stats from '~/components/widgets/Stats.astro';
 import Content from '~/components/widgets/Content.astro';
+import Testimonials from '~/components/widgets/Testimonials.astro';
+import FAQs from '~/components/widgets/FAQs.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 // 1. DATOS REALES (Middleware)
 const { currentShop } = Astro.locals;
+const shopName = currentShop?.name || "Tienda Oficial";
 
-// NOTA: No necesitamos comprobar si es FREE aquí, el middleware ya lo ha hecho.
-// Si llegamos aquí, es porque es PRO o el middleware falló (y en ese caso, mejor mostrar algo que un error).
+// 2. CONFIGURACIÓN DEL HEADER ESPECÍFICO DE LA TIENDA
+const storeHeaderData = {
+  links: [
+    { text: 'Inicio', href: '#' },
+    { text: 'Catálogo', href: '#catalogo' },
+    { text: 'Nosotros', href: '#nosotros' },
+    { text: 'FAQ', href: '#faq' },
+  ],
+  actions: [
+    { text: 'Contacto', href: '#contacto', variant: 'primary' }
+  ],
+};
 
-const shopName = currentShop?.name || "Tienda";
-const metadata = { title: `${shopName} - Catálogo`, ignoreTitleTemplate: true };
+const metadata = {
+  title: `${shopName}`,
+  ignoreTitleTemplate: true
+};
 
-// 2. MOCKUP PRODUCTOS (Lo conectaremos a BD después)
+// 3. MOCKUP DE PRODUCTOS (Para simular catálogo)
 const products = [
-  { title: 'Producto Premium', description: '29.99€', icon: 'tabler:package' },
-  { title: 'Pack Ahorro', description: '49.99€', icon: 'tabler:box' },
-  { title: 'Accesorio', description: '15.50€', icon: 'tabler:tag' },
-  { title: 'Novedad', description: 'Consultar', icon: 'tabler:star' },
+  {
+    title: 'Auriculares Premium',
+    description: 'Sonido de alta fidelidad con cancelación de ruido.',
+    icon: 'tabler:headphones',
+  },
+  {
+    title: 'Smartwatch Series X',
+    description: 'Controla tu salud y notificaciones al instante.',
+    icon: 'tabler:device-watch',
+  },
+  {
+    title: 'Cámara 4K Pro',
+    description: 'Captura momentos increíbles con calidad profesional.',
+    icon: 'tabler:camera',
+  },
+  {
+    title: 'Laptop UltraSlim',
+    description: 'Potencia y portabilidad para tu trabajo diario.',
+    icon: 'tabler:device-laptop',
+  },
 ];
 ---
 
-<Layout metadata={metadata}>
-  
-  {/* 1. HERO */}
-  <Hero
-    tagline="Comercio Oficial"
+<PageLayout metadata={metadata} headerData={storeHeaderData}>
+
+  {/* 1. HERO SECTION IMPACTANTE */}
+  <Hero2
+    tagline="Calidad Garantizada"
     actions={[
-      { text: 'Ver Catálogo', href: '#catalogo', variant: 'primary', icon: 'tabler:shopping-cart' },
-      { text: 'WhatsApp', href: '#contacto', icon: 'tabler:brand-whatsapp' }
+      { variant: 'primary', text: 'Ver Ofertas', href: '#catalogo', icon: 'tabler:shopping-cart' },
+      { text: 'Saber más', href: '#nosotros' },
     ]}
-    image={{ src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', alt: 'Tienda Cover' }}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      alt: 'Store Hero Image',
+    }}
   >
     <fragment slot="title">
       Bienvenido a <span class="text-accent dark:text-white highlight">{shopName}</span>
     </fragment>
 
     <fragment slot="subtitle">
-      Descubre la mejor selección de productos con la garantía y confianza de siempre. 
-      Compra online o reserva y recoge en tienda.
+      Tu destino favorito para encontrar los mejores productos con una atención personalizada.
+      Descubre nuestra selección exclusiva pensada para ti.
     </fragment>
-  </Hero>
+  </Hero2>
 
-  {/* 2. CATÁLOGO */}
-  <div id="catalogo" class="bg-blue-50 dark:bg-slate-900">
-      <Features2
-        title="Nuestros Productos Destacados"
-        subtitle="Calidad seleccionada para ti."
-        tagline="Catálogo"
-        items={products} 
-        columns={4}
-      />
-  </div>
-
-  {/* 3. SECCIÓN VISUAL */}
-  <Content
-    isReversed
-    tagline="Garantía"
-    title="¿Por qué comprar aquí?"
-    items={[
-      {
-        title: 'Atención Personalizada',
-        description: 'Somos un comercio real, con personas reales detrás.',
-      },
-      {
-        title: 'Pago Seguro',
-        description: 'Tecnología cifrada para proteger tus datos.',
-      },
+  {/* 2. ESTADÍSTICAS (CONFIANZA) */}
+  <Stats
+    stats={[
+      { title: 'Clientes Satisfechos', amount: '+1.5K' },
+      { title: 'Productos', amount: '250+' },
+      { title: 'Años de experiencia', amount: '10' },
+      { title: 'Garantía', amount: '100%' },
     ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Confianza',
-    }}
   />
 
-  {/* 4. CALL TO ACTION */}
-  <CallToAction
-    actions={[
+  {/* 3. CATÁLOGO DE PRODUCTOS (SIMULADO) */}
+  <div id="catalogo">
+    <Features2
+      title="Nuestra Selección"
+      subtitle="Productos destacados que no te puedes perder"
+      items={products}
+      columns={4}
+    >
+      <fragment slot="bg">
+        <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
+      </fragment>
+    </Features2>
+  </div>
+
+  {/* 4. SOBRE NOSOTROS */}
+  <div id="nosotros">
+    <Content
+      isReversed
+      tagline="Nuestra Historia"
+      title={`¿Quiénes somos en ${shopName}?`}
+      items={[
+        {
+          title: 'Pasión por el servicio',
+          description: 'Nos dedicamos a ofrecerte la mejor experiencia de compra desde el primer click.',
+        },
+        {
+          title: 'Calidad certificada',
+          description: 'Trabajamos solo con proveedores de confianza para asegurar tu satisfacción.',
+        },
+        {
+          title: 'Soporte local',
+          description: 'Estamos aquí para resolver cualquier duda que tengas, sin robots, personas reales.',
+        },
+      ]}
+      image={{
+        src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+        alt: 'About Us Image',
+      }}
+    >
+      <fragment slot="content">
+        <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Construyendo confianza día a día</h3>
+        Somos un equipo comprometido con la excelencia. En <b>{shopName}</b>, creemos que cada cliente es parte de nuestra familia.
+      </fragment>
+
+      <fragment slot="bg">
+        <div class="absolute inset-0 bg-white dark:bg-transparent"></div>
+      </fragment>
+    </Content>
+  </div>
+
+  {/* 5. TESTIMONIOS */}
+  <Testimonials
+    title="Lo que dicen nuestros clientes"
+    testimonials={[
       {
-        variant: 'primary',
-        text: 'Contactar ahora',
-        href: '#',
-        icon: 'tabler:message-circle',
+        testimonial: `El servicio de ${shopName} es impecable. El pedido llegó antes de lo esperado y en perfectas condiciones.`,
+        name: 'María García',
+        job: 'Cliente Verificada',
+        image: {
+          src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+          alt: 'María García',
+        },
+      },
+      {
+        testimonial: 'Me encanta la atención al detalle. Sin duda volveré a comprar aquí por la seguridad que transmiten.',
+        name: 'Carlos Rodríguez',
+        job: 'Cliente Frecuente',
+        image: {
+          src: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+          alt: 'Carlos Rodríguez',
+        },
+      },
+      {
+        testimonial: 'La calidad de los productos superó mis expectativas. Recomendado 100%.',
+        name: 'Ana Martínez',
+        job: 'Cliente Nueva',
+        image: {
+          src: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+          alt: 'Ana Martínez',
+        },
       },
     ]}
-  >
-    <fragment slot="title">
-      ¿No encuentras lo que buscas?
-    </fragment>
+  />
 
-    <fragment slot="subtitle">
-      Escríbenos y te ayudaremos a encontrar el producto perfecto.
-    </fragment>
-  </CallToAction>
+  {/* 6. FAQ */}
+  <div id="faq">
+    <FAQs
+      title="Preguntas Frecuentes"
+      subtitle="Resolvemos tus dudas al instante"
+      tagline="Ayuda"
+      classes={{ container: 'max-w-6xl' }}
+      items={[
+        {
+          title: '¿Hacen envíos a todo el país?',
+          description:
+            'Sí, realizamos envíos a nivel nacional con las mejores paqueterías para asegurar que tu pedido llegue seguro.',
+        },
+        {
+          title: '¿Cuáles son los métodos de pago?',
+          description:
+            'Aceptamos tarjetas de crédito, débito, transferencias y pagos en efectivo en puntos autorizados.',
+        },
+        {
+          title: '¿Tienen garantía de devolución?',
+          description:
+            'Por supuesto. Si no estás satisfecho con tu compra, tienes 30 días para solicitar un cambio o devolución.',
+        },
+        {
+          title: '¿Cómo puedo contactar con soporte?',
+          description:
+            'Puedes escribirnos a través de nuestro formulario de contacto o directamente por WhatsApp para una atención más rápida.',
+        },
+      ]}
+    />
+  </div>
 
-</Layout>
+  {/* 7. CONTACTO / CTA FINAL */}
+  <div id="contacto">
+    <CallToAction
+      actions={[
+        {
+          variant: 'primary',
+          text: 'Chatear por WhatsApp',
+          href: 'https://wa.me/?text=Hola,%20quisiera%20más%20información%20sobre%20sus%20productos.',
+          icon: 'tabler:brand-whatsapp',
+          target: '_blank',
+        },
+      ]}
+    >
+      <fragment slot="title">
+        ¿Tienes alguna pregunta más?
+      </fragment>
+
+      <fragment slot="subtitle">
+        Estamos listos para ayudarte. Escríbenos y te responderemos a la brevedad.
+      </fragment>
+    </CallToAction>
+  </div>
+
+</PageLayout>
