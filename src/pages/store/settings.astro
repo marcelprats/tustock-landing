@@ -1,0 +1,156 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import StoreHeader from '~/components/widgets/StoreHeader.astro';
+import { Icon } from 'astro-icon/components';
+
+// 1. SEGURIDAD DE SESIÓN (Copiar lógica de admin.astro para consistencia)
+const session = Astro.cookies.get('session');
+const { currentShop } = Astro.locals;
+const env = Astro.locals.runtime?.env;
+
+if (!session) return Astro.redirect(`/login?redirect=/admin`);
+
+// (Simplificamos la auth aquí asumiendo que el middleware o admin previo ya filtró, pero por seguridad doble check)
+const userId = session.value;
+let isAuthorized = false;
+try {
+    const db = env?.DB;
+    if (db) {
+        const tenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+        if(tenant) {
+             const membership = await db.prepare("SELECT role FROM memberships WHERE user_id = ? AND tenant_id = ?").bind(userId, tenant.id).first();
+             if(membership) isAuthorized = true;
+        }
+    } else if (import.meta.env.DEV) {
+        isAuthorized = true;
+    }
+} catch (e) { console.error(e); }
+
+if (!isAuthorized) return Astro.redirect('/store/admin');
+
+const shopName = currentShop?.name || "Configuración";
+const metadata = { title: `Ajustes - ${shopName}` };
+
+const storeHeaderData = {
+  links: [{ text: '← Volver al Panel', href: '/admin' }],
+  actions: []
+};
+
+// 2. PROCESAMIENTO DEL FORMULARIO
+let successMsg = "";
+let errorMsg = "";
+
+if (Astro.request.method === "POST") {
+    try {
+        const formData = await Astro.request.formData();
+        const newName = formData.get("shopName")?.toString();
+
+        if (newName && newName.length > 2) {
+             const db = env?.DB;
+             if (db) {
+                // Actualizar nombre en BD
+                await db.prepare("UPDATE tenants SET name = ? WHERE slug = ?").bind(newName, currentShop.slug).run();
+                successMsg = "Nombre actualizado correctamente.";
+                // Actualizar localmente para visualizar cambio inmediato
+                currentShop.name = newName;
+             } else {
+                successMsg = "Simulación: Nombre actualizado (sin DB conectada).";
+             }
+        } else {
+            errorMsg = "El nombre es demasiado corto.";
+        }
+    } catch (e) {
+        errorMsg = "Error al guardar: " + e.message;
+    }
+}
+---
+
+<PageLayout metadata={metadata}>
+  <fragment slot="header">
+    <StoreHeader {...storeHeaderData} shopName={`Ajustes: ${currentShop?.name}`} isSticky showToggleTheme />
+  </fragment>
+
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+             <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600">
+                <Icon name="tabler:settings" class="w-8 h-8" />
+             </div>
+             Configuración de la Tienda
+        </h1>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Personaliza la información pública de tu negocio.</p>
+      </div>
+
+      {successMsg && (
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 animate-fade-in">
+            <Icon name="tabler:check" class="w-5 h-5" /> {successMsg}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2 animate-fade-in">
+            <Icon name="tabler:alert-circle" class="w-5 h-5" /> {errorMsg}
+        </div>
+      )}
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="p-8 space-y-8">
+
+            {/* SECCIÓN 1: Identidad */}
+            <form method="POST" class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Identidad del Negocio</h3>
+
+                    <div class="grid gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre Público</label>
+                            <input type="text" name="shopName" value={currentShop?.name}
+                                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                            <p class="text-xs text-gray-500 mt-1">Este nombre aparecerá en el encabezado y en los títulos de la web.</p>
+                        </div>
+
+                        <div>
+                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Subdominio (Slug)</label>
+                             <div class="flex items-center px-4 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 cursor-not-allowed">
+                                <Icon name="tabler:lock" class="w-4 h-4 mr-2" />
+                                {currentShop?.slug}.tustock.app
+                             </div>
+                             <p class="text-xs text-gray-400 mt-1">El subdominio no se puede cambiar automáticamente. Contacta con soporte.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" class="btn-primary px-6 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+
+            {/* SECCIÓN 2: Contacto (Mockup) */}
+            <div class="opacity-50 pointer-events-none relative">
+                <div class="absolute inset-0 z-10"></div> {/* Bloqueo visual */}
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700 flex justify-between">
+                    Información de Contacto
+                    <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded uppercase self-center">Próximamente</span>
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono WhatsApp</label>
+                        <input type="text" disabled placeholder="+34 600 000 000" class="w-full px-4 py-2 border rounded-lg bg-gray-50" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Email Visible</label>
+                        <input type="email" disabled placeholder="info@tienda.com" class="w-full px-4 py-2 border rounded-lg bg-gray-50" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</PageLayout>
