@@ -39,8 +39,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // 3. LÓGICA DE TIENDA (Buscando en tabla 'tenants')
     // ------------------------------------------------------------------------
     if (isStoreContext) {
-        
-        if (url.pathname.startsWith('/store')) return next();
+
+        // 🔥 FIX: Cargamos los datos SIEMPRE, incluso si va a /store/...
+        // Para que Astro.locals.currentShop esté disponible en las páginas internas
 
         let shopData: any = null; 
         
@@ -102,6 +103,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
         if (!shopData) return new Response(`Tienda '${subdomain}' no encontrada`, { status: 404 });
 
         // --- ENRUTAMIENTO ---
+
+        // Si ya estamos en una ruta interna (/store/...), dejamos pasar
+        // PERO ahora ya llevamos currentShop cargado ✅
+        if (url.pathname.startsWith('/store')) return next();
         
         // A) ADMIN
         if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
