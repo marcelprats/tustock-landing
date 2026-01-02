@@ -51,6 +51,7 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
 // --- LÓGICA DE SESIÓN ---
 const session = Astro.cookies.get('session');
 const isLoggedIn = !!session?.value;
+---
 
 <header
   class:list={[
