@@ -1,6 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import { Icon } from 'astro-icon/components';
+import { decryptLicense } from '~/utils/crypto';
 
 // 1. SEGURIDAD: SI NO HAY COOKIE, AL LOGIN
 const session = Astro.cookies.get('session');
@@ -10,7 +11,8 @@ if (!session || !session.value) {
 
 // 2. OBTENER DATOS REALES
 const userId = session.value;
-const db = Astro.locals.runtime?.env?.DB;
+const env = Astro.locals.runtime?.env; // Acceso a env para Master Key
+const db = env?.DB;
 
 let userStores = [];
 let userName = "Usuario";
@@ -20,8 +22,9 @@ if (userId && db) {
     const userRes = await db.prepare("SELECT full_name FROM users WHERE id = ?").bind(userId).first();
     if (userRes) userName = userRes.full_name;
 
+    // 🔥 Recuperamos también 'license_encrypted'
     const storesRes = await db.prepare(`
-      SELECT t.id, t.name, t.slug, t.status, t.web_plan, m.role 
+      SELECT t.id, t.name, t.slug, t.status, t.web_plan, t.license_encrypted, m.role
       FROM memberships m
       JOIN tenants t ON m.tenant_id = t.id
       WHERE m.user_id = ?
@@ -33,26 +36,31 @@ if (userId && db) {
       for (const s of storesRes.results) {
         let currentStatus = s.status;
 
-        // AUTO-ACTIVACIÓN: Si está PENDING, probamos si ya responde
+        // Desencriptar Licencia
+        let licenseKey = "No disponible";
+        if (s.license_encrypted && env?.MASTER_KEY) {
+            licenseKey = decryptLicense(s.license_encrypted, env.MASTER_KEY);
+        } else if (import.meta.env.DEV) {
+            licenseKey = "DEV-KEY-1234";
+        }
+
+        // AUTO-ACTIVACIÓN
         if (currentStatus === 'PENDING') {
           try {
             const checkUrl = import.meta.env.PROD 
               ? `https://${s.slug}.tustock.app` 
               : `http://localhost:4321/?tenant=${s.slug}`;
-
             const check = await fetch(checkUrl, { method: 'HEAD' });
-
             if (check.ok || check.status === 404 || check.status === 200) {
               await db.prepare("UPDATE tenants SET status = 'ACTIVE' WHERE id = ?").bind(s.id).run();
               currentStatus = 'ACTIVE';
             }
-          } catch (e) {
-            // Sigue sin responder
-          }
+          } catch (e) {}
         }
 
         processedStores.push({
           ...s,
+          licenseKey, // <--- Pasamos la licencia limpia
           status: currentStatus,
           isPending: currentStatus === 'PENDING',
           url: currentStatus === 'ACTIVE' 
@@ -144,6 +152,25 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                         <Icon name="tabler:world" class="w-4 h-4" />
                         <span class="text-sm">{store.slug}.tustock.app</span>
                     </div>
+
+                    {/* VISOR DE LICENCIA */}
+                    {!store.isPending && (
+                        <div class="mt-4 p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between group/license relative z-20" onclick="event.preventDefault()">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <Icon name="tabler:key" class="w-3 h-3 text-slate-400 shrink-0" />
+                                <code class="text-[10px] font-mono text-slate-600 dark:text-slate-300 truncate select-all cursor-text">
+                                    {store.licenseKey}
+                                </code>
+                            </div>
+                            <button
+                                onclick={`event.stopPropagation(); navigator.clipboard.writeText('${store.licenseKey}').then(() => alert('Licencia copiada: ${store.licenseKey}'))`}
+                                class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-400 hover:text-blue-500 transition-colors"
+                                title="Copiar Licencia"
+                            >
+                                <Icon name="tabler:copy" class="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div class="mt-8 flex items-center justify-between">
