@@ -1,5 +1,6 @@
 ---
 import PageLayout from '~/layouts/PageLayout.astro';
+import StoreHeader from '~/components/widgets/StoreHeader.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 import Stats from '~/components/widgets/Stats.astro';
@@ -55,7 +56,17 @@ const products = [
 ];
 ---
 
-<PageLayout metadata={metadata} headerData={storeHeaderData}>
+<PageLayout metadata={metadata}>
+
+  {/* INYECTAMOS EL HEADER PERSONALIZADO */}
+  <fragment slot="header">
+    <StoreHeader
+      {...storeHeaderData}
+      shopName={shopName}
+      isSticky
+      showToggleTheme
+    />
+  </fragment>
 
   {/* 1. HERO SECTION IMPACTANTE */}
   <Hero2
