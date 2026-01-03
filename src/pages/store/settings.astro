@@ -53,27 +53,69 @@ const storeHeaderData = {
 let successMsg = "";
 let errorMsg = "";
 
+// Cargar Miembros
+let members = [];
+if (isAuthorized && env?.DB) {
+    try {
+        const tenantRes = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+        if (tenantRes) {
+            const membersRes = await env.DB.prepare(`
+                SELECT u.full_name, u.email, m.role
+                FROM memberships m
+                JOIN users u ON m.user_id = u.id
+                WHERE m.tenant_id = ?
+            `).bind(tenantRes.id).all();
+            members = membersRes.results || [];
+        }
+    } catch(e) { console.error("Error loading members", e); }
+}
+
 if (Astro.request.method === "POST") {
     try {
         const formData = await Astro.request.formData();
-        const newName = formData.get("shopName")?.toString();
+        const action = formData.get("action");
 
-        if (newName && newName.length > 2) {
-             const db = env?.DB;
-             if (db) {
-                // Actualizar nombre en BD
-                await db.prepare("UPDATE tenants SET name = ? WHERE slug = ?").bind(newName, currentShop.slug).run();
-                successMsg = "Nombre actualizado correctamente.";
-                // Actualizar localmente para visualizar cambio inmediato
-                currentShop.name = newName;
-             } else {
-                successMsg = "Simulación: Nombre actualizado (sin DB conectada).";
-             }
-        } else {
-            errorMsg = "El nombre es demasiado corto.";
+        // A) ACTUALIZAR NOMBRE
+        if (action === "update_name") {
+            const newName = formData.get("shopName")?.toString();
+            if (newName && newName.length > 2) {
+                 if (env?.DB) {
+                    await env.DB.prepare("UPDATE tenants SET name = ? WHERE slug = ?").bind(newName, currentShop.slug).run();
+                    successMsg = "Nombre actualizado correctamente.";
+                    currentShop.name = newName;
+                 }
+            } else {
+                errorMsg = "El nombre es demasiado corto.";
+            }
         }
+
+        // B) INVITAR USUARIO
+        if (action === "invite_user") {
+            const email = formData.get("email")?.toString();
+            const role = formData.get("role")?.toString();
+
+            if (email && env?.DB) {
+                // 1. Buscar usuario
+                const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
+                if (user) {
+                    // 2. Obtener Tenant ID
+                    const tenant = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+                    // 3. Insertar Membership (si no existe)
+                    try {
+                        const mId = crypto.randomUUID();
+                        await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(mId, user.id, tenant.id, role).run();
+                        successMsg = `Usuario ${email} añadido correctamente.`;
+                    } catch(err) {
+                        errorMsg = "El usuario ya es miembro de este equipo.";
+                    }
+                } else {
+                    errorMsg = "El usuario no existe en TuStock. Pídele que se registre primero.";
+                }
+            }
+        }
+
     } catch (e) {
-        errorMsg = "Error al guardar: " + e.message;
+        errorMsg = "Error: " + e.message;
     }
 }
 ---
@@ -113,6 +155,7 @@ if (Astro.request.method === "POST") {
 
             {/* SECCIÓN 1: Identidad */}
             <form method="POST" class="space-y-6">
+                <input type="hidden" name="action" value="update_name" />
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Identidad del Negocio</h3>
 
@@ -141,6 +184,47 @@ if (Astro.request.method === "POST") {
                     </button>
                 </div>
             </form>
+
+            {/* SECCIÓN 1.5: Equipo */}
+            <div class="mt-8">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Equipo y Permisos</h3>
+
+                <div class="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-4 mb-6">
+                    <h4 class="text-sm font-bold mb-3 uppercase tracking-wider text-gray-500">Miembros Actuales</h4>
+                    <ul class="space-y-3">
+                        {members.map(m => (
+                            <li class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded border border-gray-200 dark:border-slate-700">
+                                <div>
+                                    <p class="font-bold text-sm text-gray-800 dark:text-gray-200">{m.full_name}</p>
+                                    <p class="text-xs text-gray-500">{m.email}</p>
+                                </div>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-bold uppercase">{m.role}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <form method="POST" class="flex gap-2 items-end">
+                    <input type="hidden" name="action" value="invite_user" />
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Invitar por Email</label>
+                        <input type="email" name="email" placeholder="usuario@email.com" required
+                            class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm" />
+                    </div>
+                    <div class="w-32">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Rol</label>
+                        <select name="role" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm">
+                            <option value="STAFF">Empleado</option>
+                            <option value="MANAGER">Encargado</option>
+                            <option value="OWNER">Propietario</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-black transition-colors">
+                        Añadir
+                    </button>
+                </form>
+                <p class="text-[10px] text-gray-400 mt-2">* El usuario debe estar registrado previamente en TuStock.</p>
+            </div>
 
             {/* SECCIÓN 2: LICENCIA Y CONEXIÓN */}
             <div class="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-xl border border-blue-100 dark:border-blue-800">
