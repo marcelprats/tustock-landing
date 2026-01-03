@@ -172,7 +172,7 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
                                 </code>
                             </div>
                             <button
-                                onclick={`event.preventDefault(); event.stopPropagation(); navigator.clipboard.writeText('${store.licenseKey}').then(() => alert('Licencia copiada al portapapeles 📋'))`}
+                                onclick={`event.preventDefault(); event.stopPropagation(); copyToClipboard('${store.licenseKey}')`}
                                 class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
                                 title="Copiar Licencia Completa"
                             >
@@ -219,6 +219,24 @@ const metadata = { title: 'Mis Tiendas - TuStock' };
         </div>
     </div>
   </section>
+
+  {/* TOAST NOTIFICATION */}
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 z-50 pointer-events-none">
+      <Icon name="tabler:check" class="w-5 h-5 text-green-500" />
+      <span class="font-medium text-sm">Licencia copiada al portapapeles</span>
+  </div>
+
+  <script is:inline>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        });
+    }
+  </script>
 </Layout>
 
 <style>
