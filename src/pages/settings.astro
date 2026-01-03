@@ -1,5 +1,6 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
+import { Icon } from 'astro-icon/components';
 
 // 1. SEGURIDAD: Solo usuarios logueados
 const session = Astro.cookies.get('session');
@@ -10,44 +11,47 @@ if (!session || !session.value) {
 const userId = session.value;
 const db = Astro.locals.runtime?.env?.DB;
 
-// 2. DETECTAR CONTEXTO (Subdominio o Principal)
-const url = new URL(Astro.request.url);
-const hostname = url.hostname;
-let tenantSlug = '';
-
-if (import.meta.env.PROD) {
-  if (hostname !== 'tustock.app' && hostname !== 'www.tustock.app') {
-    tenantSlug = hostname.split('.')[0];
-  }
-} else {
-  tenantSlug = url.searchParams.get('tenant') || '';
-}
-
-// 3. OBTENER DATOS DE LA TIENDA
-let shopData = null;
-let userShops = [];
+let pendingInvites = [];
+let errorMsg = "";
+let successMsg = "";
 
 if (db) {
-  // Si estamos en un subdominio, cargamos esa tienda específica
-  if (tenantSlug) {
-    shopData = await db.prepare(`
-      SELECT t.* FROM tenants t
-      JOIN memberships m ON t.id = m.tenant_id
-      WHERE t.slug = ? AND m.user_id = ?
-    `).bind(tenantSlug, userId).first();
+  try {
+    // 2. PROCESAR ACCIONES (Aceptar/Rechazar)
+    if (Astro.request.method === "POST") {
+        const formData = await Astro.request.formData();
+        const action = formData.get("action");
+        const membershipId = formData.get("membershipId");
+
+        if (action === "accept" && membershipId) {
+            await db.prepare("UPDATE memberships SET status = 'ACTIVE' WHERE id = ? AND user_id = ?").bind(membershipId, userId).run();
+            successMsg = "Invitación aceptada. ¡Bienvenido al equipo!";
+        }
+        else if (action === "reject" && membershipId) {
+            await db.prepare("DELETE FROM memberships WHERE id = ? AND user_id = ?").bind(membershipId, userId).run();
+            successMsg = "Invitación rechazada.";
+        }
+    }
+
+    // 3. CARGAR INVITACIONES PENDIENTES
+    const invitesRes = await db.prepare(`
+        SELECT m.id, m.role, t.name as shop_name, t.slug
+        FROM memberships m
+        JOIN tenants t ON m.tenant_id = t.id
+        WHERE m.user_id = ? AND m.status = 'PENDING'
+    `).bind(userId).all();
+
+    pendingInvites = invitesRes.results || [];
+
+  } catch (e) {
+    console.error("Error invites:", e);
+    // Si la columna 'status' no existe, simplemente no mostramos invitaciones (backward compatibility)
+    if (!e.message.includes("no such column")) {
+        errorMsg = "Error al procesar invitaciones.";
+    }
   }
-  
-  // Siempre cargamos la lista de tiendas del usuario por si quiere cambiar
-  const result = await db.prepare(`
-    SELECT t.name, t.slug, m.role FROM tenants t
-    JOIN memberships m ON t.id = m.tenant_id
-    WHERE m.user_id = ?
-  `).bind(userId).all();
-  userShops = result.results;
 }
 
-// Si entras a /settings en la principal sin especificar tienda, mostramos selector
-const isSelecting = !tenantSlug && userShops.length > 0;
 const metadata = { title: 'Ajustes de Cuenta | TuStock' };
 ---
 
@@ -55,79 +59,76 @@ const metadata = { title: 'Ajustes de Cuenta | TuStock' };
   <section class="px-4 py-16 sm:px-6 mx-auto lg:px-8 lg:py-20 max-w-4xl">
     <div class="mb-10 md:mx-auto text-center md:mb-12 max-w-3xl">
       <h1 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading">
-        Configuración
+        Mi Perfil
       </h1>
       <p class="text-xl text-muted dark:text-slate-400">
-        Gestiona tu perfil y las preferencias de tus negocios vinculados.
+        Gestiona tus datos personales y tus equipos.
       </p>
     </div>
 
+    {successMsg && (
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 animate-fade-in">
+            <Icon name="tabler:check" class="w-5 h-5" /> {successMsg}
+        </div>
+    )}
+
     <div class="grid gap-8">
-      {/* SECCIÓN A: PERFIL DE USUARIO (Dato compartido) */}
+
+      {/* SECCIÓN A: PERFIL DE USUARIO */}
       <div class="bg-white dark:bg-slate-900 shadow-md rounded-lg p-6 border border-gray-200 dark:border-slate-700">
         <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-          <span class="text-blue-600">👤</span> Perfil de Usuario
+          <span class="text-blue-600">👤</span> Datos Personales
         </h2>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">ID de Usuario (Sesión)</label>
-            <input type="text" disabled value={userId} class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-500 sm:text-sm" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">ID de Usuario</label>
+            <input type="text" disabled value={userId} class="mt-1 block w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-gray-500 sm:text-sm" />
           </div>
-          <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-            Cambiar Contraseña
-          </button>
+          <a href="/hub" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+            Volver a mis tiendas
+          </a>
         </div>
       </div>
 
-      {/* SECCIÓN B: AJUSTES DE TIENDA */}
-      <div class="bg-white dark:bg-slate-900 shadow-md rounded-lg p-6 border border-gray-200 dark:border-slate-700">
-        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-          <span class="text-blue-600">🏪</span> Gestión de Tienda
-        </h2>
+      {/* SECCIÓN B: INVITACIONES PENDIENTES */}
+      {pendingInvites.length > 0 && (
+          <div class="bg-amber-50 dark:bg-amber-900/10 shadow-md rounded-lg p-6 border border-amber-200 dark:border-amber-800">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <span class="text-amber-600">📬</span> Invitaciones Pendientes
+            </h2>
+            <p class="text-sm text-amber-700 dark:text-amber-300 mb-6">
+                Te han invitado a colaborar en los siguientes negocios:
+            </p>
 
-        {tenantSlug && shopData ? (
-          <form class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la Tienda</label>
-                <input type="text" value={shopData.name} class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL del Panel</label>
-                <div class="mt-1 flex rounded-md shadow-sm">
-                  <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">https://</span>
-                  <input type="text" disabled value={shopData.slug} class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-none rounded-r-md bg-gray-100 text-gray-500 sm:text-sm" />
-                </div>
-              </div>
-            </div>
-            
-            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-              <p class="text-sm text-blue-800 dark:text-blue-300 italic font-medium">
-                Suscripción actual: <b>{shopData.plan_type}</b>
-              </p>
-            </div>
-
-            <button type="submit" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded transition shadow-lg shadow-green-500/20">
-              Guardar cambios de la tienda
-            </button>
-          </form>
-        ) : (
-          <div class="text-center py-8">
-            <p class="text-gray-500 mb-6">Selecciona una tienda para configurar:</p>
-            <div class="flex flex-wrap justify-center gap-4">
-              {userShops.map((s) => (
-                <a href={`https://${s.slug}.tustock.app/settings`} class="px-4 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:ring-2 hover:ring-blue-500 transition-all border border-slate-200 dark:border-slate-700">
-                  <span class="font-bold">{s.name}</span>
-                  <p class="text-xs text-gray-400">vía {s.slug}.tustock.app</p>
-                </a>
-              ))}
-              <a href="/new-store" class="px-4 py-3 bg-blue-50 dark:bg-blue-900/10 text-blue-600 rounded-xl border border-blue-200 border-dashed hover:bg-blue-100 transition-all">
-                + Crear nueva tienda
-              </a>
+            <div class="space-y-4">
+                {pendingInvites.map((invite) => (
+                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm">
+                        <div class="mb-4 sm:mb-0">
+                            <h3 class="font-bold text-lg text-gray-900 dark:text-white">{invite.shop_name}</h3>
+                            <p class="text-sm text-gray-500">Rol asignado: <span class="font-bold text-blue-600 uppercase">{invite.role}</span></p>
+                        </div>
+                        <div class="flex gap-3">
+                            <form method="POST">
+                                <input type="hidden" name="action" value="reject" />
+                                <input type="hidden" name="membershipId" value={invite.id} />
+                                <button type="submit" class="px-4 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                                    Rechazar
+                                </button>
+                            </form>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="accept" />
+                                <input type="hidden" name="membershipId" value={invite.id} />
+                                <button type="submit" class="px-6 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-lg shadow-green-500/30 transition-all transform hover:-translate-y-0.5">
+                                    Aceptar Invitación
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                ))}
             </div>
           </div>
-        )}
-      </div>
+      )}
+
     </div>
   </section>
 </Layout>
