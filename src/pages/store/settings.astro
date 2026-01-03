@@ -103,10 +103,17 @@ if (Astro.request.method === "POST") {
                     // 3. Insertar Membership (si no existe)
                     try {
                         const mId = crypto.randomUUID();
-                        await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(mId, user.id, tenant.id, role).run();
-                        successMsg = `Usuario ${email} añadido correctamente.`;
+                        // 🔥 INSERTAMOS COMO PENDING
+                        await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role, status) VALUES (?, ?, ?, ?, 'PENDING')").bind(mId, user.id, tenant.id, role).run();
+                        successMsg = `Invitación enviada a ${email}.`;
                     } catch(err) {
-                        errorMsg = "El usuario ya es miembro de este equipo.";
+                        // Fallback por si la columna status no existe aún en DDL (MVP)
+                        try {
+                             await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), user.id, tenant.id, role).run();
+                             successMsg = `Usuario ${email} añadido (Auto-Active).`;
+                        } catch (e2) {
+                             errorMsg = "El usuario ya es miembro de este equipo.";
+                        }
                     }
                 } else {
                     errorMsg = "El usuario no existe en TuStock. Pídele que se registre primero.";

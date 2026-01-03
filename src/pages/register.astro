@@ -50,19 +50,32 @@ const metadata = {
 
       {/* COLUMNA DERECHA: Formulario */}
       <div class="p-8 md:p-12">
-        <div class="text-center md:text-left mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Empezar ahora</h1>
-          <p class="text-gray-500 dark:text-gray-400 mt-2">Configura tu tienda en menos de 1 minuto.</p>
+
+        {/* SWITCHER TIPO CUENTA */}
+        <div class="flex p-1 bg-slate-100 dark:bg-slate-700 rounded-xl mb-8">
+            <button type="button" id="tab-owner" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400 transition-all">
+                Crear Empresa
+            </button>
+            <button type="button" id="tab-employee" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all">
+                Unirme a un Equipo
+            </button>
+        </div>
+
+        <div class="text-center md:text-left mb-6">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white" id="form-title">Nueva Empresa</h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-2" id="form-desc">Crea tu tienda y empieza a vender hoy.</p>
         </div>
 
         <form id="registro-form" class="space-y-5">
+          <input type="hidden" name="type" id="input-type" value="owner" />
+
           <div class="grid md:grid-cols-2 gap-4">
-            <div>
+            <div class="md:col-span-1" id="col-name">
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tu Nombre Completo</label>
               <input type="text" name="full_name" required placeholder="Juan Pérez"
                 class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
             </div>
-            <div>
+            <div id="field-shop-name">
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Nombre del Negocio</label>
               <input type="text" name="name" required placeholder="Mi Tienda S.L."
                 class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
@@ -75,7 +88,7 @@ const metadata = {
               class="w-full px-4 py-3 mt-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition dark:text-white" />
           </div>
 
-          <div>
+          <div id="field-subdomain">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">URL de tu Panel</label>
             <div class="flex mt-1">
               <input type="text" name="subdomain" id="subdomain" required placeholder="mi-tienda" 
@@ -94,7 +107,7 @@ const metadata = {
 
           <button type="submit" id="btn-submit"
             class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all transform hover:-translate-y-1 active:scale-95">
-            Crear mi cuenta gratuita
+            Crear cuenta y tienda
           </button>
 
           <p id="mensaje" class="text-sm text-center font-medium hidden"></p>
@@ -114,6 +127,69 @@ const metadata = {
   const msg = document.getElementById('mensaje');
   const btn = document.getElementById('btn-submit');
   const subInput = document.getElementById('subdomain');
+
+  // Tabs
+  const tabOwner = document.getElementById('tab-owner');
+  const tabEmployee = document.getElementById('tab-employee');
+  const inputType = document.getElementById('input-type');
+
+  // Fields to toggle
+  const fieldShopName = document.getElementById('field-shop-name');
+  const fieldSubdomain = document.getElementById('field-subdomain');
+  const colName = document.getElementById('col-name'); // Para expandirlo
+  const formTitle = document.getElementById('form-title');
+  const formDesc = document.getElementById('form-desc');
+
+  // LOGICA TABS
+  function setMode(mode) {
+    inputType.value = mode;
+    if (mode === 'owner') {
+        // UI
+        tabOwner.classList.add('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+        tabOwner.classList.remove('text-slate-500', 'dark:text-slate-400');
+        tabEmployee.classList.remove('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+        tabEmployee.classList.add('text-slate-500', 'dark:text-slate-400');
+
+        // Fields
+        fieldShopName.classList.remove('hidden');
+        fieldSubdomain.classList.remove('hidden');
+        colName.classList.remove('md:col-span-2');
+
+        // Required
+        fieldShopName.querySelector('input').required = true;
+        subInput.required = true;
+
+        // Texts
+        formTitle.innerText = "Nueva Empresa";
+        formDesc.innerText = "Crea tu tienda y empieza a vender hoy.";
+        btn.innerText = "Crear cuenta y tienda";
+    } else {
+        // UI
+        tabEmployee.classList.add('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+        tabEmployee.classList.remove('text-slate-500', 'dark:text-slate-400');
+        tabOwner.classList.remove('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+        tabOwner.classList.add('text-slate-500', 'dark:text-slate-400');
+
+        // Fields
+        fieldShopName.classList.add('hidden');
+        fieldSubdomain.classList.add('hidden');
+        colName.classList.add('md:col-span-2');
+
+        // Required
+        fieldShopName.querySelector('input').required = false;
+        subInput.required = false;
+
+        // Texts
+        formTitle.innerText = "Perfil de Trabajador";
+        formDesc.innerText = "Regístrate para que te inviten a una tienda.";
+        btn.innerText = "Crear mi perfil";
+    }
+  }
+
+  if (tabOwner && tabEmployee) {
+    tabOwner.addEventListener('click', () => setMode('owner'));
+    tabEmployee.addEventListener('click', () => setMode('employee'));
+  }
 
   // Forzar minúsculas y quitar caracteres raros en la URL
   if (subInput) {
