@@ -108,9 +108,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
         // PERO ahora ya llevamos currentShop cargado ✅
         if (url.pathname.startsWith('/store')) return next();
         
-        // A) ADMIN
-        if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
+        // A) ADMIN ROUTING
+        if (url.pathname === '/admin' || url.pathname === '/admin/') {
             return context.rewrite('/store/admin');
+        }
+
+        if (url.pathname.startsWith('/admin/')) {
+            // Ejemplo: /admin/settings -> /store/settings
+            const subPath = url.pathname.replace('/admin/', '');
+            return context.rewrite(`/store/${subPath}`);
         }
 
         // B) PLAN FREE -> Placeholder
