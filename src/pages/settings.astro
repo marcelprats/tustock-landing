@@ -11,12 +11,17 @@ if (!session || !session.value) {
 const userId = session.value;
 const db = Astro.locals.runtime?.env?.DB;
 
+let userData = { full_name: '', email: '' };
 let pendingInvites = [];
 let errorMsg = "";
 let successMsg = "";
 
 if (db) {
   try {
+    // 1. CARGAR DATOS USUARIO
+    const userRes = await db.prepare("SELECT full_name, email FROM users WHERE id = ?").bind(userId).first();
+    if (userRes) userData = userRes;
+
     // 2. PROCESAR ACCIONES (Aceptar/Rechazar)
     if (Astro.request.method === "POST") {
         const formData = await Astro.request.formData();
@@ -80,27 +85,37 @@ const metadata = { title: 'Ajustes de Cuenta | TuStock' };
           <span class="text-blue-600">👤</span> Datos Personales
         </h2>
         <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">ID de Usuario</label>
-            <input type="text" disabled value={userId} class="mt-1 block w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-gray-500 sm:text-sm" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+                <input type="text" disabled value={userData.full_name} class="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-gray-700 dark:text-gray-200 sm:text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+                <input type="text" disabled value={userData.email} class="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-gray-700 dark:text-gray-200 sm:text-sm" />
+              </div>
           </div>
-          <a href="/hub" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-            Volver a mis tiendas
-          </a>
+
+          <div class="pt-4 flex justify-between items-center">
+              <span class="text-xs text-gray-400">ID: {userId}</span>
+              <a href="/hub" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md">
+                Volver a mis tiendas
+              </a>
+          </div>
         </div>
       </div>
 
       {/* SECCIÓN B: INVITACIONES PENDIENTES */}
-      {pendingInvites.length > 0 && (
-          <div class="bg-amber-50 dark:bg-amber-900/10 shadow-md rounded-lg p-6 border border-amber-200 dark:border-amber-800">
-            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-amber-800 dark:text-amber-200">
-              <span class="text-amber-600">📬</span> Invitaciones Pendientes
-            </h2>
-            <p class="text-sm text-amber-700 dark:text-amber-300 mb-6">
-                Te han invitado a colaborar en los siguientes negocios:
-            </p>
+      <div class="bg-amber-50 dark:bg-amber-900/10 shadow-md rounded-lg p-6 border border-amber-200 dark:border-amber-800">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-amber-800 dark:text-amber-200">
+            <span class="text-amber-600">📬</span> Invitaciones Pendientes
+        </h2>
 
+        {pendingInvites.length > 0 ? (
             <div class="space-y-4">
+                <p class="text-sm text-amber-700 dark:text-amber-300 mb-6">
+                    Te han invitado a colaborar en los siguientes negocios:
+                </p>
                 {pendingInvites.map((invite) => (
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm">
                         <div class="mb-4 sm:mb-0">
@@ -126,8 +141,13 @@ const metadata = { title: 'Ajustes de Cuenta | TuStock' };
                     </div>
                 ))}
             </div>
-          </div>
-      )}
+        ) : (
+            <div class="text-center py-8 opacity-60">
+                <Icon name="tabler:mail-off" class="w-12 h-12 mx-auto text-amber-300 mb-2" />
+                <p class="text-amber-800 dark:text-amber-200 font-medium">No tienes invitaciones pendientes.</p>
+            </div>
+        )}
+      </div>
 
     </div>
   </section>
