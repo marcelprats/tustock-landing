@@ -7,7 +7,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const host = context.request.headers.get("x-forwarded-host") || url.host;
 
     // Debug: Log request info to help diagnose edge routing issues
-    // console.log(`[Middleware] Request: ${url.pathname} | Host: ${host}`);
+    if (context.request.method === 'POST') {
+        console.log(`[Middleware POST] Request: ${url.pathname} | Host: ${host}`);
+    }
     
     // ------------------------------------------------------------------------
     // 1. DETECCIÓN DE SUBDOMINIO
