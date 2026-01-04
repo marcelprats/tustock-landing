@@ -92,32 +92,48 @@ if (Astro.request.method === "POST") {
 
         // B) INVITAR USUARIO
         if (action === "invite_user") {
-            const email = formData.get("email")?.toString();
+            const email = formData.get("email")?.toString().trim();
             const role = formData.get("role")?.toString();
 
-            if (email && env?.DB) {
+            if (!email) {
+                errorMsg = "Por favor, introduce un email válido.";
+            } else if (!env?.DB) {
+                errorMsg = "Error: No hay conexión con la base de datos (D1 missing).";
+            } else {
                 // 1. Buscar usuario
                 const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
                 if (user) {
                     // 2. Obtener Tenant ID
                     const tenant = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
-                    // 3. Insertar Membership (si no existe)
-                    try {
-                        const mId = crypto.randomUUID();
-                        // 🔥 INSERTAMOS COMO PENDING
-                        await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role, status) VALUES (?, ?, ?, ?, 'PENDING')").bind(mId, user.id, tenant.id, role).run();
-                        successMsg = `Invitación enviada a ${email}.`;
-                    } catch(err) {
-                        // Fallback por si la columna status no existe aún en DDL (MVP)
+
+                    if (tenant) {
+                        // 3. Insertar Membership
                         try {
-                             await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), user.id, tenant.id, role).run();
-                             successMsg = `Usuario ${email} añadido (Auto-Active).`;
-                        } catch (e2) {
-                             errorMsg = "El usuario ya es miembro de este equipo.";
+                            const mId = crypto.randomUUID();
+                            // Intentamos insertar con status PENDING
+                            await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role, status) VALUES (?, ?, ?, ?, 'PENDING')").bind(mId, user.id, tenant.id, role).run();
+                            successMsg = `Invitación enviada a ${email}.`;
+                        } catch(err) {
+                            console.error("Error inserting membership:", err);
+                            // Fallback: Si falla (probablemente por constraint unique o falta de columna status en schemas viejos)
+                            if (err.message.includes("no such column")) {
+                                try {
+                                     await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), user.id, tenant.id, role).run();
+                                     successMsg = `Usuario ${email} añadido (Versión Legacy).`;
+                                } catch (e2) {
+                                     errorMsg = "No se pudo añadir al usuario (Legacy Error).";
+                                }
+                            } else if (err.message.includes("UNIQUE")) {
+                                errorMsg = "Este usuario ya es miembro del equipo.";
+                            } else {
+                                errorMsg = `Error al invitar: ${err.message}`;
+                            }
                         }
+                    } else {
+                        errorMsg = "Error crítico: No se encuentra la tienda actual en la BD.";
                     }
                 } else {
-                    errorMsg = "El usuario no existe en TuStock. Pídele que se registre primero.";
+                    errorMsg = `El usuario ${email} no está registrado en TuStock.`;
                 }
             }
         }
