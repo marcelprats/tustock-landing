@@ -53,6 +53,11 @@ const storeHeaderData = {
 let successMsg = "";
 let errorMsg = "";
 
+// Debug para el error 403
+if (Astro.request.method === "POST") {
+    console.log(`[Settings POST] Session: ${session?.value ? 'OK' : 'Missing'} | Authorized: ${isAuthorized}`);
+}
+
 // Cargar Miembros
 let members = [];
 if (isAuthorized && env?.DB) {
@@ -178,7 +183,7 @@ if (Astro.request.method === "POST") {
         <div class="p-8 space-y-8">
 
             {/* SECCIÓN 1: Identidad */}
-            <form method="POST" class="space-y-6">
+            <form method="POST" action={Astro.url.pathname} class="space-y-6">
                 <input type="hidden" name="action" value="update_name" />
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Identidad del Negocio</h3>
@@ -235,7 +240,7 @@ if (Astro.request.method === "POST") {
                     </ul>
                 </div>
 
-                <form method="POST" class="flex gap-2 items-end">
+                <form method="POST" action={Astro.url.pathname} class="flex gap-2 items-end">
                     <input type="hidden" name="action" value="invite_user" />
                     <div class="flex-1">
                         <label class="block text-xs font-bold text-gray-500 mb-1">Invitar por Email</label>
