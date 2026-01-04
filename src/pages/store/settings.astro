@@ -49,22 +49,12 @@ const storeHeaderData = {
   actions: []
 };
 
-// 2. PROCESAMIENTO DEL FORMULARIO
-let successMsg = "";
-let errorMsg = "";
-
-// Debug para el error 403
-if (Astro.request.method === "POST") {
-    console.log(`[Settings POST] Session: ${session?.value ? 'OK' : 'Missing'} | Authorized: ${isAuthorized}`);
-}
-
-// Cargar Miembros
+// Cargar Miembros (Renderizado Server-Side)
 let members = [];
 if (isAuthorized && env?.DB) {
     try {
         const tenantRes = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
         if (tenantRes) {
-            // 🔥 AÑADIDO: status
             const membersRes = await env.DB.prepare(`
                 SELECT u.full_name, u.email, m.role, m.status
                 FROM memberships m
@@ -74,78 +64,6 @@ if (isAuthorized && env?.DB) {
             members = membersRes.results || [];
         }
     } catch(e) { console.error("Error loading members", e); }
-}
-
-if (Astro.request.method === "POST") {
-    try {
-        const formData = await Astro.request.formData();
-        const action = formData.get("action");
-
-        // A) ACTUALIZAR NOMBRE
-        if (action === "update_name") {
-            const newName = formData.get("shopName")?.toString();
-            if (newName && newName.length > 2) {
-                 if (env?.DB) {
-                    await env.DB.prepare("UPDATE tenants SET name = ? WHERE slug = ?").bind(newName, currentShop.slug).run();
-                    successMsg = "Nombre actualizado correctamente.";
-                    currentShop.name = newName;
-                 }
-            } else {
-                errorMsg = "El nombre es demasiado corto.";
-            }
-        }
-
-        // B) INVITAR USUARIO
-        if (action === "invite_user") {
-            const email = formData.get("email")?.toString().trim();
-            const role = formData.get("role")?.toString();
-
-            if (!email) {
-                errorMsg = "Por favor, introduce un email válido.";
-            } else if (!env?.DB) {
-                errorMsg = "Error: No hay conexión con la base de datos (D1 missing).";
-            } else {
-                // 1. Buscar usuario
-                const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
-                if (user) {
-                    // 2. Obtener Tenant ID
-                    const tenant = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
-
-                    if (tenant) {
-                        // 3. Insertar Membership
-                        try {
-                            const mId = crypto.randomUUID();
-                            // Intentamos insertar con status PENDING
-                            await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role, status) VALUES (?, ?, ?, ?, 'PENDING')").bind(mId, user.id, tenant.id, role).run();
-                            successMsg = `Invitación enviada a ${email}.`;
-                        } catch(err) {
-                            console.error("Error inserting membership:", err);
-                            // Fallback: Si falla (probablemente por constraint unique o falta de columna status en schemas viejos)
-                            if (err.message.includes("no such column")) {
-                                try {
-                                     await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_id, role) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), user.id, tenant.id, role).run();
-                                     successMsg = `Usuario ${email} añadido (Versión Legacy).`;
-                                } catch (e2) {
-                                     errorMsg = "No se pudo añadir al usuario (Legacy Error).";
-                                }
-                            } else if (err.message.includes("UNIQUE")) {
-                                errorMsg = "Este usuario ya es miembro del equipo.";
-                            } else {
-                                errorMsg = `Error al invitar: ${err.message}`;
-                            }
-                        }
-                    } else {
-                        errorMsg = "Error crítico: No se encuentra la tienda actual en la BD.";
-                    }
-                } else {
-                    errorMsg = `El usuario ${email} no está registrado en TuStock.`;
-                }
-            }
-        }
-
-    } catch (e) {
-        errorMsg = "Error: " + e.message;
-    }
 }
 ---
 
@@ -167,31 +85,21 @@ if (Astro.request.method === "POST") {
         <p class="mt-2 text-gray-500 dark:text-gray-400">Personaliza la información pública de tu negocio.</p>
       </div>
 
-      {successMsg && (
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 animate-fade-in">
-            <Icon name="tabler:check" class="w-5 h-5" /> {successMsg}
-        </div>
-      )}
-
-      {errorMsg && (
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2 animate-fade-in">
-            <Icon name="tabler:alert-circle" class="w-5 h-5" /> {errorMsg}
-        </div>
-      )}
+      {/* Mensajes JS */}
+      <div id="msg-container" class="hidden mb-6 p-4 rounded-lg flex items-center gap-2 animate-fade-in"></div>
 
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="p-8 space-y-8">
 
             {/* SECCIÓN 1: Identidad */}
-            <form method="POST" action={Astro.url.pathname} class="space-y-6">
-                <input type="hidden" name="action" value="update_name" />
+            <form id="form-update-name" class="space-y-6">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Identidad del Negocio</h3>
 
                     <div class="grid gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nombre Público</label>
-                            <input type="text" name="shopName" value={currentShop?.name}
+                            <input type="text" id="input-shop-name" value={currentShop?.name}
                                 class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
                             <p class="text-xs text-gray-500 mt-1">Este nombre aparecerá en el encabezado y en los títulos de la web.</p>
                         </div>
@@ -208,7 +116,7 @@ if (Astro.request.method === "POST") {
                 </div>
 
                 <div class="pt-4 flex justify-end">
-                    <button type="submit" class="btn-primary px-6 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all">
+                    <button type="submit" id="btn-update-name" class="btn-primary px-6 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all">
                         Guardar Cambios
                     </button>
                 </div>
@@ -240,22 +148,21 @@ if (Astro.request.method === "POST") {
                     </ul>
                 </div>
 
-                <form method="POST" action={Astro.url.pathname} class="flex gap-2 items-end">
-                    <input type="hidden" name="action" value="invite_user" />
+                <form id="form-invite" class="flex gap-2 items-end">
                     <div class="flex-1">
                         <label class="block text-xs font-bold text-gray-500 mb-1">Invitar por Email</label>
-                        <input type="email" name="email" placeholder="usuario@email.com" required
+                        <input type="email" id="input-invite-email" placeholder="usuario@email.com" required
                             class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm" />
                     </div>
                     <div class="w-32">
                         <label class="block text-xs font-bold text-gray-500 mb-1">Rol</label>
-                        <select name="role" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm">
+                        <select id="input-invite-role" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-sm">
                             <option value="STAFF">Empleado</option>
                             <option value="MANAGER">Encargado</option>
                             <option value="OWNER">Propietario</option>
                         </select>
                     </div>
-                    <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-black transition-colors">
+                    <button type="submit" id="btn-invite" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-black transition-colors">
                         Añadir
                     </button>
                 </form>
@@ -311,3 +218,73 @@ if (Astro.request.method === "POST") {
     </div>
   </div>
 </PageLayout>
+
+<script define:vars={{ currentSlug: currentShop?.slug }}>
+    // FUNCIONES DE CLIENTE PARA EVITAR 403 EN SUBDOMINIOS
+    const msgContainer = document.getElementById('msg-container');
+
+    function showMessage(text, isError) {
+        msgContainer.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'text-green-700', 'text-red-700', 'border-green-200', 'border-red-200');
+        msgContainer.classList.add(isError ? 'bg-red-50' : 'bg-green-50', isError ? 'text-red-700' : 'text-green-700', isError ? 'border-red-200' : 'border-green-200', 'border');
+        msgContainer.innerHTML = `<strong>${isError ? 'Error' : 'Éxito'}:</strong> ${text}`;
+    }
+
+    // 1. UPDATE NAME
+    const formUpdate = document.getElementById('form-update-name');
+    if (formUpdate) {
+        formUpdate.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('input-shop-name').value;
+            const btn = document.getElementById('btn-update-name');
+            btn.disabled = true; btn.innerText = "...";
+
+            try {
+                const res = await fetch('/api/store/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newName, slug: currentSlug })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage(data.message, false);
+                } else {
+                    showMessage(data.error, true);
+                }
+            } catch (e) {
+                showMessage("Error de conexión", true);
+            }
+            btn.disabled = false; btn.innerText = "Guardar Cambios";
+        });
+    }
+
+    // 2. INVITE USER
+    const formInvite = document.getElementById('form-invite');
+    if (formInvite) {
+        formInvite.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('input-invite-email').value;
+            const role = document.getElementById('input-invite-role').value;
+            const btn = document.getElementById('btn-invite');
+            btn.disabled = true; btn.innerText = "...";
+
+            try {
+                const res = await fetch('/api/store/invite', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, role, slug: currentSlug })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage(data.message, false);
+                    document.getElementById('input-invite-email').value = '';
+                    setTimeout(() => location.reload(), 1500); // Recargar para ver al nuevo miembro
+                } else {
+                    showMessage(data.error, true);
+                }
+            } catch (e) {
+                showMessage("Error de conexión", true);
+            }
+            btn.disabled = false; btn.innerText = "Añadir";
+        });
+    }
+</script>
