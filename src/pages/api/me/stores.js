@@ -16,22 +16,28 @@ export const GET = async ({ locals, cookies }) => {
             return new Response(JSON.stringify({ error: "Database not connected" }), { status: 500 });
         }
 
-        // 2. Obtener Tiendas del Usuario
-        // Obtenemos: Datos tienda + Rol + Licencia (Encrypted)
+        // --- 🆕 NUEVO: OBTENER DATOS DEL USUARIO (FULL_NAME) ---
+        // Hacemos una consulta rápida para sacar el nombre de la tabla users
+        const userData = await db.prepare(`
+            SELECT full_name, email FROM users WHERE id = ?
+        `).bind(userId).first();
+
+        // 2. Obtener Tiendas del Usuario (Con el fix del plan_type que hicimos antes)
         const stores = await db.prepare(`
-            SELECT t.id, t.name, t.slug, t.status, t.license_encrypted, m.role
+            SELECT 
+                t.id, t.name, t.slug, t.status, t.license_encrypted, 
+                t.plan_type, -- Recuerda que añadimos esto
+                m.role
             FROM memberships m
             JOIN tenants t ON m.tenant_id = t.id
             WHERE m.user_id = ? AND t.status = 'ACTIVE'
         `).bind(userId).all();
 
-        // 3. Procesar datos (Desencriptar licencias)
+        // 3. Procesar datos
         const results = [];
         if (stores.results) {
             for (const store of stores.results) {
                 let licenseKey = null;
-
-                // Intentar desencriptar
                 if (store.license_encrypted && env.MASTER_KEY) {
                     licenseKey = decryptLicense(store.license_encrypted, env.MASTER_KEY);
                 }
@@ -41,15 +47,19 @@ export const GET = async ({ locals, cookies }) => {
                     name: store.name,
                     slug: store.slug,
                     role: store.role,
+                    plan_type: store.plan_type || 'FREE',
                     url: `https://${store.slug}.tustock.app`,
-                    license_key: licenseKey // La app usará esto para el login
+                    license_key: licenseKey
                 });
             }
         }
 
+        // 4. Respuesta Final (Añadimos full_name)
         return new Response(JSON.stringify({
             success: true,
             user_id: userId,
+            full_name: userData?.full_name || 'Usuario', // 👈 ¡AQUÍ LO ENVIAMOS!
+            email: userData?.email,
             stores: results
         }), {
             status: 200,
