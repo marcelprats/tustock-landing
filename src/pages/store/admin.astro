@@ -154,14 +154,24 @@ const storeHeaderData = {
                     <p class="text-sm text-gray-500 dark:text-gray-400">Base de datos de compradores.</p>
                 </div>
 
-                {/* 5. INTEGRACIONES */}
-                <div class="group p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm opacity-60">
-                    <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center mb-4">
-                        <Icon name="tabler:puzzle" class="w-6 h-6" />
+{/* 5. MONITOR EN VIVO (NUEVO) */}
+                <a href="/store/live" class="group p-6 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl border border-indigo-500/30 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 relative overflow-hidden">
+                    
+                    {/* Efecto decorativo de fondo */}
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/20 blur-3xl rounded-full -mr-10 -mt-10 group-hover:bg-indigo-500/30 transition-colors"></div>
+
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30 z-10 relative">
+                        <Icon name="tabler:activity-heartbeat" class="w-7 h-7 animate-pulse" />
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Integraciones</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Próximamente: Conecta con Instagram y WhatsApp API.</p>
-                </div>
+                    
+                    <h3 class="text-lg font-bold text-white mb-1 flex items-center gap-2 relative z-10">
+                        Monitor en Vivo 
+                        <span class="bg-indigo-500 text-[10px] px-1.5 py-0.5 rounded text-white uppercase tracking-wider font-bold">PRO</span>
+                    </h3>
+                    <p class="text-sm text-indigo-200 relative z-10">
+                        Conéctate a tu PC en tiempo real. Mira ventas y busca stock desde cualquier lugar.
+                    </p>
+                </a>
 
                 {/* 6. VOLVER AL HUB */}
                 <a href="https://tustock.app/hub" class="group p-6 bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-slate-800 transition-all">

@@ -1,0 +1,60 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import StoreHeader from '~/components/widgets/StoreHeader.astro';
+import { LiveMonitor } from '~/components/react/LiveMonitor'; // 👈 Importamos el componente React
+
+// 1. OBTENER SESIÓN (Igual que admin.astro)
+const session = Astro.cookies.get('session');
+const { currentShop } = Astro.locals;
+const env = Astro.locals.runtime?.env;
+
+if (!session) return Astro.redirect(`/login?redirect=/store/live`);
+
+// 2. OBTENER ID REAL DE LA TIENDA (Para el WebSocket)
+let shopId = "";
+try {
+    const db = env?.DB;
+    if (db && currentShop) {
+        const tenant = await db.prepare("SELECT id FROM tenants WHERE slug = ?").bind(currentShop.slug).first();
+        if (tenant) shopId = tenant.id as string;
+    }
+} catch (e) {
+    console.error("Error obteniendo ID tienda:", e);
+}
+
+const shopName = currentShop?.name || "Tienda";
+const metadata = { title: `En Vivo - ${shopName}` };
+---
+
+<PageLayout metadata={metadata}>
+  
+  <fragment slot="header">
+    <StoreHeader
+      links={[{ text: 'Volver al Dashboard', href: '/store/admin' }]} 
+      shopName={`🔴 LIVE: ${shopName}`}
+      isSticky
+      showToggleTheme
+    />
+  </fragment>
+
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Monitor en Tiempo Real</h1>
+            <p class="text-gray-500">Conexión directa segura con tu terminal TPV.</p>
+        </div>
+
+        {/* 🔥 IMPORTANTE: client:only="react" 
+            Esto le dice a Astro: "No intentes renderizar esto en el servidor, 
+            hazlo solo en el navegador del cliente". Vital para WebSockets.
+        */}
+        {shopId ? (
+            <LiveMonitor client:only="react" shopId={shopId} />
+        ) : (
+            <div class="p-4 bg-red-100 text-red-700 rounded-lg">Error: No se pudo identificar la tienda.</div>
+        )}
+
+    </div>
+  </div>
+</PageLayout>
