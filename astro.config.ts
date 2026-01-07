@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
 
 // 1. IMPORTAR EL ADAPTADOR DE CLOUDFLARE
 import cloudflare from '@astrojs/cloudflare';
@@ -36,6 +37,7 @@ export default defineConfig({
     }),
 
   integrations: [
+    react(),
     tailwind({
       applyBaseStyles: false,
     }),
