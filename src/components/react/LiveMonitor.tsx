@@ -4,7 +4,7 @@ import {
   Search, Package, AlertTriangle, Activity 
 } from 'lucide-react';
 
-// 🔥 TU URL DEL WORKER DE CLOUDFLARE (La que obtuviste antes)
+// 🔥 TU URL DEL WORKER DE CLOUDFLARE
 const WORKER_URL = 'wss://tustock-bridge.marcelprats-0.workers.dev'; 
 
 export const LiveMonitor = ({ shopId }: { shopId: string }) => {
@@ -26,13 +26,11 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
   const connectToBridge = () => {
     setStatus('CONNECTING');
     
-    // Conectamos como WEB (Observer)
     const socket = new WebSocket(`${WORKER_URL}/connect?storeId=${shopId}&role=WEB`);
     ws.current = socket;
 
     socket.onopen = () => {
       console.log("🔌 Web conectada a la Nube");
-      // Al conectar, el Worker nos enviará el Snapshot automáticamente si lo tiene
     };
 
     socket.onmessage = (event) => {
@@ -40,17 +38,30 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
         const msg = JSON.parse(event.data);
 
         // 1. Recibimos actualización de estado (Snapshot)
-        if (msg.type === 'SNAPSHOT_UPDATE') {
-          console.log("📸 Snapshot recibido:", msg.data);
+        if (msg.type === 'SNAPSHOT_UPDATE' || msg.type === 'HEARTBEAT') {
+          
+          // 👇👇👇 AQUÍ ESTÁ EL CHIVATO - MIRA LA CONSOLA (F12) 👇👇👇
+          console.group("📡 DATOS RECIBIDOS DEL TPV");
+          console.log("Datos crudos:", msg.data);
+          console.log("Ventas posibles:", { 
+             totalSales: msg.data?.totalSales, 
+             salesToday: msg.data?.salesToday, 
+             dailyTotal: msg.data?.dailyTotal 
+          });
+          console.groupEnd();
+          // 👆👆👆
+
           setData(msg.data);
           
           // Calculamos si está "Vivo" (si el último update fue hace menos de 60s)
-          const lastTime = new Date(msg.data.lastUpdate).getTime();
+          // Si no viene lastUpdate, asumimos que es AHORA mismo
+          const lastTimeStr = msg.data.lastUpdate || new Date().toISOString();
+          const lastTime = new Date(lastTimeStr).getTime();
           const now = new Date().getTime();
-          const isLive = (now - lastTime) < 60000; // 1 minuto de margen
+          const isLive = (now - lastTime) < 60000; 
 
           setStatus(isLive ? 'LIVE' : 'OFFLINE');
-          setLastUpdated(new Date(msg.data.lastUpdate).toLocaleTimeString());
+          setLastUpdated(new Date(lastTimeStr).toLocaleTimeString());
         }
 
         // 2. Recibimos respuesta de búsqueda (Túnel)
@@ -68,23 +79,37 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
     socket.onclose = () => {
       console.log("❌ Desconectado");
       setStatus('OFFLINE');
+      // Reintento simple
+      setTimeout(() => { if(document.visibilityState === 'visible') connectToBridge() }, 5000);
     };
   };
 
   const buscarProducto = (e: any) => {
     e.preventDefault();
     if(!query || !ws.current) return;
-    
-    setStatus('LIVE'); // Asumimos live al buscar
-    setSearchResults([]); // Limpiar anteriores
+    setStatus('LIVE'); 
+    setSearchResults([]); 
 
-    // Enviamos petición al túnel
     ws.current.send(JSON.stringify({
         type: 'EXEC_QUERY',
         requestId: Date.now(),
-        queryType: 'GLOBAL_STOCK', // Coincide con lo que programamos en Electron
+        queryType: 'GLOBAL_STOCK', 
         payload: { query } 
     }));
+  };
+
+  // 👇 FUNCIÓN ROBUSTA PARA LEER EL DINERO
+  const getSalesAmount = () => {
+    if (!data) return '0.00';
+    // Buscamos el dato en todas las variables posibles
+    const rawValue = data.totalSales ?? data.salesToday ?? data.dailyTotal ?? 0;
+    const num = parseFloat(rawValue);
+    return isNaN(num) ? '0.00' : num.toFixed(2);
+  };
+
+  const getTicketCount = () => {
+     if (!data) return 0;
+     return data.ticketCount ?? data.count ?? data.ticketsToday ?? 0;
   };
 
   return (
@@ -119,8 +144,9 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
                 <TrendingUp size={48} />
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Ventas Hoy</p>
+            {/* 👇 USAMOS LA FUNCIÓN SEGURA AQUÍ */}
             <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-2">
-                {data?.totalSales ? parseFloat(data.totalSales).toFixed(2) : '0.00'}€
+                {getSalesAmount()}€
             </h3>
             <div className="mt-3 flex items-center gap-1 text-emerald-600 text-xs font-bold">
                 <Activity size={12}/> Caja Abierta
@@ -134,7 +160,7 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Tickets</p>
             <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-2">
-                {data?.ticketCount || 0}
+                {getTicketCount()}
             </h3>
             <div className="mt-3 text-slate-400 text-xs">Transacciones realizadas</div>
          </div>
@@ -152,8 +178,8 @@ export const LiveMonitor = ({ shopId }: { shopId: string }) => {
             </div>
          </div>
       </div>
-
-      {/* BUSCADOR TÚNEL (SOLO SI ESTÁ LIVE) */}
+      
+      {/* ... El resto del buscador sigue igual ... */}
       <div className={`transition-all duration-500 ${status === 'LIVE' ? 'opacity-100 translate-y-0' : 'opacity-50 grayscale'}`}>
         <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-800">
             <div className="flex items-center gap-3 mb-4">
