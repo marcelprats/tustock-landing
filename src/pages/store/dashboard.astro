@@ -1,0 +1,41 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+import { Dashboard } from '~/components/react/Dashboard';
+import StoreHeader from '~/components/widgets/StoreHeader.astro';
+
+// 1. Seguridad: Verificar Sesión
+const session = Astro.cookies.get('session');
+if (!session) return Astro.redirect('/login');
+
+// 2. Obtener Tienda Actual (Server Side)
+const { currentShop, user } = Astro.locals;
+const shopName = currentShop?.name || "Mi Tienda";
+
+const metadata = { title: `Dashboard - ${shopName}` };
+---
+
+<PageLayout metadata={metadata}>
+  
+  {/* Cabecera bonita de Astro */}
+  <fragment slot="header">
+    <StoreHeader
+      links={[
+        { text: 'Monitor en Vivo', href: '/store/live' },
+        { text: 'Inventario', href: '/store/inventory' },
+      ]} 
+      shopName={shopName}
+      isSticky
+      showToggleTheme
+    />
+  </fragment>
+
+  {/* El Componente React interactivo */}
+  <div class="h-[calc(100vh-64px)] w-full">
+    <Dashboard 
+      client:only="react" 
+      user={user} 
+      store={currentShop} 
+    />
+  </div>
+
+</PageLayout>
